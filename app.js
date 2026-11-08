@@ -527,12 +527,16 @@
       const milestone = rt.combo >= 5 && rt.combo % 5 === 0;
       $fb.innerHTML = `<div class="feedback good">
         <span class="bigmark">✓</span>
+        ${v.kind === 'lineup' ? `<span class="he big">${esc(w.he)}</span>` : ''}
         ${milestone ? `<span class="combo-big">x${rt.combo} 🔥</span>` : ''}
         ${mastered ? `<span class="he big">נכבש! 🏆</span>` : ''}
       </div>`;
       if (milestone) document.body.classList.add('flash'), setTimeout(() => document.body.classList.remove('flash'), 500);
-      // move on when the word has finished being spoken (capped), so the next card never cuts it off
-      Audio.afterSpeech(() => practice ? nextPracticeCard() : nextCard(), mastered ? 2200 : 900, 1700);
+      // move on when the word has finished being spoken (capped), so the next card never cuts it off;
+      // the lineup card shows the meaning too, so it lingers a little longer
+      const lingerMin = mastered ? 2200 : (v.kind === 'lineup' ? 1500 : 900);
+      const lingerMax = v.kind === 'lineup' ? 2300 : 1700;
+      Audio.afterSpeech(() => practice ? nextPracticeCard() : nextCard(), lingerMin, lingerMax);
     } else {
       Audio.hm();
       setTimeout(() => Audio.speak(w.en), 350);
