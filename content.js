@@ -59,8 +59,26 @@ window.CONTENT = {
     { id: 'break',      en: 'break',        he: 'לשבור',        he2: 'הפסקה',           emoji: '💔',  chunks: 'break',             group: 'b',  tip: 'ea כאן = "אֵיי" → בְּרֵייק (יוצא דופן!)', wrong: true },
   ],
 
-  // Five lands of ten. × words first (lands 1, 2 and half of 3), known words last.
+  // Starter kit (land 0, day 0): pronouns and question words as sight words. Not counted in the 50.
+  starter: [
+    { id: 'i',       en: 'I',       he: 'אני',        he2: '', emoji: '🙋', chunks: 'I',       group: 'pr', tip: 'איי. תמיד באות גדולה, גם באמצע משפט', starter: true },
+    { id: 'you',     en: 'you',     he: 'אתה / את',   he2: 'אתם / אתן', emoji: '👉', chunks: 'you',     group: 'pr', tip: 'יוּ', starter: true },
+    { id: 'he',      en: 'he',      he: 'הוא',        he2: '', emoji: '👦', chunks: 'he',      group: 'pr', tip: 'הִי', starter: true },
+    { id: 'she',     en: 'she',     he: 'היא',        he2: '', emoji: '👧', chunks: 'she',     group: 'pr', tip: 'sh = שׁ → שִׁי', starter: true },
+    { id: 'it',      en: 'it',      he: 'זה',         he2: 'חפץ או חיה', emoji: '📦', chunks: 'it',      group: 'pr', tip: 'אִיט', starter: true },
+    { id: 'we',      en: 'we',      he: 'אנחנו',      he2: '', emoji: '',   chunks: 'we',      group: 'pr', tip: 'וִוי', starter: true },
+    { id: 'they',    en: 'they',    he: 'הם / הן',    he2: '', emoji: '',   chunks: 'they',    group: 'pr', tip: 'th = לשון בין השיניים → דֵ׳יי', starter: true },
+    { id: 'what',    en: 'What',    he: 'מה',         he2: '', emoji: '❓', chunks: 'What',    group: 'wh', tip: 'wh = וו → ווֹט', starter: true },
+    { id: 'where',   en: 'Where',   he: 'איפה',       he2: '', emoji: '📍', chunks: 'Where',   group: 'wh', tip: 'וֶור', starter: true },
+    { id: 'who',     en: 'Who',     he: 'מי',         he2: '', emoji: '👤', chunks: 'Who',     group: 'wh', tip: 'ה-w שקטה! → הוּ', starter: true },
+    { id: 'when',    en: 'When',    he: 'מתי',        he2: '', emoji: '⏰', chunks: 'When',    group: 'wh', tip: 'וֶון', starter: true },
+    { id: 'why',     en: 'Why',     he: 'למה',        he2: '', emoji: '🤔', chunks: 'Why',     group: 'wh', tip: 'וַויי', starter: true },
+    { id: 'how-old', en: 'How old', he: 'בן כמה',     he2: 'How old are you? = בן כמה אתה?', emoji: '🎂', chunks: 'How · old', group: 'h', tip: 'הַאוּ אוֹלְד', starter: true },
+  ],
+
+  // Land 0 = starter kit. Then five lands of ten: × words first (lands 1, 2 and half of 3), known words last.
   lands: [
+    { id: 0, starter: true, words: ['i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'where', 'who', 'when', 'why', 'how-old'] },
     { id: 1, words: ['blanket', 'brush', 'wash', 'put', 'team', 'people', 'old', 'time', 'fast', 'hard'] },
     { id: 2, words: ['also', 'but', 'if', 'because', 'every', 'always', 'other', 'more', 'important', 'special'] },
     { id: 3, words: ['wait-for', 'take-care-of', 'learn', 'best', 'break', 'age', 'year', 'month', 'birthday', 'young'] },
@@ -70,33 +88,36 @@ window.CONTENT = {
 
   // Grammar towers arrive in M2. Listed so the map can show them locked.
   grammar: [
-    { id: 'g1', title: 'כינויי גוף + to be', sub: 'I am, he is, they are' },
-    { id: 'g2', title: 'to be: שלילה ושאלות', sub: "isn't, Are you…? Yes, I am." },
-    { id: 'g3', title: 'שאלות Wh', sub: 'What, Where, Who, How old' },
-    { id: 'g4', title: 'have / has, a / an / some', sub: 'She has a toy' },
+    { id: 'g1', title: 'כינויי גוף + to be', short: 'am · is · are', sub: 'I am, he is, they are' },
+    { id: 'g2', title: 'to be: שלילה ושאלות', short: 'שאלות', sub: "isn't, Are you…? Yes, I am." },
+    { id: 'g3', title: 'שאלות Wh', short: 'What · Who', sub: 'What, Where, Who, How old' },
+    { id: 'g4', title: 'have / has, a / an / some', short: 'have · has', sub: 'She has a toy' },
   ],
 
   // Three skins. Same mechanics, different words and pictures.
   skins: {
     map: {
-      id: 'map', name: 'כיבוש המפה', icon: '🏰', hero: 'מצביא',
-      territory: 'ממלכה', territoriesLabel: 'ממלכות', names: ['ממלכת היער', 'ממלכת ההרים', 'ממלכת הנהר', 'ממלכת המדבר', 'ממלכת החוף'],
+      id: 'map', name: 'כיבוש המפה', icon: '🏰', hero: 'מצביא', blurb: 'חמש ממלכות. אף אחת לא תיכנע מרצון.',
+      territory: 'ממלכה', newTerritory: 'ממלכה חדשה', territoriesLabel: 'ממלכות', names: ['ממלכת היער', 'ממלכת ההרים', 'ממלכת הנהר', 'ממלכת המדבר', 'ממלכת החוף'],
+      starterName: 'המחנה', starterIcon: '⛺', starterNew: 'ציוד למסע',
       tower: 'מגדל', boss: 'המבחן הגדול', bossIcon: '🐉',
       boxNames: ['גיוס', 'חייל', 'אביר', 'שר', 'מלך'],
       terrIcons: ['🌲', '⛰️', '🏞️', '🏜️', '🏖️'],
       accent: '#2f6f4e',
     },
     space: {
-      id: 'space', name: 'משימת חלל', icon: '🚀', hero: 'קפטן',
-      territory: 'כוכב', territoriesLabel: 'כוכבים', names: ['הירח', 'מאדים', 'צדק', 'שבתאי', 'נפטון'],
+      id: 'space', name: 'משימת חלל', icon: '🚀', hero: 'קפטן', blurb: 'חמישה כוכבים. בקרת המשימה מבקשת לא לגעת בכפתור האדום.',
+      territory: 'כוכב', newTerritory: 'כוכב חדש', territoriesLabel: 'כוכבים', names: ['הירח', 'מאדים', 'צדק', 'שבתאי', 'נפטון'],
+      starterName: 'תחנת השיגור', starterIcon: '🛰️', starterNew: 'ציוד לטיסה',
       tower: 'תחנה', boss: 'הנחיתה הגדולה', bossIcon: '🛸',
       boxNames: ['טירון', 'טייס', 'נווט', 'קפטן', 'אגדה'],
       terrIcons: ['🌙', '🔴', '🪐', '💫', '🔵'],
       accent: '#2b4c7e',
     },
     wizard: {
-      id: 'wizard', name: 'שוליית הקוסם', icon: '🧙', hero: 'קוסם',
-      territory: 'ארץ', territoriesLabel: 'ארצות', names: ['ארץ המערות', 'ארץ הביצות', 'היער הקסום', 'ארץ המצודה', 'ארץ העננים'],
+      id: 'wizard', name: 'שוליית הקוסם', icon: '🧙', hero: 'קוסם', blurb: '50 לחשים ללמוד, ודרקון אחד שלא קרא את הספר.',
+      territory: 'ארץ', newTerritory: 'ארץ חדשה', territoriesLabel: 'ארצות', names: ['ארץ המערות', 'ארץ הביצות', 'היער הקסום', 'ארץ המצודה', 'ארץ העננים'],
+      starterName: 'ערכת הקוסם', starterIcon: '🪄', starterNew: 'השרביט והגלימה',
       tower: 'מגדל קסמים', boss: 'הדרקון', bossIcon: '🐲',
       boxNames: ['מגילה', 'שוליה', 'מיומן', 'אמן', 'ספר הקסמים'],
       terrIcons: ['🕯️', '🐸', '🌳', '🏯', '☁️'],
