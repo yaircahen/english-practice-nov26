@@ -6,10 +6,11 @@ Design: `prd.md`. Static web app, no build step, no backend.
 
 | File | What |
 |---|---|
-| `index.html` | the page shell; bumps `?v=` on every milestone so iPad caches refresh |
+| `index.html` | the page shell; bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.0.0`) |
 | `styles.css` | reading-friendly styles |
-| `content.js` | the 50 words, lands, skins, Leitner intervals (data only) |
-| `app.js` | engine, session loop, screens, coach screen |
+| `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary (data only) |
+| `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track |
+| `prd.md` / `prd-v3.md` | the design (v4) and the previous version |
 | `.claude/launch.json` | local dev server definition (uses the venv) |
 | `.venv/` | Python venv; only used for the local static server |
 
@@ -63,6 +64,21 @@ git remote add origin git@github.com:<personal-user>/<repo>.git && git push -u o
    browser and expect the same save.
 5. Each later milestone: commit, push. The `?v=` stamps in `index.html` are bumped per milestone
    so the iPad picks up the new files. If a change does not appear, pull down to refresh once.
+
+## What M2 added (10 Nov, test-facing part)
+
+- **Grammar towers** open one unit a day in parent sessions, once land 2 is in: to be, has/have,
+  negatives and questions, then Wh-questions and a/an/some. The same/different cards open with land 4.
+- **Writing**: two sentences a session once the first tower is open. Tiles first; from the second
+  writing day the mission screen says "להכין עט ודף" and he copies, then writes, on paper. He checks
+  each sentence against three points and taps ✓ or "again".
+- **Stories**: one new friend a day in parent sessions (five passages so far); a solo session
+  revisits the last one. Support level and writing rung can be moved from the coach screen.
+- An M1 save carries over as is. Nothing in the save format was removed.
+
+To check on the iPad before he plays: the voice in the stories (level 1 reads each sentence
+aloud and lights it), that the tiles are comfortable to tap, and that the "tall / short"
+pictures show two figure sizes next to a door.
 
 ## Coach screen (hidden)
 
