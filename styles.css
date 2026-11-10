@@ -176,8 +176,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .combo-big { font-family: var(--display-font); font-size: 36px; color: var(--accent-deep); }
 
 /* hero */
-.hero { display: flex; align-items: center; gap: 14px; }
-.hero .avatar { font-size: 40px; width: 68px; height: 68px; display: grid; place-items: center; background: var(--accent); border-radius: 50%; border-bottom: 5px solid var(--accent-deep); }
+.hero { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+.avatar { position: relative; flex: none; font-size: 40px; line-height: 1; width: 68px; height: 68px; display: grid; place-items: center; background: var(--accent); border-radius: 50%; border-bottom: 5px solid var(--accent-deep); }
 .hero .name { font-family: var(--display-font); font-weight: 400; font-size: 32px; line-height: 1.1; color: var(--fg); }
 .hero .sub { color: var(--fg-muted); font-size: 15px; }
 
@@ -227,7 +227,7 @@ input.text:focus { outline: none; border-color: var(--accent); }
 .intro .emoji { font-size: 80px; line-height: 1; }
 
 /* summary */
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
 .stat { text-align: center; padding: 14px 8px; }
 .stat .num { font-family: var(--display-font); font-size: 46px; line-height: 1.1; color: var(--accent-deep); }
 body[data-skin="space"] .stat .num { color: var(--accent-deep); }
@@ -351,7 +351,126 @@ b.ans { color: var(--good); background: var(--good-soft); border-radius: 8px; pa
 .fchip span { font-size: 24px; }
 .fchip.gold { border-color: var(--gold); }
 
+/* ---------- M2, the game half: what the hero wears ---------- */
+.avatar .hat { position: absolute; top: -.5em; left: 50%; transform: translateX(-50%) rotate(-10deg); font-size: .62em; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .35)); }
+.avatar .pal { position: absolute; bottom: -.2em; right: -.3em; font-size: .62em; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .35)); }
+.avatar.lg { font-size: 62px; width: 108px; height: 108px; border-bottom-width: 7px; }
+.avatar.xl { font-size: 98px; width: 172px; height: 172px; border-bottom-width: 10px; }
+.avatar.aura-ember { box-shadow: 0 0 0 4px #ff9a3d, 0 0 22px 7px rgba(255, 110, 30, .65); }
+.avatar.aura-ice { box-shadow: 0 0 0 4px #9fe8ff, 0 0 22px 7px rgba(90, 200, 255, .65); }
+.avatar.aura-leaf { box-shadow: 0 0 0 4px #8fd47a, 0 0 22px 7px rgba(70, 170, 80, .6); }
+.avatar.aura-rainbow { border: 5px solid transparent; background: linear-gradient(var(--accent), var(--accent)) padding-box, conic-gradient(#ff5d5d, #ffb13d, #f6e84a, #5fd66a, #4ac3f0, #8a6cf0, #ff5d5d) border-box; }
+.avatar.aura-gold { box-shadow: 0 0 0 5px #ffd66e, 0 0 16px 5px rgba(217, 164, 65, .55); animation: auragold 1.8s ease-in-out infinite alternate; }
+@keyframes auragold { to { box-shadow: 0 0 0 5px #ffe9a8, 0 0 32px 13px rgba(255, 214, 110, .85); } }
+button.pill { cursor: pointer; }
+.pill .ice { margin-inline-start: 6px; }
+.questbtns { justify-content: flex-end; }
+.bigcta.row { align-items: stretch; }
+
+/* the trail and the friend cards, in what he chose to wear */
+.trail.road-candy { --path: #ff7eb6; }
+.trail.road-ice { --path: #8fe3ff; }
+.trail.road-lava { --path: #ff5a1f; }
+.trail.road-lava .road-glow { stroke: #ffb03d; opacity: .32; }
+.trail.road-rainbow .road-glow { stroke: #ffffff; opacity: .16; }
+.node .lootdot { position: absolute; bottom: -9px; left: -9px; font-size: 21px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45)); }
+.fcard.fr-dots { border-style: dotted; border-width: 5px 5px 7px; }
+.fcard.fr-wood { border-color: #8a5a2b; border-width: 7px 7px 10px; background: #fbf1dc; }
+.fcard.fr-neon { border-color: #2fd8c0; box-shadow: 0 0 0 3px #10213d, 0 0 20px 4px rgba(47, 216, 192, .7); }
+.fcard.fr-royal { border: 7px double var(--gold); background: linear-gradient(180deg, #fff8e0, var(--paper)); }
+.fcard.gold[class*="fr-"] { box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 45%, transparent), 0 0 22px 6px color-mix(in srgb, var(--gold) 55%, transparent); }
+.confetti.glyph { background: none; width: auto; height: auto; font-size: 20px; line-height: 1; }
+
+/* ---------- the mystery box. Its shape and colours come from the skin. ---------- */
+.lootcard { margin-top: 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; position: relative; overflow: hidden; }
+.lootlabel { font-family: var(--display-font); font-size: 26px; line-height: 1.3; color: var(--ink); }
+.lootwhy { font-size: 20px; font-weight: 600; color: var(--ink); }
+.chest { --chest: var(--accent); --chest-deep: var(--accent-deep); --chest-trim: color-mix(in srgb, var(--accent-ink) 26%, transparent); position: relative; width: 196px; height: 174px; border: 0; background: none; padding: 0; margin: 16px 0 4px; animation: chestshake 2.4s ease-in-out infinite; }
+.chest .base { position: absolute; left: 6px; right: 6px; bottom: 0; height: 96px; background: var(--chest); border-radius: 8px 8px 18px 18px; border-bottom: 11px solid var(--chest-deep); box-shadow: inset 0 0 0 5px var(--chest-trim); }
+.chest .lid { position: absolute; left: 0; right: 0; top: 12px; height: 74px; background: var(--chest); border-radius: 64px 64px 8px 8px; border-bottom: 8px solid var(--chest-deep); box-shadow: inset 0 0 0 5px var(--chest-trim); transform-origin: 100% 100%; transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); z-index: 2; }
+.chest .lock { position: absolute; left: 50%; top: 62px; transform: translateX(-50%); width: 56px; height: 56px; border-radius: 50%; background: var(--gold); color: #3b2a05; display: grid; place-items: center; font: 800 30px/1 var(--en-font); border-bottom: 5px solid #8a6420; z-index: 3; transition: opacity .2s; }
+.chest .rays { position: absolute; left: 50%; top: 46%; width: 22px; height: 22px; border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; background: radial-gradient(circle, #ffffff 0%, var(--gold) 38%, transparent 70%); transition: transform .65s ease-out, opacity .3s; z-index: 1; }
+.chest.opening { animation: none; }
+.chest.opening .lid { transform: rotate(40deg) translate(12px, -36px); }
+.chest.opening .lock { opacity: 0; }
+.chest.opening .rays { transform: translate(-50%, -50%) scale(26); opacity: .95; }
+@keyframes chestshake { 0%, 76%, 100% { transform: none; } 80% { transform: rotate(-5deg) translateY(-4px); } 84% { transform: rotate(5deg); } 88% { transform: rotate(-4deg) translateY(-2px); } 92% { transform: rotate(3deg); } }
+body[data-skin="wizard"] .chest { --chest: #5b3a8a; --chest-deep: #33205a; --chest-trim: var(--gold); }
+body[data-skin="space"] .chest { --chest: #e9f0fb; --chest-deep: #9db1d1; --chest-trim: var(--accent); }
+body[data-skin="space"] .chest .lid { top: 2px; height: 84px; border-radius: 98px 98px 6px 6px; }
+body[data-skin="space"] .chest .base { border-radius: 6px 6px 44px 44px; }
+body[data-skin="space"] .chest .lock { background: var(--accent); border-bottom-color: var(--accent-deep); color: var(--accent-ink); }
+.lootcard.flagged .chest { filter: drop-shadow(0 0 14px #5aa7f0); }
+.lootcard.revealed .lootitem { font-size: 112px; line-height: 1.15; animation: lootpop .6s cubic-bezier(.3, 1.7, .5, 1); filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .25)); }
+@keyframes lootpop { 0% { transform: scale(.2) rotate(-25deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.lootname { font-size: 26px; font-weight: 700; line-height: 1.3; }
+.tierchip { font-family: var(--display-font); font-size: 20px; line-height: 1.5; padding: 0 18px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 10%, transparent); color: var(--ink); }
+.tier-rare .tierchip { background: #2f7fd6; color: #ffffff; }
+.tier-golden .tierchip { background: var(--gold); color: #3b2a05; }
+.lootcard.revealed.tier-rare { box-shadow: inset 0 0 0 4px #5aa7f0; }
+.lootcard.revealed.tier-golden { box-shadow: inset 0 0 0 5px var(--gold); background: linear-gradient(180deg, #fff3cc, var(--card-bg) 70%); }
+.lootlines { text-align: right; }
+.lootline { font-size: 22px; font-weight: 700; }
+.lootline.tier-rare { color: #1f5fa8; }
+.lootline.tier-golden { color: #8a6420; }
+
+/* ---------- the wardrobe: straight on the skin's ground, not on a card ---------- */
+.wardhero { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 38px 0 14px; }
+.wardhero .name { font-family: var(--display-font); font-size: 34px; line-height: 1.2; color: var(--fg); }
+.wardrow { margin-top: 16px; }
+.wardlabel { font-family: var(--display-font); font-size: 22px; color: var(--fg); margin-bottom: 6px; }
+.litems { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.litem { position: relative; min-height: 122px; padding: 10px 6px 8px; border-radius: 18px; border: 0; border-bottom: 6px solid var(--btn-edge); background: var(--btn); color: var(--btn-ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; }
+button.litem:active { transform: translateY(4px); border-bottom-width: 2px; }
+.litem .le { font-size: 46px; line-height: 1.15; }
+.litem .ln { font-size: 13px; line-height: 1.25; font-weight: 600; }
+.litem.tier-rare { border-bottom-color: #2f7fd6; box-shadow: inset 0 0 0 3px #5aa7f0; }
+.litem.tier-golden { border-bottom-color: #8a6420; box-shadow: inset 0 0 0 3px var(--gold); }
+.litem.on { background: var(--accent); color: var(--accent-ink); }
+.litem .lon { position: absolute; top: 5px; left: 9px; font-weight: 800; font-size: 20px; }
+.litem .lnew { position: absolute; top: 7px; right: 8px; font-size: 12px; font-weight: 700; line-height: 1.5; background: var(--miss); color: #ffffff; border-radius: 999px; padding: 0 8px; }
+.litem.locked { background: color-mix(in srgb, var(--fg) 8%, transparent); border-bottom-color: color-mix(in srgb, var(--fg) 16%, transparent); color: var(--fg-muted); box-shadow: none; }
+.litem.locked.tier-rare { box-shadow: inset 0 0 0 2px color-mix(in srgb, #5aa7f0 65%, transparent); }
+.litem.locked.tier-golden { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 75%, transparent); }
+.litem.locked .le { font-family: var(--display-font); font-size: 40px; opacity: .55; }
+
+/* ---------- reading minute ---------- */
+.rdlist { display: flex; flex-direction: column; gap: 12px; }
+.rdline { display: flex; align-items: center; gap: 14px; direction: ltr; padding: 18px 16px; }
+.rdtext { flex: 1; min-width: 0; font-size: 34px; line-height: 1.7; font-weight: 600; text-align: left; }
+.rdmarks { display: flex; gap: 10px; flex: none; align-items: center; }
+.rdbtn { width: 64px; height: 64px; border-radius: 50%; border: 0; border-bottom: 5px solid var(--btn-edge); background: var(--btn); color: var(--btn-ink); font-size: 28px; font-weight: 800; padding: 0; }
+.rdbtn:active { transform: translateY(3px); border-bottom-width: 2px; }
+.rdbtn.on { background: var(--accent); border-bottom-color: var(--accent-deep); color: var(--accent-ink); }
+.rdnote { margin-top: 12px; font-size: 16px; }
+
+/* ---------- letter-tile cards ---------- */
+.tcard { gap: 12px; padding-top: 30px; }
+.tslots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; direction: ltr; }
+.tword { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 13px; }
+.tsyl { display: flex; gap: 5px; }
+.tslot { width: 50px; height: 62px; border-radius: 12px; border: 3px dashed var(--card-edge); background: var(--paper); font: 600 32px/1 var(--en-font); color: var(--ink); padding: 0; }
+.tslot.full { border-style: solid; border-color: var(--btn-edge); }
+.tslot.wrong { border-color: var(--miss); background: var(--miss-soft); }
+.tslot.ok { border-color: var(--good); background: var(--good-soft); }
+.ttray { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 18px; direction: ltr; }
+.ttile { width: 66px; height: 74px; border-radius: 16px; border: 0; border-bottom: 6px solid var(--btn-edge); background: var(--btn); color: var(--btn-ink); font: 600 34px/1 var(--en-font); padding: 0; transition: transform .06s ease, opacity .15s ease; }
+.ttile:active { transform: translateY(4px); border-bottom-width: 2px; }
+.ttile.used { opacity: .22; transform: none; }
+.bornchip { font-size: 18px; font-weight: 600; background: var(--paper); border: 1px dashed var(--card-edge); border-radius: 999px; padding: 2px 14px; }
+
+/* ---------- brag card ---------- */
+.bragwrap { display: flex; justify-content: center; margin: 4px 0 16px; }
+.bragimg { display: block; width: min(100%, 540px); aspect-ratio: 4 / 5; border-radius: 28px; box-shadow: 0 12px 34px rgba(0, 0, 0, .35); -webkit-touch-callout: default; -webkit-user-select: auto; user-select: auto; }
+.bragimg.wait { background: color-mix(in srgb, var(--fg) 10%, transparent); }
+a.btn { text-decoration: none; }
+
 @media (max-width: 600px) {
+  .rdtext { font-size: 26px; }
+  .rdbtn { width: 52px; height: 52px; font-size: 22px; }
+  .tslot { width: 38px; height: 50px; font-size: 25px; }
+  .ttile { width: 54px; height: 62px; font-size: 28px; }
+  .avatar.xl { font-size: 80px; width: 140px; height: 140px; }
   .en.big { font-size: 44px; }
   .opt { font-size: 26px; min-height: 80px; }
   .node { width: 96px; }

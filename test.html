@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>משחק בדיקה</title>
+  <style>
+    body { font-family: -apple-system, "Rubik", "Helvetica Neue", Arial, sans-serif; background: #f4efe2; color: #2b2a33; margin: 0; padding: 24px 16px; font-size: 19px; line-height: 1.6; }
+    main { max-width: 640px; margin: 0 auto; }
+    h1 { font-size: 28px; margin: 0 0 6px; }
+    p { margin: 0 0 14px; }
+    button { display: block; width: 100%; text-align: right; font: inherit; padding: 14px 18px; margin: 0 0 12px; border-radius: 16px; border: 1px solid #cdb98a; border-bottom-width: 5px; background: #fffdf7; color: inherit; cursor: pointer; }
+    button b { display: block; font-size: 21px; }
+    button span { color: #6e6a7a; font-size: 16px; }
+    button.plain { border-bottom-width: 1px; background: transparent; text-align: center; font-size: 17px; }
+    .note { color: #6e6a7a; font-size: 16px; }
+    .warn { background: #f7e6d6; border: 1px solid #c47b3a; border-radius: 14px; padding: 12px 16px; }
+    label { display: block; margin: 0 0 14px; }
+    select { font: inherit; padding: 6px 10px; border-radius: 10px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>משחק בדיקה</h1>
+  <p>הדף הזה ממלא משחק לדוגמה, כדי לראות את החלקים החדשים בלי לשחק כמה ימים. הוא עובד רק כשפותחים אותו מהמחשב בבית.</p>
+  <div id="blocked" class="warn" hidden>הדף הזה עובד רק מהמחשב בבית (localhost או כתובת ברשת הביתית). כאן הוא לא עושה כלום.</div>
+  <div id="ui" hidden>
+    <div id="real" class="warn" hidden>שימו לב: בכתובת הזאת כבר שמור משחק שאינו משחק בדיקה. בחירה באחת האפשרויות תשאל לפני שהיא מחליפה אותו.</div>
+    <label>עולם:
+      <select id="skin">
+        <option value="wizard">שוליית הקוסם</option>
+        <option value="space">משימת חלל</option>
+        <option value="map">כיבוש המפה</option>
+      </select>
+    </label>
+    <button data-preset="day3"><b>יום 3</b><span>מגדל הדקדוק הראשון (am · is · are), בניית משפטים באריחים, הסיפור הראשון</span></button>
+    <button data-preset="day4"><b>יום 4</b><span>has · have, קלפי same / different, העתקת משפט לדף עם עט, סיפור שני</span></button>
+    <button data-preset="day7"><b>יום 7</b><span>שאלות Wh, כתיבה על דף מתמונה ובנק מילים, סיפור בשתי פסקאות ברמת תמיכה 2</span></button>
+    <button class="plain" id="clear">למחוק את משחק הבדיקה ולהתחיל מההתחלה</button>
+    <p class="note">אחרי הבחירה נפתח המשחק. לוחצים "למשימה" ובוחרים "עם אבא או אמא". קוד מסך המאמן במשחק הבדיקה: 1111 (לחיצה ארוכה על מונה הכוכבים).</p>
+    <p class="note">מגרסה 2.1.0, בכל אחד מהימים: בסוף המשימה באות דקת קריאה בקול (עם הורה, כשנשאר זמן), תיבה וכרטיס להשוויץ. הארון נפתח בלחיצה על הגיבור במפה, אחרי המשימה. ביום 7 יש גם קלפי בנייה מאותיות בתוך החזרה.</p>
+  </div>
+</main>
+<script src="content.js"></script>
+<script>
+// Test helper, not part of the game. Fills localStorage with a sample save so M2's parts can be seen
+// without playing several days. It refuses to run anywhere but a local address, and asks before it
+// replaces a save it did not write. Do not publish this file.
+(() => {
+  const KEY = 'hey1-game-v1';
+  const local = /^(localhost|127\.0\.0\.1|\[::1\]|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|[^.]+\.local)$/.test(location.hostname);
+  if (!local) { document.getElementById('blocked').hidden = false; return; }
+  document.getElementById('ui').hidden = false;
+
+  const existing = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } };
+  const isReal = s => !!s && !s.testSave;
+  if (isReal(existing())) document.getElementById('real').hidden = false;
+
+  const C = window.CONTENT;
+  const pad2 = n => String(n).padStart(2, '0');
+  const day = k => { const d = new Date(); d.setDate(d.getDate() + k); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+  const W = Object.fromEntries([...C.words, ...C.starter].map(w => [w.id, w]));
+  const INT = { 1: 1, 2: 2, 3: 4 };
+
+  const PRESETS = {
+    day3: { lands: [0, 1, 2], packs: [], stories: [], level: 1, writing: null },
+    day4: { lands: [0, 1, 2, 3], packs: ['u1'], stories: ['A1'], level: 1, writing: { rung: 3, clean: 0, seq: 1 } },
+    day7: { lands: [0, 1, 2, 3, 4, 5], packs: ['u1', 'u2', 'sd', 'u3'], stories: ['A1', 'A2', 'B1'], level: 2, writing: { rung: 4, clean: 0, seq: 4 } },
+  };
+
+  function build(p, skin) {
+    const n = p.lands.length;                                  // one parent session per land so far
+    const cards = {};
+    // every card is due today, so the review stack is full, as on a real day
+    const card = (box, born) => ({ box, lastSession: Math.max(0, n - INT[box] + 1), misses: 0, born, priority: 0 });
+    p.lands.forEach((id, i) => C.lands.find(l => l.id === id).words.forEach((wid, j) => {
+      ['rec', 'lineup', ...(W[wid].emoji ? ['img'] : [])].forEach((t, k) => {
+        const box = Math.max(1, Math.min(3, (n - i) - ((j + k) % 2)));   // older lands sit in higher boxes
+        cards[`${wid}|${t}`] = card(box, i + 1);
+      });
+    }));
+    p.packs.forEach((id, i) => {
+      const u = C.units.find(x => x.id === id); const box = i < p.packs.length - 1 ? 2 : 1;
+      if (u) { u.items.forEach(it => { cards[`${it.id}|gc`] = card(box, n); }); u.bridge.forEach(it => { cards[`${it.id}|np`] = card(box, n); }); }
+      else C.sameDiff.forEach(it => { cards[`${it.id}|sd`] = card(box, n); });
+    });
+    const days = {};
+    for (let k = 1; k <= n; k++) {
+      days[day(k - n - 1)] = { freePlaySec: 0, session: { n: k, mode: 'parent', startedAt: Date.now() - (n + 1 - k) * 864e5, durationMs: 13 * 60000, correct: 34, wrong: 5, promoted: 22, demoted: 3, maxCombo: 8, hardStop: false, newLand: p.lands[k - 1], mastered: 0, code: '0000' } };
+    }
+    const s = {
+      testSave: true, version: 1, hero: { name: 'בדיקה', skin, createdAt: Date.now() - n * 864e5 }, createdAt: Date.now() - n * 864e5, sessionCount: n,
+      cards, landsIntroduced: p.lands.map((id, i) => ({ id, date: day(i - n) })), days,
+      settings: { freePlayCapMin: 15, autoSpeak: true, coachPin: '1111' }, log: [],
+    };
+    // day 3 is left exactly as an M1 save looks (none of the fields below), which also exercises the upgrade path
+    if (p.packs.length) {
+      s.packsIntroduced = p.packs.map((id, i) => ({ id, date: day(i - p.packs.length) }));
+      const done = {}, runs = [];
+      p.stories.forEach((pid, i) => {
+        const q = C.stories.find(x => x.id === pid).questions.length; const date = day(i - p.stories.length);
+        done[pid] = { stars: q, total: q, date, reads: 1 };
+        runs.push({ pid, date, n: n - p.stories.length + i + 1, level: 1, reread: false, stars: q, total: q, taps: 3, audioTaps: 1, heTaps: 1, seconds: 110, hints: Array(q).fill(0), clean: true });
+      });
+      s.story = { level: p.level, clean: 0, done, runs };
+      s.writing = Object.assign({ again: [], history: [] }, p.writing);
+    }
+    return s;
+  }
+
+  document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+    if (isReal(existing()) && !confirm('בכתובת הזאת שמור משחק שאינו משחק בדיקה. להחליף אותו במשחק בדיקה? ההתקדמות שבו תימחק.')) return;
+    localStorage.setItem(KEY, JSON.stringify(build(PRESETS[b.dataset.preset], document.getElementById('skin').value)));
+    location.href = './';
+  }));
+  document.getElementById('clear').addEventListener('click', () => {
+    if (isReal(existing())) { alert('המשחק ששמור כאן אינו משחק בדיקה, ולכן הדף הזה לא מוחק אותו.'); return; }
+    localStorage.removeItem(KEY);
+    location.href = './';
+  });
+})();
+</script>
+</body>
+</html>
