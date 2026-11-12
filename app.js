@@ -63,7 +63,7 @@
       log: [],
       // M2. All of these are absent from an M1 save and get these defaults on load.
       packsIntroduced: [],                                   // [{ id, date }] grammar units and the same/different pack
-      story: { level: 1, clean: 0, done: {}, runs: [] },     // done[passageId] = { stars, total, date, reads }
+      story: { level: 1, clean: 0, done: {}, runs: [], reask: [], flags: [], best: {}, warms: [], tips: 0 },   // done[passageId] = { stars, total, date, reads, warm } · reask / flags: [{ pid, qi }] · best['pid:part'] = seconds · warms: [{ date, pid, part, sec }]
       writing: { rung: 1, clean: 0, seq: 0, again: [], history: [] },
       // M2, the game half. Absent from a save made before it; same rule.
       loot: { owned: [], worn: {}, fresh: [], boxes: [], cleared: [] },   // owned: item ids · worn[slot] = item id · fresh: found, not yet seen in the wardrobe · boxes: [{ date, n, id, tier, why }] · cleared: territories whose rare drop was given
@@ -504,7 +504,7 @@
     const rung = mode === 'parent' ? S.writing.rung : Math.min(S.writing.rung, 2);
     return { rung, paper: rung >= 3 };
   }
-  const estStory = s => s.reread ? 2.5 : (s.p.tier === 'A' ? 3 : 4.5);
+  const estStory = s => s.reread ? 2.5 : (s.p.tier === 'A' ? 3 : (s.p.tier === 'C' ? 6.5 : 4.5));
   const estWriting = w => w.paper ? 3 : 1.5;
 
   // The mid-boss (PRD §8, day 6): once, with a parent, from the day after the last of the 50 words is in.
@@ -522,9 +522,11 @@
     const parent = mode === 'parent';
     const newLand = parent ? nextLandForToday() : null;
     const unit = parent ? unitForToday(newLand) : null;
+    const story = storyForSession(mode, newLand);
     return {
       newLand, unit, sd: parent ? sdForToday(newLand) : false, boss: parent && midBossDue(),
-      story: storyForSession(mode, newLand), writing: writingForSession(mode, unit), listening: listeningForSession(mode),
+      story, writing: writingForSession(mode, unit), listening: listeningForSession(mode),
+      reread: rereadForSession(mode, story), warm: warmForSession(mode),
     };
   }
   // The days that do not fit one sitting (PRD §7.4): the mid-boss, a recording, a first meeting with a long story.
@@ -568,12 +570,13 @@
     const newLand = pl.newLand, unit = pl.unit, sd = pl.sd;
     const boss = cards && pl.boss;
     const story = longForms ? pl.story : null, writing = longForms ? pl.writing : null, listening = longForms ? pl.listening : null;
+    const reread = longForms ? pl.reread : null, warm = cards ? pl.warm : null;       // the warm read opens a sitting that has cards in it
     // the cards sitting stops at 8 minutes; the one that holds the mid-boss gets two more, or the new land never fits behind it
     const stopMin = sitting === 'cards' ? C.cardsStopMin + (boss ? 2 : 0) : C.sessionHardStopMin;
     // word bank and sentence halves: one set of each in the review; on the mid-boss day they are inside the boss
     const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? [S.sets.history.length % 2 ? 'halves' : 'bank'] : ['bank', 'halves']);
     // the review stack is what gives way to everything else in the sitting
-    const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + sets.length + 1;
+    const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + sets.length + (warm ? 0.5 : 0) + 1;
     const short = boss || sitting === 'single';
     const cap = short ? 6 : clamp(Math.floor((stopMin - other) * CARDS_PER_MIN), 8, C.reviewStackCap);
     const queue = cards ? buildReviewQueue(n, cap, short) : [];
@@ -581,7 +584,7 @@
     sets.forEach((k, i) => queue.splice(Math.min(queue.length, i * 6), 0, { set: k, sec: k === 'bank' ? 'V' : 'R', retry: false, retries: 0 }));
     // a cards sitting with no cards in it is no sitting: with a parent the rest is played now, alone it is an ordinary solo session
     if (sitting === 'cards' && !queue.length && !boss && !newLand && !unit && !sd) return startSession(mode, parent ? 'single' : 'full');
-    if (!queue.length && !boss && !newLand && !unit && !sd && !writing && !story && !listening) {
+    if (!queue.length && !boss && !newLand && !unit && !sd && !writing && !story && !listening && !reread) {
       toast(t(mode === 'solo' && !Object.keys(S.cards).length ? 'firstWithParent' : 'allRest'), 4500);
       view = 'map'; render(); return;
     }
@@ -590,7 +593,7 @@
       reviewTotal: queue.length, round: { title: t('roundReview'), total: queue.length },
       done: 0, correct: 0, wrong: 0, promoted: 0, demoted: 0, combo: 0, maxCombo: 0,
       newLand, introIdx: 0, mastered: [], hardStop: false, firstTry: {},
-      plan: { unit, sd, writing, story, listening, boss }, pack: null, packsDone: [], w: null, st: null, wResult: null, stResult: null,
+      plan: { unit, sd, writing, story, listening, boss, reread, warm }, pack: null, packsDone: [], w: null, st: null, wResult: null, stResult: null,
       rd: null, rdResult: null,
       sitting, stopMin, later: sitting === 'cards' ? laterParts(planFor('parent')) : '', boss: null, afterBoss: null, ls: null, lsResult: null,
     };
@@ -598,6 +601,12 @@
     view = 'mission'; render();
   }
 
+  // after the mission screen: the warm read first, then the mid-boss or the review
+  function beginQuest() {
+    if (R.plan.warm && !R.warmed) { R.warmed = true; R.warmAt = Date.now(); view = 'warm'; return render(); }
+    if (R.plan.boss && !R.boss) return startBoss();
+    nextCard();
+  }
   function elapsedMin() { return (Date.now() - R.startedAt) / 60000; }
   function setPhase(p) { const now = Date.now(); R.timing[R.phase] = (R.timing[R.phase] || 0) + (now - R.phaseAt); R.phase = p; R.phaseAt = now; }
   // minutes still owed to the parts that are never cut (writing, story) and to today's new content
@@ -1128,7 +1137,10 @@
   }
 
   // ---------- story track (PRD §6.5) ----------
-  // Levels built in M2: 1 listen and follow · 2 read along · 3 read with help. Hints cost stars, never progress.
+  // Levels: 1 listen and follow · 2 read along · 3 read with help · 4 read alone · 5 read aloud to the coach
+  // (4 and 5 with a parent only). Hints cost stars, never progress. A long (tier C) story is shown one
+  // paragraph a screen at levels 1–3, and each paragraph is followed by its own questions.
+  // A story is met three times: new; again two sessions later, one level higher; and once more as a warm read.
   function glossOf(token) {
     const k = token.toLowerCase().replace(/[^a-z']/g, '');
     if (!k) return null;
@@ -1140,34 +1152,92 @@
   const friendCard = (p, gold) => { const fr = wornItem('frame'); return `<div class="fcard ${fr ? fr.css : ''} ${gold ? 'gold' : ''}"><div class="femoji">${p.friend.emoji}</div><div class="fname en">${esc(p.friend.name)}</div><div class="ffacts en">${p.friend.facts.map(x => `<span>${esc(x)}</span>`).join('')}</div></div>`; };
   const friendChip = (p, gold) => `<div class="fchip ${gold ? 'gold' : ''}"><span>${p.friend.emoji}</span><b class="en">${esc(p.friend.name)}</b></div>`;
   const curQ = () => R.st.qs[R.st.qIdx];
+  const stLines = () => R.st.parts[R.st.part].lines;
+  const penQ = () => curQ().type === 'write2' && R.st.level >= 4;   // "write two things" goes on paper from level 4
 
+  // The second meeting: two sessions after the first, one level higher, with a parent.
+  function rereadForSession(mode, first) {
+    if (mode !== 'parent') return null;
+    const n = (today().half || {}).n || S.sessionCount + 1;
+    const firsts = {}; S.story.runs.forEach(r => { if (!r.reread && !firsts[r.pid]) firsts[r.pid] = r; });
+    const pid = Object.keys(S.story.done).find(id => STORY[id] && S.story.done[id].reads === 1 && firsts[id] && n - firsts[id].n >= 2
+      && !(first && first.p.id === id) && !S.story.runs.some(r => r.pid === id && r.date === todayStr()));
+    return pid ? { p: STORY[pid], reread: true, second: true, level: firsts[pid].level + 1 } : null;
+  }
+  // The third meeting: one paragraph of a story he has read twice, read once more as a session opens.
+  function warmForSession(mode) {
+    if (mode !== 'parent') return null;
+    const pid = Object.keys(S.story.done).find(id => STORY[id] && S.story.done[id].reads >= 2 && !S.story.done[id].warm && !S.story.runs.some(r => r.pid === id && r.date === todayStr()));
+    return pid ? { p: STORY[pid], part: Math.floor(Math.random() * STORY[pid].paras.length) } : null;
+  }
+  // A reading time is kept per paragraph (or per short story). It returns the seconds when they beat the best so far.
+  // Times from level 1 do not count: there the device sets the pace.
+  function stBestTime(p, key, ms, level) {
+    const sec = Math.round(ms / 1000); if (level < 2 || sec < 3) return 0;
+    const k = `${p.id}:${key == null ? 'all' : key}`, prev = S.story.best[k];
+    if (prev == null || sec < prev) { S.story.best[k] = sec; return prev == null ? 0 : sec; }
+    return 0;
+  }
+  function warmDone() {
+    const w = R.plan.warm, p = w.p; if (!w || R.warmAt == null) return;
+    const sec = Math.round((Date.now() - R.warmAt) / 1000); R.warmAt = null;
+    const best = stBestTime(p, p.tier === 'C' ? w.part : (p.paras.length === 1 ? null : 'w' + w.part), sec * 1000, 2);
+    if (S.story.done[p.id]) S.story.done[p.id].warm = true;
+    S.story.warms.push({ date: todayStr(), pid: p.id, part: w.part, sec }); if (S.story.warms.length > 20) S.story.warms.shift();
+    logEvent('warm', { pid: p.id, part: w.part, sec }); save();
+    if (best) toast(t('warmBest', { now: best }), 4000);
+    beginQuest();
+  }
+
+  // The story step holds up to three runs, in this order: a question that came back, the day's story, the re-read.
   function startStory() {
-    const pl = R.plan.story;
-    if (!pl) return startListening();
-    const level = clamp(S.story.level, 1, 3);
+    const again = !R.reasked && S.story.reask.find(x => STORY[x.pid] && STORY[x.pid].questions[x.qi]);
+    R.reasked = true;
+    if (again) return openStory({ p: STORY[again.pid], reread: true, ask: again.qi });
+    if (R.plan.story && !R.stResult) return openStory(R.plan.story);
+    // the re-read gives way when the sitting is short of time; the listening behind it does not
+    const rr = R.plan.reread, owed = R.plan.listening && !R.lsResult ? estListening(R.plan.listening) : 0;
+    if (rr && !R.rrDone && minLeft() > 2.5 + owed) { R.rrDone = true; return openStory(rr); }
+    startListening();
+  }
+  function openStory(run) {
+    const p = run.p;
+    const level = clamp(run.level || S.story.level, 1, R.mode === 'parent' ? 5 : 3);
+    const one = run.ask != null;                                // a single question that came back
+    const byPart = p.tier === 'C' && !one && (level <= 3 || !!run.reread);
+    const qsAll = p.questions.map((q, qi) => Object.assign({ qi }, q)).filter(q => one ? q.qi === run.ask : (q.type !== 'he' || level <= 2));
+    let parts = byPart ? p.paras.map((lines, k) => ({ i: k, lines })) : [{ i: null, lines: p.sentences.map((_, k) => k) }];
+    if (one && p.tier === 'C') { const k = qsAll[0].para || 0; parts = [{ i: k, lines: p.paras[k] }]; }
     R.st = {
-      p: pl.p, reread: pl.reread, level, stage: 'pre', qIdx: 0, results: [], taps: 0, audioTaps: 0, heTaps: 0, heShown: {},
-      qs: pl.p.questions.filter(q => q.type !== 'he' || level <= 2),      // the Hebrew meaning check is for levels 1–2 only
-      kTok: 0, readDone: level > 1, startedAt: 0, gloss: '',
+      p, run, one, reread: !!run.reread, level, parts, part: 0, qsAll, qs: [], qIdx: 0, results: [], taps: 0, audioTaps: 0, heTaps: 0, heShown: {},
+      // the first meeting with a long story keeps its sentences on tap, whatever the level
+      sayOk: level <= 2 || (p.tier === 'C' && !S.story.done[p.id] && level <= 4),
+      kTok: 0, readDone: level > 1, startedAt: Date.now(), readAt: 0, readMs: 0, gloss: '', marks: {}, pb: 0,
+      tip: !run.reread && level >= 2 && S.story.tips < (C.storyTips || []).length ? C.storyTips[S.story.tips] : '',
+      stage: one ? 'q' : (byPart && run.reread ? 'pick' : (level >= 5 ? 'read' : 'pre')),
     };
-    setPhase('story'); view = 'story'; render();
+    setPhase('story'); view = 'story';
+    if (one) stOpenPart(); else if (R.st.stage === 'read') stStartRead(); else render();
   }
   function stStartRead() {
-    const st = R.st; st.stage = 'read'; st.startedAt = Date.now(); render();
+    const st = R.st;
+    if (st.stage === 'pre' && st.tip) { S.story.tips++; save(); }          // the tip on the opening screen has now been seen
+    st.stage = 'read'; st.readAt = Date.now(); st.readDone = st.level > 1; st.heShown = {}; st.gloss = ''; render();
     if (st.level === 1) karaoke(0, ++st.kTok);
   }
-  // level 1: the passage is read aloud sentence by sentence, each one lit while it is spoken
-  function karaoke(i, tok) {
+  // level 1: the paragraph is read aloud sentence by sentence, each one lit while it is spoken
+  function karaoke(k, tok) {
     const st = R && R.st; if (!st || st.stage !== 'read' || st.kTok !== tok) return;
+    const lines = stLines(), i = lines[k];
     document.querySelectorAll('.sline').forEach(el => el.classList.toggle('now', Number(el.dataset.i) === i));
     Audio.speak(st.p.sentences[i].en);
     Audio.afterSpeech(() => {
       if (!R || R.st !== st || st.stage !== 'read' || st.kTok !== tok) return;
-      if (i + 1 < st.p.sentences.length) return karaoke(i + 1, tok);
+      if (k + 1 < lines.length) return karaoke(k + 1, tok);
       st.readDone = true; render();
     }, 1400, 8000);
   }
-  function stopKaraoke() { const st = R.st; st.kTok++; if (st.stage === 'read' && !st.readDone) { st.readDone = true; const b = document.querySelector('[data-action="st-toq"]'); if (b) b.disabled = false; } }
+  function stopKaraoke() { const st = R.st; st.kTok++; if (st.stage === 'read' && !st.readDone && st.level === 1) { st.readDone = true; const b = document.querySelector('[data-action="st-toq"]'); if (b) b.disabled = false; } }
   function stWord(tok) {
     const st = R.st; stopKaraoke(); st.taps++;
     const clean = tok.replace(/[^A-Za-z']/g, '');
@@ -1175,6 +1245,7 @@
     const he = glossOf(tok);
     st.gloss = he ? `${clean} = ${he}` : clean;
     const el = document.getElementById('sgloss'); if (el) el.textContent = st.gloss;     // no re-render: the page keeps its scroll
+    const n = document.getElementById('staps'); if (n) n.textContent = `👆 ${st.taps}`;
   }
   function stSay(i) {
     const st = R.st; stopKaraoke(); st.audioTaps++;
@@ -1182,28 +1253,53 @@
     Audio.speak(st.p.sentences[i].en);
   }
   function stHe(i) { const st = R.st; stopKaraoke(); if (!st.heShown[i]) st.heTaps++; st.heShown[i] = !st.heShown[i]; render(); }
+  // level 5: he reads aloud, the parent marks each sentence. The marks go to the coach log only.
+  function stMark(i, m) { const st = R.st; st.marks[i] = st.marks[i] === m ? null : m; Audio.tick(); render(); }
+  const stAllMarked = st => stLines().every(i => st.marks[i]);
   // a Hebrew line he opened while reading would answer the question for him; in the questions, Hebrew comes only through the hint ladder
-  function stToQ() { const st = R.st; stopKaraoke(); Audio.stop(); st.heShown = {}; st.stage = 'q'; st.qIdx = 0; openQ(); render(); }
+  function stToQ() {
+    const st = R.st; if (st.level >= 5 && !stAllMarked(st)) return;
+    stopKaraoke(); Audio.stop(); st.heShown = {};
+    if (st.readAt) { const ms = Date.now() - st.readAt; st.readAt = 0; st.readMs += ms; const nb = stBestTime(st.p, st.parts[st.part].i, ms, st.level); if (nb) st.pb = nb; }
+    stOpenPart();
+  }
+  function stOpenPart() {
+    const st = R.st, k = st.parts[st.part].i;
+    st.qs = st.qsAll.filter(q => st.one || k == null || (q.para || 0) === k); st.qIdx = 0;
+    if (!st.qs.length) return stPartDone();
+    st.stage = 'q'; openQ(); render();
+  }
   function openQ() {
     const st = R.st, q = curQ(), L = st.level;
-    Object.assign(st, { hint: 0, wrongs: 0, picked: [], off: [], solved: false, revealed: false, gloss: '' });
+    Object.assign(st, { hint: 0, wrongs: 0, picked: [], off: [], solved: false, revealed: false, gloss: '', pen: false, finding: false });
     if (q.type === 'tf') st.opts = [{ id: 'T', label: L === 1 ? t('stTrue') : 'True', ok: q.ok === true }, { id: 'F', label: L === 1 ? t('stFalse') : 'False', ok: q.ok === false }];
+    else if (q.type === 'write2') st.opts = [];
     else {
       const o = q.choices.map((c, i) => ({ id: String(i), label: L === 1 ? c.he : c.en, ok: !!c.ok }));
       st.opts = q.type === 'tick2' ? o : shuffle(o);
     }
   }
-  function stRecord() { const st = R.st; st.results.push({ hints: st.hint, wrongs: st.wrongs, star: st.hint === 0 && st.wrongs === 0 }); }
+  function stRecord() { const st = R.st; st.results.push({ qi: curQ().qi, hints: st.hint, wrongs: st.wrongs, star: st.hint === 0 && st.wrongs === 0 }); }
+  const stLater = (ms, fn) => { const st = R.st, at = st.results.length; setTimeout(() => { if (R && R.st === st && st.stage === 'q' && st.results.length === at) fn(); }, ms); };
   function stSolved() {
-    const st = R.st, at = st.qIdx; st.solved = true; stRecord();
-    Audio.ding(st.results.filter(r => r.star).length * 2); render();
-    setTimeout(() => { if (R && R.st === st && st.stage === 'q' && st.qIdx === at) stNext(); }, 1300);
+    const st = R.st, q = curQ(); st.solved = true; stRecord();
+    Audio.ding(st.results.filter(r => r.star).length * 2);
+    // level 3, "find it": after a right answer he taps the sentence that holds it (a hint would have lit it already)
+    if (st.level === 3 && st.hint === 0 && !st.one && (q.type === 'fact' || q.type === 'complete')) { st.finding = true; return render(); }
+    render(); stLater(1300, stNext);
   }
   // the hint ladder: 1 light the sentence that holds the answer · 2 show its Hebrew · 3 show the answer
   function stHint() {
     const st = R.st; if (st.solved || st.revealed) return;
     st.hint = Math.min(3, st.hint + 1);
-    if (st.hint === 3) { st.revealed = true; stRecord(); }
+    if (st.hint === 3) {
+      st.revealed = true; stRecord();
+      // the answer had to be shown: the question comes back next session; a second time is a line for the coach
+      const q = curQ(), same = x => x.pid === st.p.id && x.qi === q.qi;
+      if (st.one) { if (!S.story.flags.some(same)) S.story.flags.push({ pid: st.p.id, qi: q.qi, date: todayStr() }); }
+      else if (!S.story.reask.some(same)) S.story.reask.push({ pid: st.p.id, qi: q.qi });
+      save();
+    }
     st.scrollEv = true; render();
   }
   function stMiss(ids) { const st = R.st; st.off.push(...ids); st.wrongs++; Audio.hm(); stHint(); }
@@ -1216,43 +1312,88 @@
     if (st.opts.find(o => o.id === id).ok) return stSolved();
     stMiss([id]);
   }
+  // a tap on a whole sentence: "find it", or one of the two sentences of a "write two things" at levels 1–3
+  function stLine(i) {
+    const st = R.st; if (!st || st.stage !== 'q') return; const q = curQ();
+    if (st.finding) {
+      const ok = q.ev.includes(i); st.finding = false; st.results[st.results.length - 1].found = ok; st.hint = 1;   // the sentence lights up either way
+      if (ok) Audio.ding(2); else Audio.hm();
+      st.scrollEv = !ok; render(); return stLater(ok ? 900 : 1700, stNext);
+    }
+    if (st.solved || st.revealed || q.type !== 'write2' || penQ()) return;
+    const id = String(i); if (st.off.includes(id)) return;
+    if (st.picked.includes(id)) st.picked = st.picked.filter(x => x !== id); else if (st.picked.length < 2) st.picked.push(id);
+    render();
+  }
   function stCheck() {
-    const st = R.st; if (st.picked.length < 2 || st.solved || st.revealed) return;
-    const bad = st.picked.filter(id => !st.opts.find(o => o.id === id).ok);
+    const st = R.st, q = curQ(); if (st.picked.length < 2 || st.solved || st.revealed) return;
+    const bad = q.type === 'write2' ? st.picked.filter(id => !q.ev.includes(Number(id))) : st.picked.filter(id => !st.opts.find(o => o.id === id).ok);
     if (!bad.length) return stSolved();
     st.picked = st.picked.filter(id => !bad.includes(id)); stMiss(bad);
+  }
+  // "write two things" on paper: he writes, then checks his page against the two sentences, with the parent beside him
+  function stPaper(ok) {
+    const st = R.st; if (!st.pen || st.solved) return;
+    st.solved = true; st.results.push({ qi: curQ().qi, hints: 0, wrongs: ok ? 0 : 1, star: ok, paper: ok ? 'ok' : 'again' });
+    if (ok) Audio.ding(st.results.filter(r => r.star).length * 2);
+    stNext();
   }
   function stNext() {
     const st = R.st;
     if (st.qIdx + 1 < st.qs.length) { st.qIdx++; openQ(); return render(); }
-    const p = st.p, total = st.qs.length, stars = st.results.filter(r => r.star).length;
+    stPartDone();
+  }
+  function stPartDone() { const st = R.st; if (st.part + 1 < st.parts.length) { st.part++; return stStartRead(); } stFinish(); }
+  function stFinish() {
+    const st = R.st, p = st.p, total = st.results.length, stars = st.results.filter(r => r.star).length;
+    if (st.one) {
+      // a question that came back leaves the list, whatever happened; it is not a story run
+      S.story.reask = S.story.reask.filter(x => !(x.pid === p.id && x.qi === st.run.ask));
+      logEvent('story_reask', { pid: p.id, qi: st.run.ask, star: stars === 1 }); save();
+      R.st = null; return startStory();
+    }
     const seconds = Math.round((Date.now() - st.startedAt) / 1000);
     const prev = S.story.done[p.id];
-    const best = !prev || stars / total >= prev.stars / prev.total;
-    S.story.done[p.id] = { stars: best ? stars : prev.stars, total: best ? total : prev.total, date: prev ? prev.date : todayStr(), reads: (prev ? prev.reads : 0) + 1 };
-    // level-up: three new passages at this level with at most 2 word taps a sentence and 80% of the stars; parent sessions only
-    const clean = st.taps / p.sentences.length <= 2 && stars >= Math.ceil(0.8 * total);
-    if (R.mode === 'parent' && !st.reread && clean) { S.story.clean++; if (S.story.clean >= 3 && S.story.level < 3) { S.story.level++; S.story.clean = 0; } }
-    const run = { pid: p.id, date: todayStr(), n: R.n, level: st.level, reread: st.reread, stars, total, taps: st.taps, audioTaps: st.audioTaps, heTaps: st.heTaps, seconds, hints: st.results.map(r => r.hints), clean };
+    const whole = st.parts.length > 1 || st.parts[0].i == null;          // a re-read of one paragraph leaves the story's stars alone
+    const best = whole && (!prev || stars / total >= prev.stars / prev.total);
+    S.story.done[p.id] = Object.assign({}, prev, { stars: best ? stars : prev.stars, total: best ? total : prev.total, date: prev ? prev.date : todayStr(), reads: (prev ? prev.reads : 0) + 1 });
+    const lines = st.parts.reduce((k, x) => k + x.lines.length, 0);
+    // level-up: three new passages at this level with few word taps (2 a sentence; 3 in all from level 4) and 80% of the stars; with a parent only
+    const clean = (st.level >= 4 ? st.taps <= 3 : st.taps / lines <= 2) && stars >= Math.ceil(0.8 * total);
+    if (R.mode === 'parent' && !st.reread && clean) { S.story.clean++; if (S.story.clean >= 3 && S.story.level < 5) { S.story.level++; S.story.clean = 0; } }
+    const run = { pid: p.id, date: todayStr(), n: R.n, level: st.level, reread: st.reread, stars, total, taps: st.taps, audioTaps: st.audioTaps, heTaps: st.heTaps, seconds, readSec: Math.round(st.readMs / 1000), lines, hints: st.results.map(r => r.hints), clean };
+    if (!whole) run.part = st.parts[0].i;
+    const again = Object.keys(st.marks).filter(i => st.marks[i] === 'again');
+    if (st.level >= 5) run.aloud = { ok: Object.keys(st.marks).length - again.length, again: again.map(i => p.sentences[i].en) };
     S.story.runs.push(run); if (S.story.runs.length > 60) S.story.runs.shift();
-    R.stResult = { pid: p.id, reread: st.reread, level: st.level, stars, total, taps: st.taps, seconds };
+    const res = { pid: p.id, reread: st.reread, level: st.level, stars, total, taps: st.taps, seconds };
+    if (st.run.second) R.rrResult = res; else R.stResult = res;
     logEvent('story', run); save();
-    st.first = !prev; st.gold = stars === total; st.stage = 'end'; render();
+    st.first = !prev; st.gold = whole && stars === total; st.stage = 'end'; render();
   }
   function storyView() {
-    const st = R.st, p = st.p, L = st.level;
+    const st = R.st, p = st.p, L = st.level; const long = st.parts.length > 1;
+    const partLabel = long ? t('stPart', { i: st.part + 1, n: st.parts.length }) : '';
     if (st.stage === 'pre') {
       const keys = p.keys.map(k => ALL_WORDS.find(w => w.en === k)).filter(Boolean);
       return `
-        ${topbar(t(st.reread ? 'stRevisit' : 'stNew'), '')}
+        ${topbar(t(st.reread ? 'stRevisit' : (p.tier === 'C' ? 'stNewPair' : 'stNew')), '')}
         <div class="card center spre">
           <div class="semoji">${p.emoji}</div>
           <div class="en big">${esc(p.title)}</div>
           ${L === 1 ? `<div class="sgist">${esc(p.gist)}</div>` : ''}
-          <div class="skeys">${keys.map(w => `<button class="skey" data-action="speak" data-text="${esc(w.en)}"><span class="en">${esc(w.en)}</span><span>${esc(w.he)}</span></button>`).join('')}</div>
+          ${long ? `<div class="muted">${t('stLong')}</div>` : ''}
+          ${L <= 3 ? `<div class="skeys">${keys.map(w => `<button class="skey" data-action="speak" data-text="${esc(w.en)}"><span class="en">${esc(w.en)}</span><span>${esc(w.he)}</span></button>`).join('')}</div>` : ''}
+          ${st.tip ? `<div class="trick">${t('stTip', { tip: st.tip })}</div>` : ''}
           <div class="bigcta"><button class="btn primary block" data-action="st-read">${t('stToStory')}</button></div>
         </div>`;
     }
+    if (st.stage === 'pick') return `
+        ${topbar(t('stRevisit'), `${p.emoji} <span class="en">${esc(p.title)}</span>`)}
+        <div class="card spre">
+          <div class="center" style="font-size:24px; font-weight:600">${t('stPick')}</div>
+          <div class="spick">${st.parts.map((x, k) => `<button class="btn block" data-action="st-part" data-i="${k}"><span>${t('stPickPart', { i: k + 1 })}</span><span class="en">${esc(p.sentences[x.lines[0]].en)}</span></button>`).join('')}</div>
+        </div>`;
     if (st.stage === 'end') {
       onRendered(() => { Audio.fanfare(); if (st.gold) confetti(60); });
       return `
@@ -1261,44 +1402,61 @@
           <div class="sstars big">${st.results.map(r => r.star ? '⭐' : '☆').join(' ')}</div>
           ${friendCard(p, st.gold)}
           ${st.gold ? `<div class="muted">${t('stGold')}</div>` : ''}
+          ${st.pb ? `<div class="muted">${t('stBest', { now: st.pb })}</div>` : ''}
           <div class="bigcta"><button class="btn primary block" data-action="st-done">${t('stContinue')}</button></div>
         </div>`;
     }
-    const inQ = st.stage === 'q'; const q = inQ ? curQ() : null;
+    const inQ = st.stage === 'q'; const q = inQ ? curQ() : null; const done = inQ && (st.solved || st.revealed);
+    const tapLines = inQ && (st.finding || (q.type === 'write2' && !penQ() && !done));
     const words = s => s.split(' ').map(tok => `<span class="w" data-action="st-word" data-w="${esc(tok)}">${esc(tok)}</span>`).join(' ');
     const line = i => {
-      const s = p.sentences[i]; const ev = inQ && st.hint >= 1 && q.ev.includes(i);
-      return `<div class="sline ${ev ? 'ev' : ''}" data-i="${i}">
-          ${L <= 2 ? `<button class="sbtn" data-action="st-say" data-i="${i}">🔊</button>` : ''}
-          <span class="stext en">${words(s.en)}</span>
+      const s = p.sentences[i]; const ev = inQ && q.ev.includes(i) && (st.hint >= 1 || (st.pen && q.type === 'write2'));
+      const sel = inQ && q.type === 'write2' && st.picked.includes(String(i));
+      const mark = m => `<button class="rdbtn sm ${st.marks[i] === m ? 'on' : ''}" data-action="st-mark" data-i="${i}" data-m="${m}">${m === 'ok' ? '✓' : '🔁'}</button>`;
+      return `<div class="sline ${ev ? 'ev' : ''} ${tapLines ? 'tap' : ''} ${sel ? 'sel' : ''}" data-i="${i}" ${tapLines ? 'data-action="st-line"' : ''}>
+          ${st.sayOk && !tapLines ? `<button class="sbtn" data-action="st-say" data-i="${i}">🔊</button>` : ''}
+          <span class="stext en">${tapLines || L >= 5 ? esc(s.en) : words(s.en)}</span>
           ${L === 1 && !inQ ? `<button class="sbtn q" data-action="st-he" data-i="${i}">?</button>` : ''}
+          ${L >= 5 && !inQ ? `<span class="rdmarks">${mark('ok')}${mark('again')}</span>` : ''}
           ${st.heShown[i] || (ev && st.hint >= 2) ? `<div class="she">${esc(s.he)}</div>` : ''}
         </div>`;
     };
-    const passage = `<div class="card passage">${p.paras.map(par => `<div class="spara">${par.map(line).join('')}</div>`).join('')}<div class="sgloss" id="sgloss" dir="ltr">${st.gloss ? esc(st.gloss) : '&nbsp;'}</div></div>`;
+    const paras = st.parts[st.part].i == null ? p.paras : [stLines()];
+    const passage = `<div class="card passage">${paras.map(par => `<div class="spara">${par.map(line).join('')}</div>`).join('')}<div class="sgloss" id="sgloss" dir="ltr">${st.gloss ? esc(st.gloss) : '&nbsp;'}</div></div>`;
+    const head = `${p.emoji} <span class="en">${esc(p.title)}</span>`;
+    const quiet = L === 4 ? `<span class="pill" id="staps">👆 ${st.taps}</span>` : '';     // at level 4 the word taps are a quiet number (at 5 there are none)
     if (!inQ) return `
-        ${topbar(`${p.emoji} <span class="en">${esc(p.title)}</span>`, t(L === 1 ? 'stListen' : 'stTouch'))}
+        ${topbar(head, [partLabel, t(L === 1 ? 'stListen' : (L >= 5 ? 'stReadCoach' : 'stTouch'))].filter(Boolean).join(' · '), quiet)}
         ${passage}
-        <div class="bigcta"><button class="btn primary block" data-action="st-toq" ${st.readDone ? '' : 'disabled'}>${t('stToQuestions')}</button></div>`;
+        <div class="bigcta"><button class="btn primary block" data-action="st-toq" ${(L === 1 && !st.readDone) || (L >= 5 && !stAllMarked(st)) ? 'disabled' : ''}>${t('stToQuestions')}</button></div>`;
     if (st.scrollEv) { st.scrollEv = false; onRendered(() => { const el = document.querySelector('.sline.ev'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }); }
-    const done = st.solved || st.revealed; const en = L > 1;
-    const qtext = q.type === 'tf'
-      ? `<div class="qlabel ${L === 3 ? 'en' : ''}">${L === 3 ? 'True or false?' : t('stTrueFalse')}</div><div class="qstmt en">${words(q.en)}</div>${L === 1 ? `<div class="she">${esc(q.he)}</div>` : ''}`
-      : (L === 3 && q.en ? `<div class="qstmt en">${words(q.en)}</div>` : `<div class="qhe">${esc(q.he)}</div>`);
+    const en = L > 1, enQ = L >= 3 && q.en;
+    let qtext;
+    if (q.type === 'tf') qtext = `<div class="qlabel ${L >= 3 ? 'en' : ''}">${L >= 3 ? 'True or false?' : t('stTrueFalse')}</div><div class="qstmt en">${words(q.en)}</div>${L === 1 ? `<div class="she">${esc(q.he)}</div>` : ''}`;
+    else if (q.type === 'complete') qtext = `<div class="qlabel">${t('stComplete')}</div>${enQ ? `<div class="qstmt en">${words(q.en)} …</div>` : `<div class="qhe">${esc(q.he)}…</div>`}`;
+    else if (q.type === 'write2') qtext = `${enQ ? `<div class="qstmt en">${words(q.en)}</div>` : `<div class="qhe">${esc(q.he)}</div>`}${done ? '' : `<div class="qlabel">${t(penQ() ? 'stWrite2Pen' : 'stWrite2Tap')}</div>`}`;
+    else qtext = enQ ? `<div class="qstmt en">${words(q.en)}</div>` : `<div class="qhe">${esc(q.he)}</div>`;
+    if (st.finding) qtext += `<div class="qlabel find">${t('stFind')}</div>`;
     const opts = st.opts.map(o => {
       const cls = done && o.ok ? 'good' : (st.off.includes(o.id) || (done && !o.ok) ? 'off' : (st.picked.includes(o.id) ? 'picked' : ''));
       return `<button class="qopt ${en ? 'en' : ''} ${cls}" data-action="st-pick" data-id="${o.id}" ${done || st.off.includes(o.id) ? 'disabled' : ''}>${esc(o.label)}</button>`;
     }).join('');
-    const stars = st.qs.map((_, i) => i < st.results.length ? (st.results[i].star ? '⭐' : '☆') : '<span class="dot">•</span>').join('');
+    const two = q.type === 'tick2' || (q.type === 'write2' && !penQ());
+    const paper = q.type === 'write2' && penQ() && !done ? (st.pen
+      ? `<div class="smodel en">${q.model.map(m => `<div>${esc(m)}</div>`).join('')}</div>
+         <div class="row wrap" style="justify-content:center; gap:14px"><button class="btn primary" data-action="st-pok">${t('wOk')}</button><button class="btn" data-action="st-pagain">${t('wAgain')}</button></div>`
+      : `<button class="btn primary" data-action="st-pen">${t('wPenDown')}</button>`) : '';
+    const stars = st.qsAll.map((_, i) => i < st.results.length ? (st.results[i].star ? '⭐' : '☆') : '<span class="dot">•</span>').join('');
     return `
-        ${topbar(`${p.emoji} <span class="en">${esc(p.title)}</span>`, t('stQCount', { i: st.qIdx + 1, n: st.qs.length }), `<span class="sstars">${stars}</span>`)}
+        ${topbar(st.one ? t('stAgainQ') : head, st.one ? head : [partLabel, t('stQCount', { i: Math.min(st.results.length + 1, st.qsAll.length), n: st.qsAll.length })].filter(Boolean).join(' · '), `${quiet}<span class="sstars">${stars}</span>`)}
         ${passage}
         <div class="card qcard">
           ${qtext}
-          <div class="qopts ${q.type === 'tick2' ? 'col' : ''} ${en ? 'ltr' : ''}">${opts}</div>
+          ${st.opts.length ? `<div class="qopts ${q.type === 'tick2' ? 'col' : ''} ${en ? 'ltr' : ''}">${opts}</div>` : ''}
           <div class="row wrap" style="justify-content:center; margin-top:12px">
-            ${q.type === 'tick2' && !done ? `<button class="btn primary" data-action="st-check" ${st.picked.length === 2 ? '' : 'disabled'}>${t('stCheck')}</button>` : ''}
-            ${!done ? `<button class="btn small" data-action="st-hint">${t('stHint')}</button>` : ''}
+            ${paper}
+            ${two && !done ? `<button class="btn primary" data-action="st-check" ${st.picked.length === 2 ? '' : 'disabled'}>${t('stCheck')}</button>` : ''}
+            ${!done && !paper ? `<button class="btn small" data-action="st-hint">${t('stHint')}</button>` : ''}
             ${st.revealed ? `<button class="btn primary" data-action="st-next">${t('stNext')}</button>` : ''}
           </div>
         </div>`;
@@ -1469,7 +1627,8 @@
   }
   function startReading() {
     // (it is skipped on a listening day, PRD §7.4)
-    if (R.mode !== 'parent' || R.lsResult || minLeft() < READING_MIN) return finishSession();
+    // ... and when the story already had him read aloud to the parent (level 5)
+    if (R.mode !== 'parent' || R.lsResult || (R.stResult && R.stResult.level >= 5) || minLeft() < READING_MIN) return finishSession();
     const items = readingPick(); if (!items.length) return finishSession();
     R.rd = { items: items.map(s => ({ id: s.id, en: s.en, mark: null })) };
     setPhase('reading'); view = 'reading'; render();
@@ -1839,6 +1998,7 @@
 
     mission() {
       const items = [];
+      if (R.plan.warm) items.push(t('missionWarm'));
       if (R.plan.boss) items.push(t('missionBoss'));
       if (R.reviewTotal) items.push(t('missionReview', { n: R.reviewTotal }));
       if (R.newLand) items.push(t('missionLand', { icon: landIcon(R.newLand), label: landNewLabel(R.newLand), name: landName(R.newLand), n: R.newLand.words.length }));
@@ -1847,6 +2007,7 @@
       if (pl.sd) items.push(t('missionSd'));
       if (pl.writing) items.push(t(pl.writing.paper ? 'missionPen' : 'missionTiles'));
       if (pl.story) items.push(pl.story.reread ? t('missionRevisit', { name: esc(pl.story.p.friend.name) }) : t('missionFriend'));
+      if (pl.reread) items.push(t('missionRevisit', { name: esc(pl.reread.p.friend.name) }));
       if (pl.listening) items.push(t('missionListen'));
       if (R.mode === 'solo') items.push(t('missionCode'));
       if (R.later) items.push(t('missionLater', { what: R.later }));
@@ -1911,6 +2072,14 @@
     },
 
     listening() { return listeningView(); },
+    // a paragraph he knows, read once as the session opens; the time is measured silently
+    warm() {
+      const w = R.plan.warm, p = w.p;
+      return `
+        ${topbar(t('warmTitle'), t('warmSub'))}
+        <div class="card passage"><div class="spara">${p.paras[w.part].map(i => `<div class="sline"><span class="stext en">${esc(p.sentences[i].en)}</span></div>`).join('')}</div></div>
+        <div class="bigcta"><button class="btn primary block" data-action="warm-done">${t('warmDone')}</button></div>`;
+    },
 
     card() { return cardScreen(R, false); },
     practice() { return cardScreen(P, true); },
@@ -2131,13 +2300,13 @@
     const wr = S.writing, sto = S.story;
     const PHASE_HE = { boss: 'מיני-בוס', review: 'חזרה', intro: 'היכרות', new: 'מילים חדשות', pintro: 'כלל', pack: 'דקדוק', writing: 'כתיבה', story: 'סיפור', listening: 'האזנה', reading: 'קריאה בקול' };
     const RUNG_HE = { 1: 'בנייה באריחים', 2: 'בנייה עם אות גדולה ונקודה', 3: 'בנייה ואז העתקה לדף', 4: 'כתיבה על דף מתמונה ובנק מילים' };
-    const LEVEL_HE = { 1: 'מקשיב ועוקב', 2: 'קורא עם הקראה לפי בקשה', 3: 'קורא עם עזרה במילים' };
+    const LEVEL_HE = { 1: 'מקשיב ועוקב', 2: 'קורא עם הקראה לפי בקשה', 3: 'קורא עם עזרה במילים', 4: 'קורא לבד', 5: 'קורא בקול להורה' };
     const mmss = s => `${Math.floor(s / 60)}:${pad2(s % 60)}`;
     const steps = d.session && d.session.secs ? Object.entries(d.session.secs).filter(([k]) => PHASE_HE[k]).map(([k, s]) => `${PHASE_HE[k]} ${mmss(s)}`).join(' · ') : '';
     const towers = `<div class="boxes">${C.grammar.map(g => { const p = towerProgress(g); return `<div><b>${p.open ? `${p.mastered}/${p.total}` : '🔒'}</b><span class="en" style="letter-spacing:0">${esc(g.short)}</span></div>`; }).join('')}</div>`;
     const wMark = r => `${r.tiles === null ? '' : (r.tiles ? 'אריחים ✓' : 'אריחים, עם תיקון')}${r.tiles !== null && r.paper ? ' · ' : ''}${r.paper ? (r.paper === 'ok' ? 'דף ✓' : 'דף 🔁') : ''}`;
     const wRows = wr.history.slice(-6).reverse().map(h => h.items.map((r, i) => `<tr>${i === 0 ? `<td rowspan="${h.items.length}">${h.date}<br>${h.mode === 'solo' ? 'לבד' : 'הורה'}</td>` : ''}<td class="en">${esc(r.model)}</td><td>${r.rung}</td><td>${wMark(r)}</td></tr>`).join('')).join('');
-    const sRows = sto.runs.slice(-8).reverse().map(r => `<tr><td>${r.date}</td><td class="en">${esc(r.pid)}${r.reread ? ' ↺' : ''}</td><td>${r.level}</td><td><bdi>${r.stars}/${r.total}</bdi></td><td>${(r.taps / ((STORY[r.pid] || { sentences: [1] }).sentences.length)).toFixed(1)}</td><td>${mmss(r.seconds)}</td><td>${Math.max(0, ...r.hints)}</td></tr>`).join('');
+    const sRows = sto.runs.slice(-8).reverse().map(r => `<tr><td>${r.date}</td><td class="en">${esc(r.pid)}${r.part != null ? `·${r.part + 1}` : ''}${r.reread ? ' ↺' : ''}</td><td>${r.level}</td><td><bdi>${r.stars}/${r.total}</bdi></td><td>${(r.taps / (r.lines || (STORY[r.pid] || { sentences: [1] }).sentences.length)).toFixed(1)}</td><td>${mmss(r.seconds)}${r.readSec ? ` (${mmss(r.readSec)})` : ''}</td><td>${Math.max(0, ...r.hints)}</td></tr>`).join('');
     const m2 = `
         <h3>דקדוק (שולט / קלפים)</h3>
         <div>${towers}</div>
@@ -2148,7 +2317,12 @@
         <div class="muted">ביום הראשון עם עט: להראות פעם אחת את h (מקל גבוה) ואת a (בלי זנב). אחר כך רק הסעיף השלישי בבדיקה. לא להעיר על זה מעבר לכך.</div>
         <h3>סיפורים · רמת תמיכה ${sto.level}: ${LEVEL_HE[sto.level] || ''} · נקיים ${sto.clean}/3</h3>
         <div class="row wrap"><button class="btn small" data-action="story-level" data-d="-1">יותר תמיכה</button><button class="btn small" data-action="story-level" data-d="1">פחות תמיכה</button></div>
-        ${sRows ? `<table><tr><th>מתי</th><th>סיפור</th><th>רמה</th><th>כוכבים</th><th>נגיעות למשפט</th><th>זמן</th><th>רמז מרבי</th></tr>${sRows}</table>` : '<div class="muted">עוד לא התחיל</div>'}`;
+        ${sRows ? `<table><tr><th>מתי</th><th>סיפור</th><th>רמה</th><th>כוכבים</th><th>נגיעות למשפט</th><th>זמן (מתוכו קריאה)</th><th>רמז מרבי</th></tr>${sRows}</table>` : '<div class="muted">עוד לא התחיל</div>'}
+        <div class="muted">↺ = קריאה חוזרת. רמות 4 ו-5 רק במשימה עם הורה. ברמה 5 הוא קורא בקול וההורה מסמן כל משפט.</div>
+        ${sto.runs.filter(r => r.aloud && r.aloud.again.length).slice(-2).map(r => `<div>${r.date}, קריאה בקול, לחזור על: <span class="en">${r.aloud.again.map(esc).join(' ')}</span></div>`).join('')}
+        ${sto.flags.length ? `<div>⚠️ שאלות שהתשובה שלהן נחשפה פעמיים: <span class="en">${sto.flags.map(f => esc(((STORY[f.pid] || { questions: [] }).questions[f.qi] || {}).en || f.pid)).join(' · ')}</span></div>` : ''}
+        ${sto.reask.length ? `<div>שאלות שיחזרו במשימה הבאה: ${sto.reask.length}</div>` : ''}
+        ${sto.warms.length ? `<div>קריאות חימום: ${sto.warms.slice(-4).reverse().map(w => `${w.date} <span class="en">${esc(w.pid)}·${w.part + 1}</span> ${w.sec} שנ׳`).join(' · ')}</div>` : ''}`;
     // M2, the game half: reading minute, letter-tile cards, streak and freezes, loot
     const rRows = S.reading.history.slice(-5).reverse().map(h => h.items.map((r, i) => `<tr>${i === 0 ? `<td rowspan="${h.items.length}">${h.date}</td>` : ''}<td class="en">${esc(r.en)}</td><td>${r.ok ? '✓' : '🔁'}</td></tr>`).join('')).join('');
     const againEn = S.reading.again.map(id => (C.readingPool || []).find(s => s.id === id)).filter(Boolean).map(s => esc(s.en)).join(' ');
@@ -2266,7 +2440,8 @@
       case 'mode': startSession(a.dataset.mode); break;
       case 'start2': startSession('parent'); break;             // the second sitting of a quest already half done
       case 'split': startSession(pendingMode || 'parent', a.dataset.how); break;
-      case 'go': if (R.plan.boss && !R.boss) startBoss(); else nextCard(); break;
+      case 'go': beginQuest(); break;
+      case 'warm-done': warmDone(); break;
       case 'boss-go': nextCard(); break;
       case 'boss-next': afterBoss(); break;
       case 'set-pick': setPick(Number(a.dataset.id)); break;
@@ -2304,7 +2479,13 @@
       case 'st-check': stCheck(); break;
       case 'st-hint': stHint(); break;
       case 'st-next': stNext(); break;
-      case 'st-done': R.st = null; startListening(); break;
+      case 'st-done': R.st = null; startStory(); break;
+      case 'st-part': { const st = R.st; st.parts = [st.parts[Number(a.dataset.i)]]; st.part = 0; stStartRead(); break; }
+      case 'st-line': stLine(Number(a.dataset.i)); break;
+      case 'st-mark': stMark(Number(a.dataset.i), a.dataset.m); break;
+      case 'st-pen': R.st.pen = true; R.st.scrollEv = true; render(); break;
+      case 'st-pok': stPaper(true); break;
+      case 'st-pagain': stPaper(false); break;
       case 'rd-mark': rdMark(Number(a.dataset.i), a.dataset.m); break;
       case 'rd-done': rdDone(false); break;
       case 'rd-skip': rdDone(true); break;
@@ -2321,7 +2502,7 @@
       case 'brag-share': shareBrag(); break;
       case 'brag-back': view = bragFrom; render(); break;
       case 'to-close': view = 'close'; render(); break;
-      case 'story-level': S.story.level = clamp(S.story.level + Number(a.dataset.d), 1, 3); S.story.clean = 0; save(); render(); break;
+      case 'story-level': S.story.level = clamp(S.story.level + Number(a.dataset.d), 1, 5); S.story.clean = 0; save(); render(); break;
       case 'writing-rung': S.writing.rung = clamp(S.writing.rung + Number(a.dataset.d), 1, 4); S.writing.clean = 0; save(); render(); break;
       case 'coach-freeze': { const k = coachFreeze(); toast(k < 0 ? 'אין רצף להקפיא: לא הייתה משימה בשלושת השבועות האחרונים' : (k ? `הוקפאו ${k} ימים. הרצף נשמר.` : 'אין ימים חסרים')); render(); break; }
       case 'toggle-box': S.settings.boxEvery = (S.settings.boxEvery || 1) === 2 ? 1 : 2; save(); render(); break;

@@ -6,7 +6,7 @@ Design: `prd.md`. Static web app, no build step, no backend.
 
 | File | What |
 |---|---|
-| `index.html` | the page shell; bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's first block = `3.0.0`) |
+| `index.html` | the page shell; bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`) |
 | `styles.css` | reading-friendly styles |
 | `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
 | `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
@@ -114,7 +114,7 @@ card opens the share sheet and the picture arrives whole (WhatsApp), that hats a
 right on the hero (they are emoji, and older iPadOS versions lack a few), that the box opens
 smoothly, the alternative answer sounds, and that the letter tiles are comfortable to tap.
 
-## What M3 added so far (12 Nov, v3.0.0: the pieces days 6 and 7 need)
+## What M3 added (12 Nov, the test-facing half, v3.0.1)
 
 Everything below opens by itself from the save's state, as before. "Day 6" means the first parent
 session on a day after the last of the 50 words came in.
@@ -143,13 +143,33 @@ session on a day after the last of the 50 words came in.
   sitting, and ends with the code. A half left open overnight still counts as that day's quest.
 - A save from 2.1.0 or earlier carries over as is.
 
-Not built yet from M3's test-facing list: the long (tier C) stories with their question formats,
-story levels 4 and 5, the re-reading schedule and the warm read. They are needed from day 8.
+- **Long stories** (from day 8): four passages of 13–14 sentences in three paragraphs, two friends
+  side by side (C1–C4; C5, the unseen one, comes with the mock in M4). Up to support level 3 a long
+  story is shown one paragraph a screen, each followed by its own two questions. New question
+  kinds: "how does the sentence go on" (four endings) and "write two things" (he taps the two
+  sentences; from level 4 he writes them on paper and checks against the story).
+- **Support levels 4 and 5** (parent sessions only): 4 = reads alone, word taps shown as a small
+  number; 5 = reads aloud while the parent marks each sentence (that day has no reading minute).
+  The coach screen's two story buttons now move between 1 and 5.
+- **Each story is met three times**: new; two missions later as a second visit, one level higher
+  (a long story: one paragraph, his pick); and later once more as a 20-second "warm read" at the
+  start of a mission. Reading times are kept per paragraph. He is told only when a paragraph's
+  best time falls; the times themselves are on the coach screen.
+- **Level 3 "find it"**: after a right answer he taps the sentence that holds it.
+- **A question whose answer had to be shown** comes back at the next mission, before the day's
+  story. If the answer has to be shown again, the coach screen lists that question.
+- **Five reading tips**, one before each new story (from level 2) until all five were shown.
+
+Not built from the PRD's story track: at level 4 the questions still come one at a time (the PRD
+wants them all on one page, as on the test; M4's test mode has that look), the "hear the whole
+paragraph" button at level 4, and the read-along days. M3's second list (trophy shelf,
+tricky-word flow, own-sentence cards, the training grounds' drills) is not started.
 
 To check on the iPad before day 6: that the three recordings start within a few seconds and play
 to the end (coach tip: `test.html` on the Mac has a "day 6" and a "day 8" save); that the fallback
 dialogue's two voices can be told apart; that the door-and-figure pictures for `tall` and `short`
-show; that the word-bank and halves sets are comfortable to tap.
+show; that the word-bank and halves sets are comfortable to tap; that in a long story the
+sentences are easy to tap for "write two things".
 
 ## Coach screen (hidden)
 
