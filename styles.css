@@ -465,7 +465,72 @@ button.litem:active { transform: translateY(4px); border-bottom-width: 2px; }
 .bragimg.wait { background: color-mix(in srgb, var(--fg) 10%, transparent); }
 a.btn { text-decoration: none; }
 
+/* ---------- M3: the bonus land ---------- */
+.apic { display: inline-flex; align-items: flex-end; gap: .08em; line-height: 1; direction: ltr; }
+.apic .abody.tall { font-size: 1.25em; }
+.apic .abody.short { font-size: .55em; }
+.apic .adoor { font-size: 1em; opacity: .85; }
+.opt.pics { font-size: 46px; letter-spacing: .06em; direction: ltr; }
+.node.side .dot { width: 66px; height: 66px; font-size: 32px; border-radius: 18px; }
+.trail .road.side { stroke-dasharray: 0.01 3.4; stroke-width: 5px; opacity: .6; }
+
+/* ---------- word bank and sentence halves: a set of five on one card ---------- */
+.setcard { display: flex; flex-direction: column; gap: 14px; }
+.settiles { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; direction: ltr; padding: 12px; border: 2px dashed var(--card-edge); border-radius: 18px; background: var(--paper); }
+.settiles.ends { border: 0; background: none; padding: 0; }
+.settile { min-height: 56px; padding: 6px 16px; border-radius: 14px; border: 0; border-bottom: 5px solid var(--btn-edge); background: var(--btn); color: var(--btn-ink); font: 600 25px/1.35 var(--en-font); letter-spacing: .03em; }
+.settile:active { transform: translateY(3px); border-bottom-width: 2px; }
+.settile.used { opacity: .25; text-decoration: line-through; transform: none; }
+.settile.bad { background: var(--miss-soft); border-bottom-color: var(--miss); animation: nudge .35s ease; }
+@keyframes nudge { 0%, 100% { transform: none; } 30% { transform: translateX(-6px); } 70% { transform: translateX(6px); } }
+.setrows { display: flex; flex-direction: column; gap: 8px; direction: ltr; }
+.setrow { padding: 8px 12px; border-radius: 14px; border: 2px solid transparent; text-align: left; cursor: pointer; }
+.setrow.cur { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.setrow.done { background: var(--good-soft); cursor: default; }
+.settext { font-size: 25px; line-height: 1.75; font-weight: 500; }
+.setblank { display: inline-block; min-width: 4.4em; border-bottom: 4px solid var(--accent-deep); margin: 0 .2em; text-align: center; font-weight: 700; color: var(--good); }
+.setblank.wide { min-width: 8em; }
+.setrow.done .setblank { border-bottom-color: var(--good); }
+.setrow .she { padding: 0; font-size: 19px; }
+.hva { font-weight: 700; }
+
+/* ---------- the mid-boss ---------- */
+.bosshp { display: flex; align-items: center; gap: 12px; direction: ltr; }
+.bosshp .progress { flex: 1; height: 20px; }
+.bosshp .progress > div { background: #d8483e; }
+.bossface { font-size: 40px; line-height: 1; }
+.bossface.hit { animation: bosshit .5s ease; }
+@keyframes bosshit { 0% { transform: none; } 30% { transform: translateX(-9px) rotate(-16deg) scale(1.25); } 60% { transform: translateX(7px) rotate(11deg); } 100% { transform: none; } }
+.bosshpn { font-family: var(--display-font); font-size: 26px; line-height: 1; color: var(--fg); min-width: 36px; text-align: center; }
+.bosscard { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.bosscard .bigcta { width: 100%; }
+.bosscard .lead { font-family: var(--display-font); font-size: 32px; line-height: 1.25; }
+.bossbig { font-size: 132px; line-height: 1.15; animation: bossbob 2.2s ease-in-out infinite; }
+@keyframes bossbob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+.bossbig.run { animation: bossrun 1.1s ease-in forwards; }
+@keyframes bossrun { 0% { transform: none; opacity: 1; } 25% { transform: translateX(14px) rotate(8deg); } 100% { transform: translateX(-46vw) rotate(-24deg) scale(.5); opacity: .28; } }
+
+/* ---------- listening ---------- */
+.lsplayer { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.lsbtn { width: 132px; height: 132px; border-radius: 50%; border: 0; border-bottom: 9px solid var(--accent-deep); background: var(--accent); color: var(--accent-ink); font-size: 58px; line-height: 1; padding: 0; }
+.lsbtn:active { transform: translateY(5px); border-bottom-width: 4px; }
+.lsbtn.on { animation: lspulse 1.1s ease-in-out infinite; opacity: 1; }
+@keyframes lspulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+.lscount { font-family: var(--display-font); font-size: 26px; line-height: 1.2; color: var(--ink); }
+.lsprog { width: 100%; max-width: 440px; background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.lsq.small { padding: 16px 14px; }
+.lsq.small .qstmt { font-size: 23px; }
+.lsq.small .qopt { min-height: 52px; font-size: 21px; }
+.qopt.pic { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.qopt .qe { font-size: 40px; line-height: 1.15; }
+.lsq.small .qopt .qe { font-size: 30px; }
+.qopts.five { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.qopts.five .qopt { padding: 8px 4px; font-size: 18px; letter-spacing: 0; word-spacing: 0; }
+
 @media (max-width: 600px) {
+  .qopts.five { grid-template-columns: repeat(3, 1fr); }
+  .settext { font-size: 21px; }
+  .settile { font-size: 21px; }
   .rdtext { font-size: 26px; }
   .rdbtn { width: 52px; height: 52px; font-size: 22px; }
   .tslot { width: 38px; height: 50px; font-size: 25px; }
