@@ -241,6 +241,9 @@
     return C.words.filter(w => { const st = S.cards[cardId(w.id, 'rec')]; return st && st.box >= 5; }).length;
   }
   function todayDone() { const d = S.days[todayStr()]; return !!(d && d.session); }
+  // a day can hold a solo session and then a parent one; the earlier ones sit in `earlier`, the latest in `session`
+  const daySessions = d => d ? [...(d.earlier || []), ...(d.session ? [d.session] : [])] : [];
+  const todayNs = () => daySessions(S.days[todayStr()]).map(r => r.n);
 
   // ---------- streak, with one free freeze a week (PRD §7.3, CD8) ----------
   // A day counts when its quest was finished. A frozen day adds nothing and breaks nothing.
@@ -371,7 +374,9 @@
   let view = 'map';
 
   function buildReviewQueue(n, cap = C.reviewStackCap) {
-    const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n));
+    // one promotion per card per day (PRD §6.1): a card already reviewed in today's earlier session waits
+    const seenToday = todayNs();
+    const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
     // the letter-tile cards are the light ones: a few a session, highest box first; the rest stay due.
     // Those few always get their turn (a full stack would otherwise crowd them out every day), and each
     // takes about the time of two ordinary cards, so the rest of the stack gives up two places for each.
@@ -426,6 +431,13 @@
   const estStory = s => s.reread ? 2.5 : (s.p.tier === 'A' ? 3 : 4.5);
   const estWriting = w => w.paper ? 3 : 1.5;
 
+  // after a solo session, a parent session the same day is worth it only when it opens something new
+  function parentExtras() {
+    const ses = daySessions(S.days[todayStr()]);
+    if (!ses.length || ses.some(r => r.mode === 'parent')) return false;
+    const newLand = nextLandForToday(), story = storyForSession('parent', newLand);
+    return !!(newLand || unitForToday(newLand) || sdForToday(newLand) || (story && !story.reread));
+  }
   function startSession(mode) {
     const n = S.sessionCount + 1;
     const parent = mode === 'parent';
@@ -557,6 +569,7 @@
       packs: R.packsDone, secs, writing: R.wResult, story: R.stResult,   // per-step log for the coach screen
       reading: R.rdResult,                                               // the parent's marks: coach log only
     };
+    if (today().session) (today().earlier = today().earlier || []).push(today().session);
     today().session = rec;
     // cosmetic, and decided only after everything that counts is recorded; whatever happens in there, the quest still closes
     try { rec.loot = grantLoot(R.n); } catch (e) { rec.loot = []; }
@@ -1327,12 +1340,14 @@
       const road = smoothPath(stops.map(s => [s.x, s.y]));
       const roadLook = wornItem('road');                       // loot: the trail's colours
       const nl = nextLandForToday();
-      const questLead = t(done ? 'mapLeadDone' : (hasCards ? 'mapLeadGo' : 'mapLeadFirst'));
+      const parentNow = done && parentExtras();
+      const questLead = t(parentNow ? 'mapLeadParentToo' : (done ? 'mapLeadDone' : (hasCards ? 'mapLeadGo' : 'mapLeadFirst')));
       const newFriend = STORIES.some(x => !S.story.done[x.id]) && landIn(2, nl);
       const questParts = [dueCount ? (dueCount === 1 ? t('mapDueOne') : t('mapDue', { n: dueCount })) : '', nl ? (nl.starter ? sk.starterNew : t('mapNewLand')) : '', newFriend ? t('mapNewFriend') : ''].filter(Boolean);
-      const questSub = done ? t('mapSubDone') : questParts.join(' · ');
+      const questSub = done && !parentNow ? t('mapSubDone') : questParts.join(' · ');
       const friends = Object.entries(S.story.done).filter(([pid]) => STORY[pid]);
       const boxWaiting = done && (today().session.loot || []).some(d => !d.done && LOOT_ID[d.id]);
+      const parentToo = done && parentExtras();
       return `
         <div class="topbar">
           <div class="hero" data-action="wardrobe">${avatar()}<div><div class="name">${esc(S.hero.name)}</div><div class="sub">${sk.hero} · ${sk.name}</div></div></div>
@@ -1343,7 +1358,8 @@
           ${done
             ? `<div class="row wrap questbtns">
                 ${boxWaiting ? `<button class="btn primary" data-action="to-close">${sk.boxIcon} ${t('mapBoxWaiting')}</button>` : ''}
-                <button class="btn ${capLeft > 0 && !boxWaiting ? 'primary' : ''}" data-action="practice" ${capLeft > 0 ? '' : 'disabled'}>${capLeft > 0 ? t('mapPractice', { n: capLeft }) : t('mapPracticeShut')}</button>
+                ${parentToo ? `<button class="btn ${boxWaiting ? '' : 'primary'}" data-action="mode" data-mode="parent">${t('mapParentToo')}</button>` : ''}
+                <button class="btn ${capLeft > 0 && !boxWaiting && !parentToo ? 'primary' : ''}" data-action="practice" ${capLeft > 0 ? '' : 'disabled'}>${capLeft > 0 ? t('mapPractice', { n: capLeft }) : t('mapPracticeShut')}</button>
                 <button class="btn" data-action="wardrobe">${sk.wardrobeIcon} ${sk.wardrobe}</button>
                 <button class="btn" data-action="brag">${t('bragBtn')}</button>
               </div>`
@@ -1639,6 +1655,7 @@
         <div class="boxes">${[1, 2, 3, 4, 5].map(b => `<div><b>${bc[b]}</b>${b}· ${sk.boxNames[b - 1]}</div>`).join('')}</div>
         <h3>היום (${todayStr()})</h3>
         ${d.session ? `<div>משימה ${d.session.n} · ${d.session.mode === 'solo' ? 'לבד' : 'עם הורה'} · ${minutes(d.session.durationMs)} דק׳ · נכון ${d.session.correct} / טעויות ${d.session.wrong} · עלו ${d.session.promoted} / ירדו ${d.session.demoted}${d.session.hardStop ? ' · נעצר בזמן' : ''}${d.session.mode === 'solo' ? ` · <b>קוד: ${d.session.code}</b>` : ''}${d.session.mode === 'solo' && minutes(d.session.durationMs) < 4 && d.session.correct > 15 ? ' · ⚠️ מהר מדי?' : ''}</div>` : '<div class="muted">עדיין לא הייתה משימה היום</div>'}
+        ${(d.earlier || []).map(e => `<div class="muted">קודם היום: משימה ${e.n} · ${e.mode === 'solo' ? 'לבד' : 'עם הורה'} · ${minutes(e.durationMs)} דק׳ · נכון ${e.correct} / טעויות ${e.wrong}${e.mode === 'solo' ? ` · קוד: ${e.code}` : ''}</div>`).join('')}
         ${steps ? `<div>לפי שלבים: ${steps}</div>` : ''}
         <div>מגרש האימונים היום: ${Math.floor(d.freePlaySec / 60)} דק׳ מתוך ${S.settings.freePlayCapMin}</div>
         <div>${sk.territoriesLabel} שנפתחו: ${lands}</div>
@@ -1647,7 +1664,7 @@
         <h3>קלפים קשים (3+ טעויות)</h3>
         ${tricky.length ? `<table><tr><th>קלף</th><th>סוג</th><th>טעויות</th><th>קופסה</th></tr>${tricky.map(([cid, st]) => { const p = parseCard(cid); return `<tr><td class="en">${esc(cardLabel(cid))}</td><td>${{ rec: 'משמעות', lineup: 'שמיעה→קריאה', img: 'תמונה', tile: 'בנייה מאותיות', gc: 'דקדוק', np: 'כינוי גוף', sd: 'same / different' }[p.type] || p.type}</td><td>${st.misses}</td><td>${st.box}</td></tr>`; }).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
         <h3>היסטוריה</h3>
-        ${sessions.length ? `<table><tr><th>תאריך</th><th>#</th><th>מצב</th><th>נכון/טעות</th><th>עלו/ירדו</th><th>דק׳</th><th>קוד</th></tr>${sessions.map(([date, v]) => `<tr><td>${date}</td><td>${v.session.n}</td><td>${v.session.mode === 'solo' ? 'לבד' : 'הורה'}</td><td><bdi>${v.session.correct}</bdi>/<bdi>${v.session.wrong}</bdi></td><td><bdi>${v.session.promoted}</bdi>/<bdi>${v.session.demoted}</bdi></td><td>${minutes(v.session.durationMs)}</td><td class="en">${v.session.mode === 'solo' ? v.session.code : ''}</td></tr>`).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
+        ${sessions.length ? `<table><tr><th>תאריך</th><th>#</th><th>מצב</th><th>נכון/טעות</th><th>עלו/ירדו</th><th>דק׳</th><th>קוד</th></tr>${sessions.flatMap(([date, v]) => daySessions(v).reverse().map(r => `<tr><td>${date}</td><td>${r.n}</td><td>${r.mode === 'solo' ? 'לבד' : 'הורה'}</td><td><bdi>${r.correct}</bdi>/<bdi>${r.wrong}</bdi></td><td><bdi>${r.promoted}</bdi>/<bdi>${r.demoted}</bdi></td><td>${minutes(r.durationMs)}</td><td class="en">${r.mode === 'solo' ? r.code : ''}</td></tr>`)).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
         <h3>הגדרות</h3>
         <div class="row wrap">
           <label>מגרש האימונים, דקות ביום: <input class="text" style="width:90px; font-size:18px; padding:6px 10px" type="number" min="0" max="60" id="capInput" value="${S.settings.freePlayCapMin}"></label>
@@ -1669,7 +1686,7 @@
   // "reset today" undoes today's quest, and with it what the quest gave: its loot and its reading marks
   function resetToday() {
     const dt = todayStr(); const d = S.days[dt]; if (!d || !d.session) return false;
-    S.sessionCount = Math.max(0, S.sessionCount - 1); delete d.session;
+    S.sessionCount = Math.max(0, S.sessionCount - daySessions(d).length); delete d.session; delete d.earlier;
     S.landsIntroduced = S.landsIntroduced.filter(l => l.date !== dt);
     S.packsIntroduced = S.packsIntroduced.filter(p => p.date !== dt);
     S.story.runs = S.story.runs.filter(r => r.date !== dt);

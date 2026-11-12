@@ -537,6 +537,8 @@ window.CONTENT = {
     mapNewLand: '{newTerritory} לכבוש',
     mapNewFriend: 'חבר חדש להכיר',
     mapStart: '▶ למשימה',
+    mapLeadParentToo: 'המשימה של היום הושלמה. עם אבא או אמא נפתח עוד משהו.',
+    mapParentToo: '👨‍👩‍👦 עוד משימה עם אבא או אמא',
     mapPractice: '🏋️ מגרש האימונים · {n} דק׳',
     mapPracticeShut: '🏋️ מגרש האימונים · סגור',
     mapBoxWaiting: '{box} עוד סגורה',
