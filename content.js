@@ -715,5 +715,6 @@ window.CONTENT = {
   intervals: { 1: 1, 2: 2, 3: 4, 4: 7, 5: Infinity },
   sessionHardStopMin: 16,
   freePlayCapMinDefault: 15,
-  reviewStackCap: 24,
+  reviewStackCap: 40,      // about 4 minutes at his pace; the 16-minute hard stop still ends the sitting
+  masteredBox: 4,          // "mastered" = Box 4–5 (PRD §2): the ⭐, the map, the stamp
 };

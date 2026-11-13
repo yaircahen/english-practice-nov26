@@ -224,6 +224,8 @@
     (g.units || []).forEach(u => packCards(u).forEach(cid => { const st = S.cards[cid]; if (st) { total++; if (st.box >= 4) mastered++; } }));
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0, open: (g.units || []).some(packIntroduced) };
   }
+  // "mastered" is Box 4–5 (PRD §2), as on the map; Box 5 can't be reached in a two-week run
+  const MASTERED_BOX = C.masteredBox || 4;
   function isDue(st, n) { if (st.box >= 5) return false; return (n - st.lastSession) >= C.intervals[st.box]; }
   function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.keys(S.cards).filter(known).forEach(cid => c[S.cards[cid].box]++); return c; }   // a skipped card isn't counted either
   // a land's flag is about its three core card types; the tile cards, born later, never take a flag down
@@ -238,7 +240,7 @@
     return C.lands.find(l => !landIntroduced(l.id)) || null;
   }
   function masteredWordCount() {
-    return C.words.filter(w => { const st = S.cards[cardId(w.id, 'rec')]; return st && st.box >= 5; }).length;
+    return C.words.filter(w => { const st = S.cards[cardId(w.id, 'rec')]; return st && st.box >= MASTERED_BOX; }).length;
   }
   function todayDone() { const d = S.days[todayStr()]; return !!(d && d.session); }
   // a day can hold a solo session and then a parent one; the earlier ones sit in `earlier`, the latest in `session`
@@ -392,7 +394,9 @@
       // what gives way first: recognition cards of words already in Box 3 and up (PRD §7.4)
       const easy = cid => !!parseCard(cid).word && S.cards[cid].box >= 3 && !S.cards[cid].priority;
       // then the strongest boxes wait a session; priority cards and Box 1 (reviewed every session, §6.1) always stay
-      const rank = cid => S.cards[cid].priority > 0 ? 0 : (easy(cid) ? 9 : S.cards[cid].box);
+      // a card cut today comes back sooner: each session it waits past due moves it up, so nothing is cut for good
+      const over = cid => n - S.cards[cid].lastSession - C.intervals[S.cards[cid].box];
+      const rank = cid => S.cards[cid].priority > 0 ? -1000 : S.cards[cid].box === 1 ? -999 : -3 * over(cid) + (easy(cid) ? 9 : S.cards[cid].box);
       const kept = new Set([...q].sort((a, b) => rank(a) - rank(b)).slice(0, cap));   // stable: keeps the shuffle inside a box
       q = q.filter(cid => kept.has(cid));                                              // and the play order stays highest box first
     }
@@ -402,7 +406,7 @@
   }
 
   // ----- what a session holds (PRD §7.4, §8). Everything is state-driven, not calendar-driven. -----
-  const CARDS_PER_MIN = 7;                                   // planning estimate only
+  const CARDS_PER_MIN = 10;                                  // planning estimate only; his log shows about 11 a minute in review
   const landIn = (id, newLand) => landIntroduced(id) || !!(newLand && newLand.id === id);
   // one grammar unit a day, in parent sessions, once land 2 is in
   function unitForToday(newLand) {
@@ -535,7 +539,7 @@
     const st = S.cards[item.cid]; let born = false;
     if (!practice && !item.retry) {
       st.lastSession = R.n; st.priority = 0;
-      if (correct) { if (st.box < 5) { st.box++; R.promoted++; if (st.box === 5) R.mastered.push(item.cid); } }
+      if (correct) { if (st.box < 5) { st.box++; R.promoted++; if (st.box === MASTERED_BOX) R.mastered.push(item.cid); } }
       else { st.misses++; if (st.box > 1) { st.box--; R.demoted++; } }
       // Recognition has reached Box 3: the word's letter-tile card is born, due from the next session
       if (correct && st.box >= 3 && item.cid.endsWith('|rec')) born = birthTile(item.cid.split('|')[0], R.n);
@@ -644,7 +648,7 @@
     item.answered = true;
     applyAnswer(item, clean, false); R.done++;
     const box = S.cards[item.cid].box;
-    v.res = { up: box > prevBox, down: box < prevBox, mastered: box > prevBox && box === 5 };
+    v.res = { up: box > prevBox, down: box < prevBox, mastered: box > prevBox && box === MASTERED_BOX };
     if (clean) { Audio.ding(R.combo); if (v.res.up) setTimeout(() => Audio.whoosh(), 200); if (v.res.mastered) { confetti(); Audio.fanfare(); } }
     else if (v.res.down) Audio.thud();
     render();
@@ -1561,7 +1565,7 @@
       Audio.ding(rt.combo);
       Audio.speak(say);
       const promoted = !practice && !item.retry && st.box > prevBox;
-      const mastered = promoted && st.box === 5;
+      const mastered = promoted && st.box === MASTERED_BOX;
       if (promoted) {
         // felt, not read: the ladder square lights up with the whoosh
         const sq = document.querySelectorAll('.boxladder span')[st.box - 1];
