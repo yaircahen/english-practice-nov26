@@ -1865,6 +1865,49 @@
       <div class="footer-note">${t('wardHint')}</div>`;
   }
 
+  // ---------- the word shelf (PRD §7.4 screen 5, widened to every unlocked word) ----------
+  // Every word he has met, land by land, at its rank. A word's rank is the box of its first card type
+  // (Recognition for the 50, as the ⭐ counter counts it). Looking never moves a card; a tap flips the
+  // card to its Hebrew and says the word. Opens with the training grounds, once the quest is done (§7.7).
+  function wordRank(wid) {
+    const w = WORDS[wid]; if (!w) return null;
+    const types = cardTypesFor(w);
+    const st = S.cards[cardId(wid, types[0])] || types.map(x => S.cards[cardId(wid, x)]).find(Boolean);
+    const fierce = types.concat(['tile', 'cz']).some(x => { const c = S.cards[cardId(wid, x)]; return c && c.misses >= 3; });
+    return { box: st ? st.box : 1, fierce };
+  }
+  function shelfView() {
+    const sk = skin();
+    const ladder = box => `<span class="minil">${[1, 2, 3, 4, 5].map(b => `<i class="${b <= box ? (box >= MASTERED_BOX ? 'top' : 'on') : ''}"></i>`).join('')}</span>`;
+    const card = wid => {
+      const w = WORDS[wid]; const r = wordRank(wid);
+      const he2 = w.he2 && w.he2.length <= 18 ? `<span class="shhe2">${esc(w.he2)}</span>` : '';
+      return `<button class="sword ${r.box >= MASTERED_BOX ? 'gold' : ''}" data-action="shelf-flip" data-id="${esc(wid)}">
+        <span class="sface front">${r.fierce ? '<span class="sfire">🔥</span>' : ''}${hasPic(w) ? `<span class="spic">${picHtml(w)}</span>` : ''}<span class="sen en">${esc(w.en)}</span>${ladder(r.box)}<span class="srank">${sk.boxNames[r.box - 1]}</span></span>
+        <span class="sface back"><span class="shhe">${esc(w.he)}</span>${he2}<span class="sen en small">${esc(w.en)}</span></span>
+      </button>`;
+    };
+    // the bonus land is two lands that share one name on the map; here too it is one section
+    const groups = [];
+    C.lands.forEach(l => { const g = l.bonus && groups.find(x => x.bonus); if (g) g.lands.push(l); else groups.push({ bonus: !!l.bonus, lands: [l] }); });
+    const tally = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let count = 0;
+    const rows = groups.map(g => {
+      const l0 = g.lands[0]; const open = g.lands.filter(l => landIntroduced(l.id)); const shut = g.lands.filter(l => !landIntroduced(l.id));
+      const hiding = shut.reduce((k, l) => k + l.words.length, 0);
+      if (!open.length) return `<div class="shelfrow locked"><div class="wardlabel">🔒 ${landName(l0)}</div><div class="muted">${t('shelfHiding', { n: hiding })}</div></div>`;
+      const ws = open.flatMap(l => l.words).filter(wid => WORDS[wid]).map(wid => ({ wid, box: wordRank(wid).box })).sort((a, b) => b.box - a.box);
+      ws.forEach(x => { tally[x.box]++; }); count += ws.length;
+      return `<div class="shelfrow"><div class="wardlabel">${landIcon(l0)} ${landName(l0)}</div><div class="swords">${ws.map(x => card(x.wid)).join('')}</div>${hiding ? `<div class="muted" style="margin-top:8px">🔒 ${t('shelfHiding', { n: hiding })}</div>` : ''}</div>`;
+    }).join('');
+    const ranks = `<div class="ranks">${[1, 2, 3, 4, 5].map(b => `<div class="rank"><b>${tally[b]}</b><span>${sk.boxNames[b - 1]}</span></div>`).join('')}</div>`;
+    return `
+      ${topbar(`${sk.shelfIcon} ${sk.shelf}`, t('shelfSub', { n: count }), `<button class="btn small" data-action="to-map">${t('wardBack')}</button>`)}
+      ${ranks}
+      ${rows}
+      <div class="footer-note">${t('shelfHint')}</div>`;
+  }
+
   // ---------- rendering ----------
   function render() {
     document.body.dataset.skin = (S.hero && S.hero.skin) || window.__skinSel || 'wizard';
@@ -1993,6 +2036,7 @@
                 ${parentToo ? `<button class="btn ${boxWaiting ? '' : 'primary'}" data-action="mode" data-mode="parent">${t('mapParentToo')}</button>` : ''}
                 <button class="btn ${capLeft > 0 && !boxWaiting && !parentToo ? 'primary' : ''}" data-action="practice" ${capLeft > 0 ? '' : 'disabled'}>${capLeft > 0 ? t('mapPractice', { n: capLeft }) : t('mapPracticeShut')}</button>
                 <button class="btn" data-action="wardrobe">${sk.wardrobeIcon} ${sk.wardrobe}</button>
+                <button class="btn" data-action="shelf">${sk.shelfIcon} ${sk.shelf}</button>
                 <button class="btn" data-action="brag">${t('bragBtn')}</button>
               </div>`
             : (half ? `<button class="btn primary" data-action="start2">${t('mapStart2')}</button>` : `<button class="btn primary" data-action="start">${t('mapStart')}</button>`)}
@@ -2174,6 +2218,7 @@
     },
 
     wardrobe() { return wardrobeView(); },
+    shelf() { return shelfView(); },
     brag() { return bragView(); },
     coach() { return coachScreen(); },
   };
@@ -2519,6 +2564,8 @@
       // the wardrobe is part of the training grounds: it opens once the day's quest is done (PRD §7.7)
       case 'wardrobe': if (!todayDone()) { toast(t('wardLocked')); break; } view = 'wardrobe'; render(); break;
       case 'wear': wear(a.dataset.id); break;
+      case 'shelf': if (!todayDone()) { toast(t('shelfLocked')); break; } view = 'shelf'; render(); break;
+      case 'shelf-flip': { a.classList.toggle('flipped'); const w = WORDS[a.dataset.id]; if (w && a.classList.contains('flipped')) Audio.speak(w.en); break; }
       case 'ward-close': S.loot.fresh = []; save(); view = 'map'; render(); break;
       case 'streak-info': toast(t(freezeLeft() ? 'freezeInfo' : 'freezeUsed'), 5000); break;
       // one tap: the share sheet opens right away when the picture is ready; the card is also shown, to save or to send again

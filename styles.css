@@ -560,3 +560,28 @@ a.btn { text-decoration: none; }
   .trail { aspect-ratio: 3 / 5; }
 }
 @media (min-width: 900px) { body { font-size: 22px; } }
+
+/* the word shelf */
+.shelfrow { margin-top: 18px; }
+.shelfrow.locked { opacity: .7; }
+.swords { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.sword { position: relative; min-height: 132px; padding: 0; border: 0; border-radius: 18px; background: transparent; perspective: 600px; color: var(--btn-ink); }
+.sword .sface { position: absolute; inset: 0; border-radius: 18px; border-bottom: 6px solid var(--btn-edge); background: var(--btn); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 8px 6px; text-align: center; backface-visibility: hidden; -webkit-backface-visibility: hidden; transition: transform .45s ease; }
+.sword .back { transform: rotateY(180deg); background: var(--accent); color: var(--accent-ink); border-bottom-color: var(--accent-deep); }
+.sword.flipped .front { transform: rotateY(-180deg); }
+.sword.flipped .back { transform: rotateY(0); }
+.sword:active .sface { transform: translateY(3px); }
+.sword.flipped:active .back { transform: translateY(3px); }
+.sword.gold .front { box-shadow: inset 0 0 0 3px var(--gold); border-bottom-color: #8a6420; }
+.sword .sen { font-size: 22px; font-weight: 700; direction: ltr; line-height: 1.15; word-break: break-word; }
+.sword .sen.small { font-size: 15px; font-weight: 600; opacity: .8; }
+.sword .spic { font-size: 30px; line-height: 1; }
+.sword .spic .apic { font-size: 24px; }
+.sword .shhe { font-size: 24px; font-weight: 700; line-height: 1.2; }
+.sword .shhe2 { font-size: 14px; opacity: .85; line-height: 1.2; }
+.sword .srank { font-size: 13px; font-weight: 600; color: var(--ink-muted); }
+.sword .sfire { position: absolute; top: 6px; right: 8px; font-size: 18px; }
+.minil { display: flex; gap: 3px; direction: ltr; }
+.minil i { width: 12px; height: 12px; border-radius: 4px; background: color-mix(in srgb, var(--ink) 14%, transparent); }
+.minil i.on { background: var(--accent); }
+.minil i.top { background: var(--gold); }
