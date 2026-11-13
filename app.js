@@ -284,8 +284,10 @@
     (g.units || []).forEach(u => packCards(u).forEach(cid => { const st = S.cards[cid]; if (st) { total++; if (st.box >= 4) mastered++; } }));
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0, open: (g.units || []).some(packIntroduced) };
   }
+  // "mastered" is Box 4–5 (PRD §2), as on the map; Box 5 can't be reached in a two-week run
+  const MASTERED_BOX = C.masteredBox || 4;
   function isDue(st, n) { if (st.box >= 5) return false; return (n - st.lastSession) >= C.intervals[st.box]; }
-  function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.values(S.cards).forEach(st => c[st.box]++); return c; }
+  function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.keys(S.cards).filter(known).forEach(cid => c[S.cards[cid].box]++); return c; }   // a skipped card isn't counted either
   // a land's flag is about its three core card types; the tile cards, born later, never take a flag down
   function landProgress(land) {
     let total = 0, mastered = 0;
@@ -298,9 +300,12 @@
     return C.lands.find(l => !landIntroduced(l.id)) || null;
   }
   function masteredWordCount() {
-    return C.words.filter(w => { const st = S.cards[cardId(w.id, 'rec')]; return st && st.box >= 5; }).length;
+    return C.words.filter(w => { const st = S.cards[cardId(w.id, 'rec')]; return st && st.box >= MASTERED_BOX; }).length;
   }
   function todayDone() { const d = S.days[todayStr()]; return !!(d && d.session); }
+  // a day can hold a solo session and then a parent one; the earlier ones sit in `earlier`, the latest in `session`
+  const daySessions = d => d ? [...(d.earlier || []), ...(d.session ? [d.session] : [])] : [];
+  const todayNs = () => daySessions(S.days[todayStr()]).map(r => r.n);
 
   // ---------- streak, with one free freeze a week (PRD §7.3, CD8) ----------
   // A day counts when its quest was finished. A frozen day adds nothing and breaks nothing.
@@ -439,7 +444,9 @@
   let view = 'map';
 
   function buildReviewQueue(n, cap = C.reviewStackCap, short = false) {
-    const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n));
+    // one promotion per card per day (PRD §6.1): a card already reviewed in today's earlier session waits
+    const seenToday = todayNs();
+    const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
     const byRank = (a, b) => (S.cards[b].priority - S.cards[a].priority) || (S.cards[b].box - S.cards[a].box);   // stable: keeps the shuffle inside a box
     const wrap = q => q.map(cid => ({ cid, retry: false, retries: 0 }));
     // the letter-tile cards are the light ones: a few a session, highest box first; the rest stay due.
@@ -447,7 +454,7 @@
     // takes about the time of two ordinary cards, so the rest of the stack gives up two places for each.
     const tiles = shuffle(all.filter(isTile)).sort((a, b) => S.cards[b].box - S.cards[a].box).slice(0, short ? 1 : TILE_CAP);
     // the cloze cards are born many at once (one for every word already in Box 2), so they come a few a session.
-    // Like the tile cards, those few always get their turn: they sit in Box 1, where a full stack never reaches.
+    // Like the tile cards, those few always get their turn: a full stack would otherwise crowd them out.
     const cz = shuffle(all.filter(isCz)).sort((a, b) => S.cards[b].box - S.cards[a].box).slice(0, short ? 2 : CZ_CAP);
     const due = all.filter(cid => !isTile(cid) && !isCz(cid));
     if (short) {
@@ -467,9 +474,12 @@
     if (q.length > cap) {
       // what gives way first: recognition-type cards of words already in Box 3 and up (PRD §7.4)
       const easy = cid => !!parseCard(cid).word && S.cards[cid].box >= 3 && !S.cards[cid].priority;
-      const keep = q.filter(cid => !easy(cid)), drop = q.filter(easy);
-      q = keep.length >= cap ? keep.slice(0, cap) : [...keep, ...drop.slice(0, cap - keep.length)];
-      q.sort(byRank);
+      // then the strongest boxes wait a session; priority cards and Box 1 (reviewed every session, §6.1) always stay
+      // a card cut today comes back sooner: each session it waits past due moves it up, so nothing is cut for good
+      const over = cid => n - S.cards[cid].lastSession - C.intervals[S.cards[cid].box];
+      const rank = cid => S.cards[cid].priority > 0 ? -1000 : S.cards[cid].box === 1 ? -999 : -3 * over(cid) + (easy(cid) ? 9 : S.cards[cid].box);
+      const kept = new Set([...q].sort((a, b) => rank(a) - rank(b)).slice(0, cap));   // stable: keeps the shuffle inside a box
+      q = q.filter(cid => kept.has(cid));                                              // and the play order stays highest box first
     }
     // the cloze and tile cards take their place by box, after the other cards of that box
     if (tiles.length || cz.length) { q.push(...cz, ...tiles); q.sort(byRank); }
@@ -477,7 +487,7 @@
   }
 
   // ----- what a session holds (PRD §7.4, §8). Everything is state-driven, not calendar-driven. -----
-  const CARDS_PER_MIN = 7;                                   // planning estimate only
+  const CARDS_PER_MIN = 10;                                  // planning estimate only; his log shows about 11 a minute in review
   const landIn = (id, newLand) => landIntroduced(id) || !!(newLand && newLand.id === id);
   // one grammar unit a day, in parent sessions, once land 2 is in
   function unitForToday(newLand) {
@@ -515,9 +525,17 @@
     const next = LISTEN.find(x => !x.fallback && !S.listening.done[x.id]); if (!next) return null;
     const last = S.listening.runs.filter(r => !r.fallback).slice(-1)[0];
     const n = (today().half || {}).n || S.sessionCount + 1;
-    return last && n - last.n < 2 ? null : next;
+    // two sessions can share a day (a solo one, then one with a parent), so the gap is counted in days as well as in sessions
+    return last && (n - last.n < 2 || last.date >= addDays(todayStr(), -1)) ? null : next;
   }
   const estListening = x => x.min || 4;
+  // after a solo session, a parent session the same day is worth it only when it opens something new
+  function parentExtras() {
+    const ses = daySessions(S.days[todayStr()]);
+    if (!ses.length || ses.some(r => r.mode === 'parent')) return false;
+    const newLand = nextLandForToday(), story = storyForSession('parent', newLand);
+    return !!(newLand || unitForToday(newLand) || sdForToday(newLand) || (story && !story.reread));
+  }
   function planFor(mode) {
     const parent = mode === 'parent';
     const newLand = parent ? nextLandForToday() : null;
@@ -562,6 +580,7 @@
     else if (how !== 'full' && isLongDay(planFor('parent'))) {
       if (!parent) sitting = 'cards';
       else if (how === 'cards' || how === 'single') sitting = how;
+      else if (todayDone()) sitting = 'single';               // a second quest the same day is never split again: the cards were played
       else { pendingMode = mode; view = 'split'; return render(); }
     }
     if (phase2()) birthClozes();
@@ -685,7 +704,7 @@
     const st = S.cards[item.cid]; let born = false;
     if (!practice && !item.retry && !item.nobox) {
       st.lastSession = R.n; st.priority = 0;
-      if (correct) { if (st.box < 5) { st.box++; R.promoted++; if (st.box === 5) R.mastered.push(item.cid); } }
+      if (correct) { if (st.box < 5) { st.box++; R.promoted++; if (st.box === MASTERED_BOX) R.mastered.push(item.cid); } }
       else { st.misses++; if (st.box > 1) { st.box--; R.demoted++; } }
       // Recognition has reached Box 3: the word's letter-tile card is born, due from the next session
       if (correct && st.box >= 3 && item.cid.endsWith('|rec')) born = birthTile(item.cid.split('|')[0], R.n);
@@ -735,6 +754,7 @@
       rec.sitting = 'both'; rec.first = { mode: h.mode, durationMs: h.durationMs, code: h.code, hardStop: !!h.hardStop };
       delete today().half;
     } else if (R.sitting === 'single') rec.sitting = 'long';
+    if (today().session) (today().earlier = today().earlier || []).push(today().session);
     today().session = rec;
     // cosmetic, and decided only after everything that counts is recorded; whatever happens in there, the quest still closes
     try { rec.loot = grantLoot(R.n); } catch (e) { rec.loot = []; }
@@ -928,7 +948,7 @@
     item.answered = true;
     applyAnswer(item, clean, false); R.done++;
     const box = S.cards[item.cid].box;
-    v.res = { up: box > prevBox, down: box < prevBox, mastered: box > prevBox && box === 5 };
+    v.res = { up: box > prevBox, down: box < prevBox, mastered: box > prevBox && box === MASTERED_BOX };
     if (clean) { Audio.ding(R.combo); if (v.res.up) setTimeout(() => Audio.whoosh(), 200); if (v.res.mastered) { confetti(); Audio.fanfare(); } }
     else if (v.res.down) Audio.thud();
     render();
@@ -1951,13 +1971,15 @@
       };
       const roadLook = wornItem('road');                       // loot: the trail's colours
       const nl = nextLandForToday();
-      const questLead = t(done ? 'mapLeadDone' : (half ? 'mapLeadHalf' : (hasCards ? 'mapLeadGo' : 'mapLeadFirst')));
+      const parentNow = done && parentExtras();
+      const questLead = t(parentNow ? 'mapLeadParentToo' : (done ? 'mapLeadDone' : (half ? 'mapLeadHalf' : (hasCards ? 'mapLeadGo' : 'mapLeadFirst'))));
       const newFriend = STORIES.some(x => !S.story.done[x.id]) && landIn(2, nl);
       const questParts = [dueCount ? (dueCount === 1 ? t('mapDueOne') : t('mapDue', { n: dueCount })) : '', nl ? (nl.starter ? sk.starterNew : t(nl.bonus ? 'mapNewBonus' : 'mapNewLand')) : '', newFriend ? t('mapNewFriend') : ''].filter(Boolean);
-      const questSub = done ? t('mapSubDone') : (half ? t('mapSubHalf') : questParts.join(' · '));
+      const questSub = done && !parentNow ? t('mapSubDone') : (half ? t('mapSubHalf') : questParts.join(' · '));
       const friends = Object.entries(S.story.done).filter(([pid]) => STORY[pid]);
       const pets = Object.entries(S.listening.done).filter(([id]) => LITEM[id] && LITEM[id].pet);
       const boxWaiting = done && (today().session.loot || []).some(d => !d.done && LOOT_ID[d.id]);
+      const parentToo = done && parentExtras();
       return `
         <div class="topbar">
           <div class="hero" data-action="wardrobe">${avatar()}<div><div class="name">${esc(S.hero.name)}</div><div class="sub">${sk.hero} · ${sk.name}</div></div></div>
@@ -1968,7 +1990,8 @@
           ${done
             ? `<div class="row wrap questbtns">
                 ${boxWaiting ? `<button class="btn primary" data-action="to-close">${sk.boxIcon} ${t('mapBoxWaiting')}</button>` : ''}
-                <button class="btn ${capLeft > 0 && !boxWaiting ? 'primary' : ''}" data-action="practice" ${capLeft > 0 ? '' : 'disabled'}>${capLeft > 0 ? t('mapPractice', { n: capLeft }) : t('mapPracticeShut')}</button>
+                ${parentToo ? `<button class="btn ${boxWaiting ? '' : 'primary'}" data-action="mode" data-mode="parent">${t('mapParentToo')}</button>` : ''}
+                <button class="btn ${capLeft > 0 && !boxWaiting && !parentToo ? 'primary' : ''}" data-action="practice" ${capLeft > 0 ? '' : 'disabled'}>${capLeft > 0 ? t('mapPractice', { n: capLeft }) : t('mapPracticeShut')}</button>
                 <button class="btn" data-action="wardrobe">${sk.wardrobeIcon} ${sk.wardrobe}</button>
                 <button class="btn" data-action="brag">${t('bragBtn')}</button>
               </div>`
@@ -2252,7 +2275,7 @@
       Audio.ding(rt.combo);
       Audio.speak(say);
       const promoted = !practice && !item.retry && st.box > prevBox;
-      const mastered = promoted && st.box === 5;
+      const mastered = promoted && st.box === MASTERED_BOX;
       if (promoted) {
         // felt, not read: the ladder square lights up with the whoosh
         const sq = document.querySelectorAll('.boxladder span')[st.box - 1];
@@ -2367,12 +2390,13 @@
     return `
       ${topbar('מסך המאמן', 'להורים בלבד', `<button class="btn small" data-action="to-map">סגור</button>`)}
       <div class="card coach">
-        <h3>הקופסאות (כל הקלפים: ${Object.keys(S.cards).length})</h3>
+        <h3>הקופסאות (כל הקלפים: ${Object.keys(S.cards).filter(known).length})</h3>
         <div class="boxes">${[1, 2, 3, 4, 5].map(b => `<div><b>${bc[b]}</b>${b}· ${sk.boxNames[b - 1]}</div>`).join('')}</div>
         <h3>היום (${todayStr()})</h3>
         ${d.session ? `<div>משימה ${d.session.n} · ${d.session.mode === 'solo' ? 'לבד' : 'עם הורה'} · ${minutes(d.session.durationMs)} דק׳ · נכון ${d.session.correct} / טעויות ${d.session.wrong} · עלו ${d.session.promoted} / ירדו ${d.session.demoted}${d.session.hardStop ? ' · נעצר בזמן' : ''}${d.session.mode === 'solo' ? ` · <b>קוד: ${d.session.code}</b>` : ''}${d.session.mode === 'solo' && minutes(d.session.durationMs) < 4 && d.session.correct > 15 ? ' · ⚠️ מהר מדי?' : ''}</div>` : '<div class="muted">עדיין לא הייתה משימה היום</div>'}
         ${d.half && !d.session ? `<div>חצי ראשון (קלפים): ${d.half.mode === 'solo' ? 'לבד' : 'עם הורה'} · ${minutes(d.half.durationMs)} דק׳ · נכון ${d.half.correct} / טעויות ${d.half.wrong}${d.half.hardStop ? ' · נעצר בזמן' : ''}${d.half.mode === 'solo' ? ` · <b>קוד: ${d.half.code}</b>` : ''} · החצי השני (עם הורה) עוד לא נעשה</div>` : ''}
         ${d.session && d.session.first ? `<div>שוחקה בשני חלקים. החצי הראשון: ${d.session.first.mode === 'solo' ? `לבד · <b>קוד: ${d.session.first.code}</b>` : 'עם הורה'} · ${minutes(d.session.first.durationMs)} דק׳</div>` : ''}
+        ${(d.earlier || []).map(e => `<div class="muted">קודם היום: משימה ${e.n} · ${e.mode === 'solo' ? 'לבד' : 'עם הורה'} · ${minutes(e.durationMs)} דק׳ · נכון ${e.correct} / טעויות ${e.wrong}${e.mode === 'solo' ? ` · קוד: ${e.code}` : ''}</div>`).join('')}
         ${steps ? `<div>לפי שלבים: ${steps}</div>` : ''}
         <div>מגרש האימונים היום: ${Math.floor(d.freePlaySec / 60)} דק׳ מתוך ${S.settings.freePlayCapMin}</div>
         <div>${sk.territoriesLabel} שנפתחו: ${lands}</div>
@@ -2382,7 +2406,7 @@
         <h3>קלפים קשים (3+ טעויות)</h3>
         ${tricky.length ? `<table><tr><th>קלף</th><th>סוג</th><th>טעויות</th><th>קופסה</th></tr>${tricky.map(([cid, st]) => { const p = parseCard(cid); return `<tr><td class="en">${esc(cardLabel(cid))}</td><td>${{ rec: 'משמעות', lineup: 'שמיעה→קריאה', img: 'תמונה', tile: 'בנייה מאותיות', gc: 'דקדוק', np: 'כינוי גוף', sd: 'same / different', num: 'מספר', cz: 'מילה במשפט', lp: 'האזנה לתמונה' }[p.type] || p.type}</td><td>${st.misses}</td><td>${st.box}</td></tr>`; }).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
         <h3>היסטוריה</h3>
-        ${sessions.length ? `<table><tr><th>תאריך</th><th>#</th><th>מצב</th><th>נכון/טעות</th><th>עלו/ירדו</th><th>דק׳</th><th>קוד</th></tr>${sessions.map(([date, v]) => `<tr><td>${date}</td><td>${v.session.n}</td><td>${v.session.mode === 'solo' ? 'לבד' : 'הורה'}</td><td><bdi>${v.session.correct}</bdi>/<bdi>${v.session.wrong}</bdi></td><td><bdi>${v.session.promoted}</bdi>/<bdi>${v.session.demoted}</bdi></td><td>${minutes(v.session.durationMs)}</td><td class="en">${v.session.mode === 'solo' ? v.session.code : ''}</td></tr>`).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
+        ${sessions.length ? `<table><tr><th>תאריך</th><th>#</th><th>מצב</th><th>נכון/טעות</th><th>עלו/ירדו</th><th>דק׳</th><th>קוד</th></tr>${sessions.flatMap(([date, v]) => daySessions(v).reverse().map(r => `<tr><td>${date}</td><td>${r.n}</td><td>${r.mode === 'solo' ? 'לבד' : 'הורה'}</td><td><bdi>${r.correct}</bdi>/<bdi>${r.wrong}</bdi></td><td><bdi>${r.promoted}</bdi>/<bdi>${r.demoted}</bdi></td><td>${minutes(r.durationMs)}</td><td class="en">${r.mode === 'solo' ? r.code : ''}</td></tr>`)).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
         <h3>הגדרות</h3>
         <div class="row wrap">
           <label>מגרש האימונים, דקות ביום: <input class="text" style="width:90px; font-size:18px; padding:6px 10px" type="number" min="0" max="60" id="capInput" value="${S.settings.freePlayCapMin}"></label>
@@ -2404,8 +2428,8 @@
   // "reset today" undoes today's quest, and with it what the quest gave: its loot and its reading marks
   function resetToday() {
     const dt = todayStr(); const d = S.days[dt]; if (!d || (!d.session && !d.half)) return false;
-    if (d.session) S.sessionCount = Math.max(0, S.sessionCount - 1);   // a half-done quest has not moved the count yet
-    delete d.session; delete d.half;
+    S.sessionCount = Math.max(0, S.sessionCount - daySessions(d).length);   // a half-done quest has not moved the count yet
+    delete d.session; delete d.earlier; delete d.half;
     S.listening.runs.filter(r => r.date === dt).forEach(r => { const x = S.listening.done[r.id]; if (x && x.date === dt) delete S.listening.done[r.id]; });
     S.listening.runs = S.listening.runs.filter(r => r.date !== dt);
     S.sets.history = S.sets.history.filter(h => h.date !== dt);

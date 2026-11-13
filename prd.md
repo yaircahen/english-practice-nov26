@@ -363,8 +363,10 @@ Hard constraints:
 - **5 boxes, session-based** (not calendar-based), so a skipped day doesn't break the schedule.
   Box 1 is reviewed every session, Box 2 every 2nd session, Box 3 every 4th, Box 4 every 7th,
   Box 5 = "mastered": only spot-checked inside boss fights and on the final two days.
-  With 13 sessions, a card seeded by session 5 can reach Box 5 by session 12. Matches the
-  reference's rule (last interval ≤ D/2).
+  (Corrected 13 Nov: at these intervals Box 1 → Box 5 takes 13 sessions, so no card reaches
+  Box 5 before the test. "Mastered" in the app (the ⭐, the map, the stamp) is therefore Box 4–5,
+  the same as §2's metric. The review stack holds up to 40 cards, and a card cut from a full
+  stack moves up a place for every session it waits, so none is cut for good.)
 - **Promotion**: correct → up one box. **Demotion**: wrong → down one box (the gentle variant).
   The classic "back to Box 1" is too punishing for a 10-year-old and over-reviews mature cards;
   the reference's weakness note applies.
