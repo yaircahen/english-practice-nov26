@@ -6,10 +6,10 @@ Design: `prd.md`. Static web app, no build step, no backend.
 
 | File | What |
 |---|---|
-| `index.html` | the page shell; bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`) |
+| `index.html` | the page shell; bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
 | `styles.css` | reading-friendly styles |
-| `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads (data only) |
-| `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards |
+| `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
+| `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
 | `prd.md` | the design (v4): the one to build from |
 | `archive/prd-v3.md` | the previous version of the design, kept as written for the record |
 | `.claude/launch.json` | local dev server definition (uses the venv) |
@@ -114,11 +114,71 @@ card opens the share sheet and the picture arrives whole (WhatsApp), that hats a
 right on the hero (they are emoji, and older iPadOS versions lack a few), that the box opens
 smoothly, the alternative answer sounds, and that the letter tiles are comfortable to tap.
 
+## What M3 added (12 Nov, the test-facing half, v3.0.1)
+
+Everything below opens by itself from the save's state, as before. "Day 6" means the first parent
+session on a day after the last of the 50 words came in.
+
+- **Mid-boss** (day 6): the day's review, in the test's five sections, 20 answers: four listen-and-pick
+  cards, a word-bank set, four grammar cards (has/have twice), a sentence-halves set, two sentences
+  built from tiles. He sees a boss losing one life per right answer. The tally by section and a
+  number by the test's weights are on the coach screen only.
+- **Bonus land** (days 6 and 7): a side path on the map. Twelve number words (word → digits, and
+  the look-alike pairs such as thirteen / thirty also as listening cards), then six months and six
+  picture adjectives. `fat` and `nice` have no clear picture, so they are meaning cards.
+- **Word bank and sentence halves**: from day 7 the review opens with a word-bank set of five and
+  holds a sentence-halves set of five. The ten word-bank sets hold each of the 50 words once, in
+  the form the sentence needs (`washes`, `months`).
+- **Word-in-a-sentence cards**: each of the 50 words gets one, with its word-bank sentence, once
+  its meaning card is in Box 2. At most six a mission (`clozeCap` in `content.js`).
+- **Listening**: a recording on day 6, then on every second parent session: Honey, Robo-Pets,
+  Splash and Sandy. He hears it once with nothing else on screen, answers, then hears it again
+  with the questions in view. Each one adds a pet card. The recordings play from ECB's address
+  and need Wi-Fi; nothing of them is in this repo. If one does not load, a short dialogue in the
+  device's voice takes its place and the recording waits for the next parent session.
+- **Two sittings**: on a mid-boss day or a recording day, a parent session first asks "cards
+  first, the rest later" or "all in one go". The cards sitting stops at 8 minutes (10 on the
+  mid-boss day) and leaves the quest half done on the map; the second sitting holds the writing,
+  the story and the listening, and ends with the box. A session alone on such a day is the cards
+  sitting, and ends with the code. A half left open overnight still counts as that day's quest.
+- A save from 2.1.0 or earlier carries over as is.
+
+- **Long stories** (from day 8): four passages of 13–14 sentences in three paragraphs, two friends
+  side by side (C1–C4; C5, the unseen one, comes with the mock in M4). Up to support level 3 a long
+  story is shown one paragraph a screen, each followed by its own two questions. New question
+  kinds: "how does the sentence go on" (four endings) and "write two things" (he taps the two
+  sentences; from level 4 he writes them on paper and checks against the story).
+- **Support levels 4 and 5** (parent sessions only): 4 = reads alone, word taps shown as a small
+  number; 5 = reads aloud while the parent marks each sentence (that day has no reading minute).
+  The coach screen's two story buttons now move between 1 and 5.
+- **Each story is met three times**: new; two missions later as a second visit, one level higher
+  (a long story: one paragraph, his pick); and later once more as a 20-second "warm read" at the
+  start of a mission. Reading times are kept per paragraph. He is told only when a paragraph's
+  best time falls; the times themselves are on the coach screen.
+- **Level 3 "find it"**: after a right answer he taps the sentence that holds it.
+- **A question whose answer had to be shown** comes back at the next mission, before the day's
+  story. If the answer has to be shown again, the coach screen lists that question.
+- **Five reading tips**, one before each new story (from level 2) until all five were shown.
+
+Not built from the PRD's story track: at level 4 the questions still come one at a time (the PRD
+wants them all on one page, as on the test; M4's test mode has that look), the "hear the whole
+paragraph" button at level 4, and the read-along days. M3's second list (trophy shelf,
+tricky-word flow, own-sentence cards, the training grounds' drills) is not started.
+
+To check on the iPad before day 6: that the three recordings start within a few seconds and play
+to the end (coach tip: `test.html` on the Mac has a "day 6" and a "day 8" save); that the fallback
+dialogue's two voices can be told apart; that the door-and-figure pictures for `tall` and `short`
+show; that the word-bank and halves sets are comfortable to tap; that in a long story the
+sentences are easy to tap for "write two things".
+
 ## Coach screen (hidden)
 
 On the map, press and hold the small ⭐ counter (top left) for 2 seconds. The first time, you
 set a 4-digit parent PIN; after that it asks for it. Nothing on screen hints at this. Export the
 save from there once a week. The PIN can be changed from the coach screen; a full reset clears it.
+
+Added in 3.0.0: the mid-boss by the test's five sections, the misses inside the word-bank and
+halves sets, the listening log, and on a day played in two sittings the first sitting's code.
 
 Added in 2.1.0: the reading-minute log, the letter-tile count, the streak with its frozen days and
 the freeze button, and the loot count with a switch between a box after every mission and after

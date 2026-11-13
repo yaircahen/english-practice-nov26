@@ -18,8 +18,10 @@ A game for one child (Gilad) to prepare for an English test on 22 Nov 2026 (Hey!
 ## Running and testing
 - Preview: `python3 -m http.server 8765 --bind 127.0.0.1`, then open `http://localhost:8765/`. Use a venv if you need any other Python.
 - **Stale-cache trap:** `index.html` stamps `content.js`, `app.js` and `styles.css` with `?v=`. After an edit, bump the stamp or the browser may serve old files. Symptom: new code with old copy, such as unfilled `{placeholders}`.
-- `test.html` (local addresses only, not published) seeds sample saves. Day 3 is M1-shaped, and days 4 and 7 are M2 saves. Use them to check behavior from an existing save.
+- `test.html` (local addresses only, not published) seeds sample saves. Day 3 is M1-shaped, days 4 and 7 are M2 saves, day 6 is the mid-boss day and day 8 a recording day after it. Use them to check behavior from an existing save.
 - To simulate the next day, rewrite every `YYYY-MM-DD` in the localStorage JSON one day back and reload.
 - Sessions can be driven from the page via `window.__game`: `state`, `session`, `view`, `startSession`, `streak`, `settleStreak`, `grantLoot`, `buildReviewQueue`. Patch `__game.Audio.speak` and `afterSpeech` to skip speech waits. The level-1 story keeps "לשאלות" disabled until the read-aloud ends, so tap a word first.
+- More handles on `window.__game`: `planFor(mode)`, `isLongDay(plan)`, `phase2()`, `settleHalves()`. A set (word bank, sentence halves) and a mid-boss sentence are queue items without a `cid`; read `session.current.view`.
+- ECB's audio host is usually not reachable from a cloud sandbox. Stub `**/*.mp3` with a short WAV to test the recording player, and abort the route to test the fallback dialogue.
 - Screenshots can lag one frame behind a script that just changed the screen. Wait, or take a second one.
 - Progress is tied to the page's origin. A new address means a fresh save.

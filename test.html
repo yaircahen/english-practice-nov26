@@ -36,8 +36,11 @@
     <button data-preset="day3"><b>יום 3</b><span>מגדל הדקדוק הראשון (am · is · are), בניית משפטים באריחים, הסיפור הראשון</span></button>
     <button data-preset="day4"><b>יום 4</b><span>has · have, קלפי same / different, העתקת משפט לדף עם עט, סיפור שני</span></button>
     <button data-preset="day7"><b>יום 7</b><span>שאלות Wh, כתיבה על דף מתמונה ובנק מילים, סיפור בשתי פסקאות ברמת תמיכה 2</span></button>
+    <button data-preset="day6"><b>יום 6</b><span>מיני-בוס בחמשת חלקי המבחן, האי של המספרים, ההקלטה הראשונה. יום ארוך: אפשר לחלק לשניים</span></button>
+    <button data-preset="day8"><b>יום 8</b><span>אחרי המיני-בוס: בנק מילים וחצאי משפטים בתוך החזרה, קלפי האזנה לתמונה, ההקלטה השנייה, והסיפור הארוך הראשון (רמת התמיכה משתנה ממסך המאמן, 1 עד 5)</span></button>
     <button class="plain" id="clear">למחוק את משחק הבדיקה ולהתחיל מההתחלה</button>
     <p class="note">אחרי הבחירה נפתח המשחק. לוחצים "למשימה" ובוחרים "עם אבא או אמא". קוד מסך המאמן במשחק הבדיקה: 1111 (לחיצה ארוכה על מונה הכוכבים).</p>
+    <p class="note">ביום 6 וביום 8 ההקלטות מתנגנות מהאתר של ECB. בלי רשת, או אם הקובץ לא נטען, באה במקומן שיחה קצרה בקול של המכשיר.</p>
     <p class="note">מגרסה 2.1.0, בכל אחד מהימים: בסוף המשימה באות דקת קריאה בקול (עם הורה, כשנשאר זמן), תיבה וכרטיס להשוויץ. הארון נפתח בלחיצה על הגיבור במפה, אחרי המשימה. ביום 7 יש גם קלפי בנייה מאותיות בתוך החזרה.</p>
   </div>
 </main>
@@ -59,13 +62,18 @@
   const C = window.CONTENT;
   const pad2 = n => String(n).padStart(2, '0');
   const day = k => { const d = new Date(); d.setDate(d.getDate() + k); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
-  const W = Object.fromEntries([...C.words, ...C.starter].map(w => [w.id, w]));
+  const W = Object.fromEntries([...C.words, ...C.starter, ...(C.bonus || [])].map(w => [w.id, w]));
+  // the card types a word has, as in app.js
+  const typesOf = w => w.kind === 'num' ? (w.twin ? ['num', 'lineup'] : ['num']) : w.kind === 'month' ? ['lineup'] : w.kind === 'adj' ? [w.emoji || w.pic ? 'img' : 'rec'] : ['rec', 'lineup', ...(w.emoji ? ['img'] : [])];
   const INT = { 1: 1, 2: 2, 3: 4 };
 
   const PRESETS = {
     day3: { lands: [0, 1, 2], packs: [], stories: [], level: 1, writing: null },
     day4: { lands: [0, 1, 2, 3], packs: ['u1'], stories: ['A1'], level: 1, writing: { rung: 3, clean: 0, seq: 1 } },
     day7: { lands: [0, 1, 2, 3, 4, 5], packs: ['u1', 'u2', 'sd', 'u3'], stories: ['A1', 'A2', 'B1'], level: 2, writing: { rung: 4, clean: 0, seq: 4 } },
+    day6: { lands: [0, 1, 2, 3, 4, 5], packs: ['u1', 'u2', 'sd', 'u3'], stories: ['A1', 'A2', 'B1'], level: 2, writing: { rung: 3, clean: 1, seq: 3 } },
+    day8: { lands: [0, 1, 2, 3, 4, 5, 6, 7], packs: ['u1', 'u2', 'sd', 'u3', 'u4a', 'u4b', 'lp'], stories: ['A1', 'A2', 'B1', 'B2', 'B3'], level: 2, writing: { rung: 4, clean: 0, seq: 6 },
+      boss: { hits: 17, total: 20, sec: { L: [4, 4], V: [4, 5], G: [3, 4], R: [5, 5], W: [1, 2] }, misses: ['Dana puts the toys in the box.', 'Omer [has] a dog.', 'Tom has a ball.'] }, heard: ['rec1'] },
   };
 
   function build(p, skin) {
@@ -74,7 +82,7 @@
     // every card is due today, so the review stack is full, as on a real day
     const card = (box, born) => ({ box, lastSession: Math.max(0, n - INT[box] + 1), misses: 0, born, priority: 0 });
     p.lands.forEach((id, i) => C.lands.find(l => l.id === id).words.forEach((wid, j) => {
-      ['rec', 'lineup', ...(W[wid].emoji ? ['img'] : [])].forEach((t, k) => {
+      typesOf(W[wid]).forEach((t, k) => {
         const box = Math.max(1, Math.min(3, (n - i) - ((j + k) % 2)));   // older lands sit in higher boxes
         cards[`${wid}|${t}`] = card(box, i + 1);
       });
@@ -82,6 +90,7 @@
     p.packs.forEach((id, i) => {
       const u = C.units.find(x => x.id === id); const box = i < p.packs.length - 1 ? 2 : 1;
       if (u) { u.items.forEach(it => { cards[`${it.id}|gc`] = card(box, n); }); u.bridge.forEach(it => { cards[`${it.id}|np`] = card(box, n); }); }
+      else if (id === 'lp') C.listenPick.forEach(it => { cards[`${it.id}|lp`] = card(1, n); });
       else C.sameDiff.forEach(it => { cards[`${it.id}|sd`] = card(box, n); });
     });
     const days = {};
@@ -104,6 +113,14 @@
       });
       s.story = { level: p.level, clean: 0, done, runs };
       s.writing = Object.assign({ again: [], history: [] }, p.writing);
+    }
+    // a save from after the mid-boss: the boss's result, and the recordings already heard
+    if (p.boss) {
+      s.boss = { mid: Object.assign({ date: day(-2), n: n - 1 }, p.boss) };
+      s.loot = { owned: [], worn: {}, fresh: [], boxes: [], cleared: ['midboss'] };
+      const runs = [], done = {};
+      (p.heard || []).forEach(id => { const q = C.listening.items.find(x => x.id === id).questions.length; done[id] = { stars: q - 1, total: q, date: day(-2) }; runs.push({ id, date: day(-2), n: n - 1, plays: 2, stars: q - 1, total: q, hints: Array(q).fill(0), fallback: false, for: null }); });
+      s.listening = { done, runs };
     }
     return s;
   }

@@ -79,7 +79,41 @@ window.CONTENT = {
     { id: 'how-old', en: 'How old', he: 'בן כמה',     he2: 'How old are you? = בן כמה אתה?', emoji: '', chunks: 'How · old', group: 'h', tip: 'הַאוּ אוֹלְד', starter: true },
   ],
 
+  // Bonus land (PRD §4.1c): words the practice copy used that are not on the 50-word sheet. Not counted in the 50.
+  // kind: num = a number word (card: word → digits; o = the four digit choices; twin = its look-alike, and the
+  //   pair gets a Sound-lineup card too) · month = Sound-lineup only · adj = a picture adjective
+  //   (a picture card when it has an emoji or a pic; a meaning card when no picture is clear enough).
+  bonus: [
+    { id: 'n11',  en: 'eleven',    he: '11',  he2: 'אחת עשרה',   kind: 'num', num: '11',  o: ['11', '7', '12', '1'],      emoji: '', chunks: 'e·le·ven',    group: 'num', tip: 'אִילֶבֶן. בלי teen, פשוט לזכור: 11', bonus: true },
+    { id: 'n12',  en: 'twelve',    he: '12',  he2: 'שתים עשרה',  kind: 'num', num: '12',  o: ['12', '20', '2', '11'],     emoji: '', chunks: 'twelve',      group: 'num', tip: 'טְוֶולְב. גם בלי teen: 12', bonus: true },
+    { id: 'n13',  en: 'thirteen',  he: '13',  he2: 'שלוש עשרה',  kind: 'num', num: '13',  o: ['13', '30', '3', '14'],     emoji: '', chunks: 'thir·teen',   group: 'num', tip: 'teen בסוף = עשר ועוד משהו → 13', twin: 'n30', bonus: true },
+    { id: 'n15',  en: 'fifteen',   he: '15',  he2: 'חמש עשרה',   kind: 'num', num: '15',  o: ['15', '50', '5', '16'],     emoji: '', chunks: 'fif·teen',    group: 'num', tip: 'teen בסוף = עשר ועוד משהו → 15', twin: 'n50', bonus: true },
+    { id: 'n17',  en: 'seventeen', he: '17',  he2: 'שבע עשרה',   kind: 'num', num: '17',  o: ['17', '70', '7', '16'],     emoji: '', chunks: 'se·ven·teen', group: 'num', tip: 'seven + teen = 17', twin: 'n70', bonus: true },
+    { id: 'n18',  en: 'eighteen',  he: '18',  he2: 'שמונה עשרה', kind: 'num', num: '18',  o: ['18', '80', '8', '13'],     emoji: '', chunks: 'eigh·teen',   group: 'num', tip: 'eight + teen = 18', bonus: true },
+    { id: 'n20',  en: 'twenty',    he: '20',  he2: 'עשרים',      kind: 'num', num: '20',  o: ['20', '12', '2', '30'],     emoji: '', chunks: 'twen·ty',     group: 'num', tip: 'ty בסוף = עשרות → 20', bonus: true },
+    { id: 'n30',  en: 'thirty',    he: '30',  he2: 'שלושים',     kind: 'num', num: '30',  o: ['30', '13', '3', '40'],     emoji: '', chunks: 'thir·ty',     group: 'num', tip: 'ty בסוף = עשרות → 30', twin: 'n13', bonus: true },
+    { id: 'n40',  en: 'forty',     he: '40',  he2: 'ארבעים',     kind: 'num', num: '40',  o: ['40', '14', '4', '50'],     emoji: '', chunks: 'for·ty',      group: 'num', tip: 'ty בסוף = עשרות → 40', bonus: true },
+    { id: 'n50',  en: 'fifty',     he: '50',  he2: 'חמישים',     kind: 'num', num: '50',  o: ['50', '15', '5', '40'],     emoji: '', chunks: 'fif·ty',      group: 'num', tip: 'ty בסוף = עשרות → 50', twin: 'n15', bonus: true },
+    { id: 'n70',  en: 'seventy',   he: '70',  he2: 'שבעים',      kind: 'num', num: '70',  o: ['70', '17', '7', '60'],     emoji: '', chunks: 'se·ven·ty',   group: 'num', tip: 'seven + ty = 70', twin: 'n17', bonus: true },
+    { id: 'n100', en: 'hundred',   he: '100', he2: 'מאה',        kind: 'num', num: '100', o: ['100', '10', '1000', '90'], emoji: '', chunks: 'hun·dred',    group: 'num', tip: 'הַאנְדְרֶד = 100', bonus: true },
+
+    { id: 'march',  en: 'March',  he: 'מרץ',    he2: '', kind: 'month', emoji: '', chunks: 'March',   group: 'mon', tip: 'ch = צ׳ → מַארְץ׳', bonus: true },
+    { id: 'april',  en: 'April',  he: 'אפריל',  he2: '', kind: 'month', emoji: '', chunks: 'A·pril',  group: 'mon', tip: 'אֵייפְּרִיל', bonus: true },
+    { id: 'may',    en: 'May',    he: 'מאי',    he2: '', kind: 'month', emoji: '', chunks: 'May',     group: 'mon', tip: 'ay = "איי" → מֵיי', bonus: true },
+    { id: 'june',   en: 'June',   he: 'יוני',   he2: '', kind: 'month', emoji: '', chunks: 'June',    group: 'mon', tip: 'ג׳וּן. נגמר ב-n', bonus: true },
+    { id: 'july',   en: 'July',   he: 'יולי',   he2: '', kind: 'month', emoji: '', chunks: 'Ju·ly',   group: 'mon', tip: 'ג׳וּלַיי. נגמר ב-ly', bonus: true },
+    { id: 'august', en: 'August', he: 'אוגוסט', he2: '', kind: 'month', emoji: '', chunks: 'Au·gust', group: 'mon', tip: 'au = "אוֹ" → אוֹגֶסְט', bonus: true },
+
+    { id: 'happy', en: 'happy', he: 'שמח',  he2: '',    kind: 'adj', emoji: '😀', chunks: 'hap·py', group: 'adj', tip: 'הֶפִּי – y בסוף נשמעת "אִי"', bonus: true },
+    { id: 'sad',   en: 'sad',   he: 'עצוב', he2: '',    kind: 'adj', emoji: '😢', chunks: 'sad',    group: 'adj', tip: 'סֶד', bonus: true },
+    { id: 'tall',  en: 'tall',  he: 'גבוה', he2: '',    kind: 'adj', emoji: '', pic: 'tall',  chunks: 'tall',  group: 'adj', tip: 'all = "אוֹל" → טוֹל', bonus: true },
+    { id: 'short', en: 'short', he: 'נמוך', he2: 'קצר', kind: 'adj', emoji: '', pic: 'short', chunks: 'short', group: 'adj', tip: 'sh = שׁ, or = "אוֹר" → שׁוֹרְט', bonus: true },
+    { id: 'fat',   en: 'fat',   he: 'שמן',  he2: '',    kind: 'adj', emoji: '', chunks: 'fat',  group: 'adj', tip: 'פֶט', bonus: true },
+    { id: 'nice',  en: 'nice',  he: 'נחמד', he2: 'יפה', kind: 'adj', emoji: '', chunks: 'nice', group: 'adj', tip: 'e שקטה: ה-i נשמעת "איי", וה-c נשמעת ס → נַייס', bonus: true },
+  ],
+
   // Land 0 = starter kit. Then five lands of ten: × words first (lands 1, 2 and half of 3), known words last.
+  // Lands 6 and 7 are the bonus land (numbers; then months and picture adjectives): a side path, twelve cards a day.
   lands: [
     { id: 0, starter: true, words: ['i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'where', 'who', 'when', 'why', 'how-old'] },
     { id: 1, words: ['blanket', 'brush', 'wash', 'put', 'team', 'people', 'old', 'time', 'fast', 'hard'] },
@@ -87,6 +121,8 @@ window.CONTENT = {
     { id: 3, words: ['wait-for', 'take-care-of', 'learn', 'best', 'break', 'age', 'year', 'month', 'birthday', 'young'] },
     { id: 4, words: ['begin', 'different', 'hobby', 'pool', 'same', 'a-lot-of', 'chess', 'first', 'together', 'win'] },
     { id: 5, words: ['help', 'better', 'call', 'choose', 'information', 'next', 'give', 'toy', 'with', 'like'] },
+    { id: 6, bonus: true, words: ['n11', 'n12', 'n13', 'n15', 'n17', 'n18', 'n20', 'n30', 'n40', 'n50', 'n70', 'n100'] },
+    { id: 7, bonus: true, words: ['march', 'april', 'may', 'june', 'july', 'august', 'happy', 'sad', 'tall', 'short', 'fat', 'nice'] },
   ],
 
   // Grammar towers, in the PRD v4 order. Each tower holds one or two units; one unit opens per day.
@@ -212,6 +248,206 @@ window.CONTENT = {
     { id: 'sd-8', a: 'different', lines: ['Maya is in a chess team.', 'Noa is in a pool team.'] },
   ],
 
+  // Listen-and-pick cards (PRD §6.2, §6.7): a spoken sentence, four pictures. The test's first listening task.
+  // pics[0] is the answer; the app shuffles them. They are born inside the mid-boss.
+  listenPick: [
+    { id: 'lp-1',  say: 'The dog has a ball.',                he: 'לכלב יש כדור.',                       pics: ['🐶⚽', '🐱⚽', '🐶🧸', '🐶📕'] },
+    { id: 'lp-2',  say: 'Dana is at the pool.',               he: 'דנה בבריכה.',                         pics: ['👧🏊', '👧♟️', '👧🎂', '👧📞'] },
+    { id: 'lp-3',  say: 'It is his birthday. He is eleven.',  he: 'זה יום ההולדת שלו. הוא בן אחת עשרה.', pics: ['🎂 11', '🎂 12', '🎂 7', '🎂 10'] },
+    { id: 'lp-4',  say: 'Tom and Roni learn chess together.', he: 'תום ורוני לומדים שחמט ביחד.',         pics: ['👦👦♟️', '👦♟️', '👦👦⚽', '👦👦🏊'] },
+    { id: 'lp-5',  say: 'She is sad.',                        he: 'היא עצובה.',                          pics: ['👧😢', '👧😀', '👦😢', '👦😀'] },
+    { id: 'lp-6',  say: 'He washes the dog.',                 he: 'הוא רוחץ את הכלב.',                   pics: ['👦🧼🐶', '👦🪥🐶', '👧🧼🐶', '👦🧼🐱'] },
+    { id: 'lp-7',  say: 'She has a brush and a book.',        he: 'יש לה מברשת וספר.',                   pics: ['🪥📕', '🪥🧸', '📞📕', '🎩📕'] },
+    { id: 'lp-8',  say: 'Omer is first!',                     he: 'עומר ראשון!',                         pics: ['👦🥇', '👦🥈', '👦🥉', '👦🎂'] },
+    { id: 'lp-9',  say: 'Maya calls her friend.',             he: 'מאיה מתקשרת לחבר שלה.',               pics: ['👧📞', '👧🧼', '👧🧸', '👧🏊'] },
+    { id: 'lp-10', say: 'They have a lot of toys.',           he: 'יש להם הרבה צעצועים.',                pics: ['🧸🧸🧸🧸🧸', '🧸', '📕📕📕📕📕', '📕'] },
+    { id: 'lp-11', say: 'It is time for chess.',              he: 'הגיע הזמן לשחמט.',                    pics: ['⏰♟️', '⏰🏊', '🎂♟️', '⏰📕'] },
+    { id: 'lp-12', say: 'We are happy. It is my birthday.',   he: 'אנחנו שמחים. זה יום ההולדת שלי.',     pics: ['😀🎂', '😢🎂', '😀🏊', '😢🏊'] },
+  ],
+
+  // Word bank (PRD §6.2): the test's second vocabulary task. Ten sets of five; every one of the 50 words is in
+  // exactly one set, in the exact form its sentence needs (washes, months). Inside a set each word fits one
+  // sentence only: that was checked by hand, set by set, so do not move a sentence to another set without
+  // checking the other four words against it. w = the word's id · t = the sentence · a = the form to tap in.
+  // The same sentences are the Sentence-cloze cards: one word, one sentence, the other choices from its set.
+  bank: [
+    { id: 'wb1', items: [
+      { w: 'wash',    t: 'Maya ___ the dog every month.',            a: 'washes',  he: 'מאיה רוחצת את הכלב כל חודש.' },
+      { w: 'blanket', t: 'Tali has a special ___ for her dog.',      a: 'blanket', he: 'לטלי יש שמיכה מיוחדת בשביל הכלב שלה.' },
+      { w: 'fast',    t: 'Omer always wins. He is very ___.',        a: 'fast',    he: 'עומר תמיד מנצח. הוא מהיר מאוד.' },
+      { w: 'but',     t: 'The toy is old, ___ I like it.',           a: 'but',     he: 'הצעצוע ישן, אבל אני אוהב אותו.' },
+      { w: 'people',  t: 'A lot of ___ are at the pool.',            a: 'people',  he: 'הרבה אנשים נמצאים בבריכה.' },
+    ] },
+    { id: 'wb2', items: [
+      { w: 'put',  t: 'Dana ___ the toys in the box.',               a: 'puts', he: 'דנה שמה את הצעצועים בקופסה.' },
+      { w: 'team', t: 'Tom and Roni are in a chess ___.',            a: 'team', he: 'תום ורוני בקבוצת שחמט.' },
+      { w: 'old',  t: 'My dog is ___. It is twelve years old.',      a: 'old',  he: 'הכלב שלי זקן. הוא בן שתים עשרה.' },
+      { w: 'if',   t: 'Call me ___ it is hard.',                     a: 'if',   he: 'תתקשר אליי אם זה קשה.' },
+      { w: 'time', t: 'What ___ is it? It is ten.',                  a: 'time', he: 'מה השעה? השעה עשר.' },
+    ] },
+    { id: 'wb3', items: [
+      { w: 'wait-for', t: 'Roni is not fast. Tom ___ him.',                 a: 'waits for', he: 'רוני לא מהיר. תום מחכה לו.' },
+      { w: 'brush',    t: 'Maya washes the dog with a ___.',                a: 'brush',     he: 'מאיה רוחצת את הכלב עם מברשת.' },
+      { w: 'hard',     t: 'I like chess because it is ___.',                a: 'hard',      he: 'אני אוהב שחמט כי זה קשה.' },
+      { w: 'also',     t: 'Tom is ten. Roni is ___ ten.',                   a: 'also',      he: 'תום בן עשר. גם רוני בן עשר.' },
+      { w: 'pool',     t: 'Every day Omer is in the water at the ___.',     a: 'pool',      he: 'כל יום עומר במים, בבריכה.' },
+    ] },
+    { id: 'wb4', items: [
+      { w: 'take-care-of', t: 'Noa ___ her old dog.',                                  a: 'takes care of', he: 'נועה מטפלת בכלב הזקן שלה.' },
+      { w: 'age',          t: 'Dan is ten and Tom is ten. They are the same ___.',     a: 'age',           he: 'דן בן עשר ותום בן עשר. הם באותו גיל.' },
+      { w: 'special',      t: 'Tali has a very ___ toy.',                              a: 'special',       he: 'לטלי יש צעצוע מיוחד מאוד.' },
+      { w: 'every',        t: 'Omer is at the pool ___ day.',                          a: 'every',         he: 'עומר בבריכה כל יום.' },
+      { w: 'win',          t: 'We are a fast team. We always ___.',                    a: 'win',           he: 'אנחנו קבוצה מהירה. אנחנו תמיד מנצחים.' },
+    ] },
+    { id: 'wb5', items: [
+      { w: 'learn',  t: 'Tom ___ chess with his friends.',                a: 'learns', he: 'תום לומד שחמט עם החברים שלו.' },
+      { w: 'month',  t: 'A year has twelve ___.',                         a: 'months', he: 'בשנה יש שנים עשר חודשים.' },
+      { w: 'best',   t: 'Dana is my ___ friend.',                         a: 'best',   he: 'דנה היא החברה הכי טובה שלי.' },
+      { w: 'always', t: 'Omer is fast. He ___ wins.',                     a: 'always', he: 'עומר מהיר. הוא תמיד מנצח.' },
+      { w: 'toy',    t: 'The dog has a ball. It is a ___ for dogs.',      a: 'toy',    he: 'לכלב יש כדור. זה צעצוע לכלבים.' },
+    ] },
+    { id: 'wb6', items: [
+      { w: 'like',     t: 'Maya ___ chess. It is her hobby.',                    a: 'likes',    he: 'מאיה אוהבת שחמט. זה התחביב שלה.' },
+      { w: 'birthday', t: 'My ___ is in April.',                                 a: 'birthday', he: 'יום ההולדת שלי באפריל.' },
+      { w: 'young',    t: 'Dan is not old. He is ___.',                          a: 'young',    he: 'דן לא זקן. הוא צעיר.' },
+      { w: 'more',     t: 'Dana has a lot of toys, but Tali has ___ toys.',      a: 'more',     he: 'לדנה יש הרבה צעצועים, אבל לטלי יש יותר צעצועים.' },
+      { w: 'first',    t: 'In the game, Dana is ___ and Tom is next.',           a: 'first',    he: 'במשחק, דנה ראשונה ותום הבא בתור.' },
+    ] },
+    { id: 'wb7', items: [
+      { w: 'begin',       t: 'The chess game ___ at ten.',                              a: 'begins',      he: 'משחק השחמט מתחיל בעשר.' },
+      { w: 'hobby',       t: 'My ___ is chess. I like it.',                             a: 'hobby',       he: 'התחביב שלי הוא שחמט. אני אוהב אותו.' },
+      { w: 'different',   t: 'Noa is nine and Tali is eleven. They are ___ ages.',      a: 'different',   he: 'נועה בת תשע וטלי בת אחת עשרה. הן בגילים שונים.' },
+      { w: 'a-lot-of',    t: 'We have ___ time. The game is in June.',                  a: 'a lot of',    he: 'יש לנו הרבה זמן. המשחק ביוני.' },
+      { w: 'information', t: 'The book has important ___ about dogs.',                  a: 'information', he: 'בספר יש מידע חשוב על כלבים.' },
+    ] },
+    { id: 'wb8', items: [
+      { w: 'help',     t: 'Tali is a good friend. She ___ Noa every day.',       a: 'helps',    he: 'טלי חברה טובה. היא עוזרת לנועה כל יום.' },
+      { w: 'chess',    t: 'My hobby is ___. It is a hard game.',                 a: 'chess',    he: 'התחביב שלי הוא שחמט. זה משחק קשה.' },
+      { w: 'same',     t: 'Dan is ten. Tom is ten. They are the ___ age.',       a: 'same',     he: 'דן בן עשר. תום בן עשר. הם באותו גיל.' },
+      { w: 'together', t: 'Maya and Noa are friends. They are always ___.',      a: 'together', he: 'מאיה ונועה חברות. הן תמיד ביחד.' },
+      { w: 'year',     t: 'I have a birthday every ___.',                        a: 'year',     he: 'יש לי יום הולדת כל שנה.' },
+    ] },
+    { id: 'wb9', items: [
+      { w: 'call',      t: 'Dana ___ her friend on the phone.',                  a: 'calls',     he: 'דנה מתקשרת לחבר שלה בטלפון.' },
+      { w: 'give',      t: 'The dog is good. Omer ___ it a ball.',               a: 'gives',     he: 'הכלב טוב. עומר נותן לו כדור.' },
+      { w: 'important', t: 'Today is my birthday. It is an ___ day.',            a: 'important', he: 'היום יום ההולדת שלי. זה יום חשוב.' },
+      { w: 'because',   t: 'Roni likes chess ___ he likes to win.',              a: 'because',   he: 'רוני אוהב שחמט כי הוא אוהב לנצח.' },
+      { w: 'next',      t: 'Omer is ten. He is eleven ___ year.',                a: 'next',      he: 'עומר בן עשר. בשנה הבאה הוא בן אחת עשרה.' },
+    ] },
+    { id: 'wb10', items: [
+      { w: 'choose', t: 'Which book? Tom ___ the book about dogs.',              a: 'chooses', he: 'איזה ספר? תום בוחר את הספר על כלבים.' },
+      { w: 'break',  t: 'Oh no! The dog ___ my toys.',                           a: 'breaks',  he: 'אוי לא! הכלב שובר את הצעצועים שלי.' },
+      { w: 'other',  t: 'I have two toys. One is old and the ___ is new.',       a: 'other',   he: 'יש לי שני צעצועים. אחד ישן והאחר חדש.' },
+      { w: 'better', t: 'My team is good, but your team is ___.',                a: 'better',  he: 'הקבוצה שלי טובה, אבל הקבוצה שלך יותר טובה.' },
+      { w: 'with',   t: 'Dana is at the pool ___ her friends.',                  a: 'with',    he: 'דנה בבריכה עם החברים שלה.' },
+    ] },
+  ],
+
+  // Sentence halves (PRD §6.2): the test's first reading task. A set takes one sentence from each of five
+  // families. The families are cut so that a beginning from one can never take an ending from another:
+  // am / is / are differ by agreement, `obj` is cut after has or have, `bec` after because, `q` is a yes/no
+  // question cut after its subject. Keep a new sentence inside its family's shape, or a set can get two right answers.
+  halves: {
+    am: [
+      { a: 'I', b: 'am ten years old.', he: 'אני בן עשר.' },
+      { a: 'I', b: 'am in a chess team.', he: 'אני בקבוצת שחמט.' },
+      { a: 'I', b: 'am at the pool with my friends.', he: 'אני בבריכה עם החברים שלי.' },
+      { a: 'I', b: 'am not old.', he: 'אני לא זקן.' },
+    ],
+    is: [
+      { a: 'My dog', b: 'is old, but it is fast.', he: 'הכלב שלי זקן, אבל הוא מהיר.' },
+      { a: 'Dana', b: 'is my best friend.', he: 'דנה היא החברה הכי טובה שלי.' },
+      { a: 'The toy', b: "isn't special.", he: 'הצעצוע לא מיוחד.' },
+      { a: 'Her birthday', b: 'is in June.', he: 'יום ההולדת שלה ביוני.' },
+      { a: 'Omer', b: 'is always first.', he: 'עומר תמיד ראשון.' },
+    ],
+    are: [
+      { a: 'Tom and Roni', b: 'are the same age.', he: 'תום ורוני באותו גיל.' },
+      { a: 'My friends', b: 'are in a different team.', he: 'החברים שלי בקבוצה אחרת.' },
+      { a: 'The toys', b: "aren't old.", he: 'הצעצועים לא ישנים.' },
+      { a: 'Maya and Noa', b: 'are always together.', he: 'מאיה ונועה תמיד ביחד.' },
+      { a: 'We', b: 'are at the pool every day.', he: 'אנחנו בבריכה כל יום.' },
+    ],
+    obj: [
+      { a: 'Omer has', b: 'a special toy.', he: 'לעומר יש צעצוע מיוחד.' },
+      { a: 'Tom and Roni have', b: 'a lot of toys.', he: 'לתום ולרוני יש הרבה צעצועים.' },
+      { a: 'Maya has', b: 'an old blanket.', he: 'למאיה יש שמיכה ישנה.' },
+      { a: 'I have', b: 'some information.', he: 'יש לי מידע.' },
+      { a: 'My team has', b: 'a new brush.', he: 'לקבוצה שלי יש מברשת חדשה.' },
+    ],
+    bec: [
+      { a: 'I like chess because', b: 'it is hard.', he: 'אני אוהב שחמט כי זה קשה.' },
+      { a: 'Roni is happy because', b: 'he likes to win.', he: 'רוני שמח כי הוא אוהב לנצח.' },
+      { a: 'Tali takes care of the dog because', b: 'it is very old.', he: 'טלי מטפלת בכלב כי הוא זקן מאוד.' },
+      { a: 'We are fast because', b: 'we learn every day.', he: 'אנחנו מהירים כי אנחנו לומדים כל יום.' },
+    ],
+    q: [
+      { a: 'Is Dana', b: 'in a team?', he: 'דנה בקבוצה?' },
+      { a: 'Are they', b: 'at the pool?', he: 'הם בבריכה?' },
+      { a: 'Is your dog', b: 'fast?', he: 'הכלב שלך מהיר?' },
+      { a: 'Are Tom and Roni', b: 'friends?', he: 'תום ורוני חברים?' },
+    ],
+  },
+
+  // Listening track (PRD §6.7). The three recordings are ECB's own files, streamed from ECB's address and never
+  // copied here; their transcripts are not in the repo either. What is here is ours: the questions.
+  // Question types: mc (one of three) · yn (Yes / No) · tick2 (two pictures of five). ok marks the right ones.
+  // pet = the card a finished recording adds to the friend collection. min = planning estimate, in minutes.
+  // fallback: true = an app-written dialogue, spoken by the device, that stands in when a recording will not load.
+  listening: {
+    base: 'https://dqt7m27rg71w0.cloudfront.net/wp-content/uploads/2018/06/',
+    items: [
+      { id: 'rec1', kind: 'recording', src: '28111212/ELM_MP3_HEY_U1_WB_Rev_p59_ex1_2.mp3', min: 3, title: 'Honey', emoji: '🐶',
+        keys: [{ en: 'night', he: 'לילה' }, { en: 'sleeps', he: 'ישנה' }, { en: 'food', he: 'אוכל' }],
+        pet: { name: 'Honey', emoji: '🐶', facts: ['🤝 Guy', '🏃 run', '🌙 blanket'] },
+        questions: [
+          { type: 'mc', en: 'Who is Honey?', he: 'מי זאת Honey?', choices: [{ e: '🐶', en: 'a dog', ok: true }, { e: '🐱', en: 'a cat' }, { e: '👧', en: 'a girl' }] },
+          { type: 'yn', en: 'Are Honey and Guy always together?', he: 'הם תמיד ביחד?', ok: true },
+          { type: 'tick2', en: 'What do they like to do together?', he: 'מה הם אוהבים לעשות ביחד?', choices: [{ e: '🏃', en: 'run', ok: true }, { e: '🏊', en: 'swim' }, { e: '🎾', en: 'play', ok: true }, { e: '📕', en: 'read' }, { e: '♟️', en: 'learn chess' }] },
+          { type: 'mc', en: 'Where does Honey sleep at night?', he: 'איפה Honey ישנה בלילה?', choices: [{ en: 'on a blanket', ok: true }, { en: "on Guy's bed" }, { en: 'in the pool' }] },
+          { type: 'mc', en: 'What does Guy give Honey every day?', he: 'מה Guy נותן לה כל יום?', choices: [{ e: '🍖', en: 'food', ok: true }, { e: '🧸', en: 'a toy' }, { e: '🪥', en: 'a brush' }] },
+        ] },
+      { id: 'rec2', kind: 'recording', src: '28111202/ELM_MP3_HEY_U1_p29.mp3', min: 6, title: 'Robo-Pets', emoji: '🤖',
+        keys: [{ en: 'pet', he: 'חיית מחמד' }, { en: 'shop', he: 'חנות' }, { en: 'buy', he: 'לקנות' }],
+        pet: { name: 'Robo-Dog', emoji: '🤖', facts: ['small', '⚫⚪', 'walk · jump'] },
+        questions: [
+          { type: 'mc', en: 'What is a Robo-Pet?', he: 'מה זה Robo-Pet?', choices: [{ e: '🤖', en: 'a pet robot', ok: true }, { e: '🐾', en: 'an animal' }, { e: '🏪', en: 'a pet shop' }] },
+          { type: 'yn', en: 'Is the Robo-Dog big?', he: 'ה-Robo-Dog גדול?', ok: false },
+          { type: 'mc', en: 'What colour is the Robo-Dog?', he: 'באיזה צבע ה-Robo-Dog?', choices: [{ e: '⚫⚪', en: 'black and white', ok: true }, { e: '🟤', en: 'brown' }, { e: '🟡', en: 'yellow' }] },
+          { type: 'tick2', en: 'What can the Robo-Bird do?', he: 'מה ה-Robo-Bird יודע לעשות?', choices: [{ e: '🚶', en: 'walk' }, { e: '🗣️', en: 'talk', ok: true }, { e: '🪑', en: 'sit' }, { e: '🕊️', en: 'fly', ok: true }, { e: '🦘', en: 'jump' }] },
+          { type: 'mc', en: 'Which one is for the child in the end?', he: 'איזה מהם נבחר בסוף?', choices: [{ e: '🐶', en: 'the Robo-Dog', ok: true }, { e: '🐦', en: 'the Robo-Bird' }, { e: '🐰', en: 'a rabbit' }] },
+        ] },
+      { id: 'rec3', kind: 'recording', src: '28111206/ELM_MP3_HEY_U1_p40_41_ex2_3.mp3', min: 6, title: 'Splash and Sandy', emoji: '🦆',
+        keys: [{ en: 'duck', he: 'ברווז' }, { en: 'swim', he: 'לשחות' }, { en: 'garden', he: 'גינה' }],
+        pet: { name: 'Splash & Sandy', emoji: '🦆', facts: ['🦆 + 🐶', '🏊 pool', 'best friends'] },
+        questions: [
+          { type: 'mc', en: 'Who is Splash?', he: 'מי זה Splash?', choices: [{ e: '🦆', en: 'a duck', ok: true }, { e: '🐶', en: 'a dog' }, { e: '👧', en: 'a girl' }] },
+          { type: 'tick2', en: 'What do Splash and Sandy do together?', he: 'מה הם עושים ביחד?', choices: [{ e: '♟️', en: 'learn chess' }, { e: '🏊', en: 'swim', ok: true }, { e: '📕', en: 'read' }, { e: '😴', en: 'sleep', ok: true }, { e: '📞', en: 'call friends' }] },
+          { type: 'mc', en: 'Where do they swim?', he: 'איפה הם שוחים?', choices: [{ en: 'in a small pool', ok: true }, { en: 'in the sea' }, { en: 'at school' }] },
+          { type: 'yn', en: 'Do they eat different food?', he: 'הם אוכלים אוכל שונה?', ok: false },
+          { type: 'mc', en: 'Where do they sleep?', he: 'איפה הם ישנים?', choices: [{ en: 'on a blanket', ok: true }, { en: 'behind a tree' }, { en: 'in the pool' }] },
+        ] },
+      { id: 'dlg0', kind: 'dialogue', fallback: true, min: 3, title: 'Tom and Roni', emoji: '📞',
+        keys: [{ en: 'home', he: 'בית' }, { en: 'young', he: 'צעיר' }, { en: 'very', he: 'מאוד' }],
+        lines: [
+          { who: 'a', en: 'Hi, Tom! Where are you?' },
+          { who: 'b', en: 'I am at the pool with my team.' },
+          { who: 'a', en: 'Is Roni with you?' },
+          { who: 'b', en: "No, he isn't. He is at home with his dog." },
+          { who: 'a', en: 'Is the dog old?' },
+          { who: 'b', en: "No, it isn't. It is young, and it is very fast." },
+          { who: 'a', en: 'I have an old dog. It is twelve years old.' },
+          { who: 'b', en: 'Twelve? That is very old!' },
+        ],
+        questions: [
+          { type: 'mc', en: 'Where is Tom?', he: 'איפה תום?', choices: [{ e: '🏊', en: 'at the pool', ok: true }, { e: '🏠', en: 'at home' }, { e: '🏫', en: 'at school' }] },
+          { type: 'yn', en: 'Is Roni at the pool?', he: 'רוני בבריכה?', ok: false },
+          { type: 'tick2', en: "Tick the TWO things about Roni's dog.", he: 'שני דברים על הכלב של רוני', choices: [{ e: '👴', en: 'old' }, { e: '👶', en: 'young', ok: true }, { e: '😢', en: 'sad' }, { e: '🏎️', en: 'fast', ok: true }, { e: '🎂', en: 'twelve' }] },
+          { type: 'mc', en: 'How old is the other dog?', he: 'בן כמה הכלב השני?', choices: [{ en: 'twelve', ok: true }, { en: 'ten' }, { en: 'two' }] },
+        ] },
+    ],
+  },
+
   // Writing track: the four frames are generated from these lists (PRD §6.6).
   writing: {
     people: [
@@ -228,9 +464,13 @@ window.CONTENT = {
     ],
   },
 
-  // Story track v1: tier A and B passages (tier C arrives in M3). One friend per passage.
+  // Story track: tier A and B passages (one friend each), then tier C (two friends side by side, three
+  // paragraphs, the test's length). C5, the unseen passage, belongs to the mock (M4).
   // paras = sentence indexes per paragraph. Question types: he (Hebrew meaning, levels 1–2 only),
-  // fact, tf (true/false), tick2 (tick two of five). ev = the sentence(s) that hold the answer.
+  // fact, tf (true/false), tick2 (tick two of five), complete (a sentence stem and four endings),
+  // write2 ("write two things": ev holds the two sentences; tapped at levels 1–3, written on paper from level 4).
+  // ev = the sentence(s) that hold the answer. para (tier C) = the paragraph a question belongs to: at levels
+  // 1–3 a long story is shown one paragraph a screen, so a question must be answerable from its own paragraph.
   stories: [
     { id: 'A1', tier: 'A', title: 'Dana', emoji: '👧', gist: 'ילדה אחת, התחביב שלה ויום ההולדת שלה.',
       keys: ['hobby', 'chess', 'birthday'],
@@ -333,6 +573,130 @@ window.CONTENT = {
           choices: [{ en: 'She has a dog.', he: 'יש לה כלב.' }, { en: 'She is nine years old.', he: 'היא בת תשע.', ok: true }, { en: 'She is in a team.', he: 'היא בקבוצה.' }, { en: 'She has some old toys.', he: 'יש לה כמה צעצועים ישנים.', ok: true }, { en: 'She is eleven years old.', he: 'היא בת אחת עשרה.' }] },
         { type: 'fact', en: 'Who has a special toy?', he: 'למי יש צעצוע מיוחד?', ev: [7], choices: [{ en: 'Tali', he: 'טלי', ok: true }, { en: 'Noa', he: 'נועה' }, { en: 'Tom', he: 'תום' }] },
       ] },
+    { id: 'C1', tier: 'C', title: 'Dan and Tom', emoji: '🏊', gist: 'שני חברים: מה אותו הדבר אצלם, ומה שונה.',
+      keys: ['same', 'different', 'wait for'],
+      friend: { name: 'Dan & Tom', emoji: '👦', facts: ['11 · 11', '🏊 same team', '♟️ + 🧸'] },
+      paras: [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13]],
+      sentences: [
+        { en: 'This is Dan and this is Tom.', he: 'זה דן וזה תום.' },
+        { en: 'They are best friends.', he: 'הם החברים הכי טובים.' },
+        { en: 'Dan is eleven years old.', he: 'דן בן אחת עשרה.' },
+        { en: 'Tom is also eleven, so they are the same age.', he: 'גם תום בן אחת עשרה, אז הם באותו גיל.' },
+        { en: 'They are in the same team at the pool.', he: 'הם באותה קבוצה בבריכה.' },
+        { en: 'Dan and Tom have different hobbies.', he: 'לדן ולתום יש תחביבים שונים.' },
+        { en: 'Dan likes chess because it is hard.', he: 'דן אוהב שחמט כי זה קשה.' },
+        { en: 'He has a special chess book.', he: 'יש לו ספר שחמט מיוחד.' },
+        { en: "What is Tom's hobby?", he: 'מה התחביב של תום?' },
+        { en: 'His hobby is toys: he has a lot of old toys.', he: 'התחביב שלו הוא צעצועים: יש לו הרבה צעצועים ישנים.' },
+        { en: 'Every day the friends are together at the pool.', he: 'כל יום החברים ביחד בבריכה.' },
+        { en: "Tom is fast, but Dan isn't fast.", he: 'תום מהיר, אבל דן לא מהיר.' },
+        { en: 'Tom always waits for Dan.', he: 'תום תמיד מחכה לדן.' },
+        { en: 'Tom also helps Dan with the brush.', he: 'תום גם עוזר לדן עם המברשת.' },
+      ],
+      questions: [
+        { para: 0, type: 'tf', en: 'Dan and Tom are the same age.', he: 'דן ותום באותו גיל.', ev: [3], ok: true },
+        { para: 0, type: 'fact', en: 'How old is Tom?', he: 'בן כמה תום?', ev: [3], choices: [{ en: 'eleven', he: 'אחת עשרה', ok: true }, { en: 'ten', he: 'עשר' }, { en: 'twelve', he: 'שתים עשרה' }] },
+        { para: 1, type: 'tf', en: 'Dan and Tom have the same hobby.', he: 'לדן ולתום יש אותו תחביב.', ev: [5], ok: false },
+        { para: 1, type: 'complete', en: 'Dan likes chess because', he: 'דן אוהב שחמט כי', ev: [6], choices: [{ en: 'it is hard.', he: 'זה קשה.', ok: true }, { en: 'it is fast.', he: 'זה מהיר.' }, { en: 'he has a team.', he: 'יש לו קבוצה.' }, { en: 'Tom likes it.', he: 'תום אוהב את זה.' }] },
+        { para: 2, type: 'tick2', en: 'Tick the TWO true things.', he: 'סמן את שני הדברים הנכונים.', ev: [10, 11],
+          choices: [{ en: 'Dan is fast.', he: 'דן מהיר.' }, { en: 'The friends are together every day.', he: 'החברים ביחד כל יום.', ok: true }, { en: 'They are at the pool every month.', he: 'הם בבריכה כל חודש.' }, { en: 'Tom is fast.', he: 'תום מהיר.', ok: true }, { en: 'Tom is old.', he: 'תום זקן.' }] },
+        { para: 2, type: 'write2', en: 'Write TWO things Tom does for Dan.', he: 'כתוב שני דברים שתום עושה בשביל דן.', ev: [12, 13], model: ['He waits for Dan.', 'He helps Dan with the brush.'] },
+      ] },
+    { id: 'C2', tier: 'C', title: 'Maya and Noa', emoji: '🐶', gist: 'שתי חברות, כלב אחד וחתול אחד.',
+      keys: ['take care of', 'if', 'call'],
+      friend: { name: 'Maya & Noa', emoji: '👧', facts: ['12 · 10', '🎂 June', '🐶 + 🐱'] },
+      paras: [[0, 1, 2, 3], [4, 5, 6, 7, 8], [9, 10, 11, 12]],
+      sentences: [
+        { en: 'Maya and Noa are friends.', he: 'מאיה ונועה חברות.' },
+        { en: 'Maya is twelve years old and Noa is ten.', he: 'מאיה בת שתים עשרה ונועה בת עשר.' },
+        { en: 'They are different ages, but they have the same birthday month.', he: 'הן בגילים שונים, אבל יש להן אותו חודש יום הולדת.' },
+        { en: 'Their birthdays are in June.', he: 'ימי ההולדת שלהן ביוני.' },
+        { en: 'Maya has a young dog.', he: 'למאיה יש כלב צעיר.' },
+        { en: 'She takes care of it every day.', he: 'היא מטפלת בו כל יום.' },
+        { en: 'She washes the dog with a special brush.', he: 'היא רוחצת את הכלב עם מברשת מיוחדת.' },
+        { en: 'Noa has a cat.', he: 'לנועה יש חתול.' },
+        { en: 'The cat is old and it is not fast.', he: 'החתול זקן והוא לא מהיר.' },
+        { en: 'Why are Maya and Noa best friends?', he: 'למה מאיה ונועה החברות הכי טובות?' },
+        { en: 'They are best friends because they always help.', he: 'הן החברות הכי טובות כי הן תמיד עוזרות.' },
+        { en: 'If Noa is sad, Maya calls her.', he: 'אם נועה עצובה, מאיה מתקשרת אליה.' },
+        { en: 'Then they learn chess together.', he: 'אחר כך הן לומדות שחמט ביחד.' },
+      ],
+      questions: [
+        { para: 0, type: 'tf', en: 'Maya and Noa are the same age.', he: 'מאיה ונועה באותו גיל.', ev: [1, 2], ok: false },
+        { para: 0, type: 'fact', en: 'When are their birthdays?', he: 'מתי ימי ההולדת שלהן?', ev: [3], choices: [{ en: 'in June', he: 'ביוני', ok: true }, { en: 'in July', he: 'ביולי' }, { en: 'in April', he: 'באפריל' }] },
+        { para: 1, type: 'write2', en: 'Write TWO things Maya does for her dog.', he: 'כתוב שני דברים שמאיה עושה בשביל הכלב שלה.', ev: [5, 6], model: ['She takes care of it every day.', 'She washes the dog.'] },
+        { para: 1, type: 'complete', en: "Noa's cat is", he: 'החתול של נועה', ev: [8], choices: [{ en: 'old.', he: 'זקן.', ok: true }, { en: 'young.', he: 'צעיר.' }, { en: 'fast.', he: 'מהיר.' }, { en: 'special.', he: 'מיוחד.' }] },
+        { para: 2, type: 'fact', en: 'If Noa is sad, who calls her?', he: 'אם נועה עצובה, מי מתקשרת אליה?', ev: [11], choices: [{ en: 'Maya', he: 'מאיה', ok: true }, { en: 'Dana', he: 'דנה' }, { en: 'Tali', he: 'טלי' }] },
+        { para: 2, type: 'tick2', en: 'Tick the TWO things about Maya and Noa.', he: 'סמן את שני הדברים הנכונים על מאיה ונועה.', ev: [10, 12],
+          choices: [{ en: 'They always help.', he: 'הן תמיד עוזרות.', ok: true }, { en: 'They are in a team.', he: 'הן בקבוצה.' }, { en: 'They are at the pool every day.', he: 'הן בבריכה כל יום.' }, { en: 'They learn chess together.', he: 'הן לומדות שחמט ביחד.', ok: true }, { en: 'They have a lot of toys.', he: 'יש להן הרבה צעצועים.' }] },
+      ] },
+    { id: 'C3', tier: 'C', title: 'Omer and Roni', emoji: '🥇', gist: 'שני חברים בקבוצה אחת. מי ראשון?',
+      keys: ['first', 'next', 'blanket'],
+      friend: { name: 'Omer & Roni', emoji: '👦', facts: ['13 · 15', '🏊 team', '🥇 Roni'] },
+      paras: [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13]],
+      sentences: [
+        { en: 'Omer and Roni are in a team.', he: 'עומר ורוני בקבוצה.' },
+        { en: 'The team is at the pool every day.', he: 'הקבוצה בבריכה כל יום.' },
+        { en: 'Omer is thirteen years old.', he: 'עומר בן שלוש עשרה.' },
+        { en: 'Roni is not thirteen. He is fifteen.', he: 'רוני לא בן שלוש עשרה. הוא בן חמש עשרה.' },
+        { en: 'They are different ages, but they are in the same team.', he: 'הם בגילים שונים, אבל הם באותה קבוצה.' },
+        { en: 'Who is the best in the team?', he: 'מי הכי טוב בקבוצה?' },
+        { en: 'Roni is very fast. He is always first.', he: 'רוני מהיר מאוד. הוא תמיד ראשון.' },
+        { en: 'Omer is not first. He is next.', he: 'עומר לא ראשון. הוא הבא אחריו.' },
+        { en: 'The team has an important game in April.', he: 'לקבוצה יש משחק חשוב באפריל.' },
+        { en: 'The friends like to win.', he: 'החברים אוהבים לנצח.' },
+        { en: 'Roni has an old blanket.', he: 'לרוני יש שמיכה ישנה.' },
+        { en: 'It is his special blanket for the pool.', he: 'זאת השמיכה המיוחדת שלו לבריכה.' },
+        { en: 'Omer has a new brush and a big ball.', he: 'לעומר יש מברשת חדשה וכדור גדול.' },
+        { en: 'After the pool they are happy because they are together.', he: 'אחרי הבריכה הם שמחים כי הם ביחד.' },
+      ],
+      questions: [
+        { para: 0, type: 'tf', en: 'Omer and Roni are in different teams.', he: 'עומר ורוני בקבוצות שונות.', ev: [4], ok: false },
+        { para: 0, type: 'fact', en: 'How old is Roni?', he: 'בן כמה רוני?', ev: [3], choices: [{ en: 'fifteen', he: 'חמש עשרה', ok: true }, { en: 'thirteen', he: 'שלוש עשרה' }, { en: 'fifty', he: 'חמישים' }] },
+        { para: 1, type: 'complete', en: 'Roni is always', he: 'רוני תמיד', ev: [6], choices: [{ en: 'first.', he: 'ראשון.', ok: true }, { en: 'next.', he: 'הבא.' }, { en: 'sad.', he: 'עצוב.' }, { en: 'old.', he: 'זקן.' }] },
+        { para: 1, type: 'tf', en: 'The important game is in June.', he: 'המשחק החשוב ביוני.', ev: [8], ok: false },
+        { para: 2, type: 'tick2', en: 'Tick the TWO things Omer has.', he: 'סמן את שני הדברים שיש לעומר.', ev: [12],
+          choices: [{ en: 'an old blanket', he: 'שמיכה ישנה' }, { en: 'a new brush', he: 'מברשת חדשה', ok: true }, { en: 'a dog', he: 'כלב' }, { en: 'a big ball', he: 'כדור גדול', ok: true }, { en: 'a chess book', he: 'ספר שחמט' }] },
+        { para: 2, type: 'write2', en: "Write TWO things about Roni's blanket.", he: 'כתוב שני דברים על השמיכה של רוני.', ev: [10, 11], model: ['It is old.', 'It is his special blanket for the pool.'] },
+      ] },
+    { id: 'C4', tier: 'C', title: 'Dana and Tali', emoji: '🎂', gist: 'שתי חברות, שתי קבוצות, ויום הולדת אחד.',
+      keys: ['people', 'win', 'next'],
+      friend: { name: 'Dana & Tali', emoji: '👧', facts: ['10 · 10', '♟️ · 🏊', '🎂 🧸 📕'] },
+      paras: [[0, 1, 2, 3], [4, 5, 6, 7, 8, 9], [10, 11, 12, 13]],
+      sentences: [
+        { en: 'Dana and Tali are ten years old.', he: 'דנה וטלי בנות עשר.' },
+        { en: 'They are the same age, but they are in different teams.', he: 'הן באותו גיל, אבל הן בקבוצות שונות.' },
+        { en: 'Dana is in a chess team.', he: 'דנה בקבוצת שחמט.' },
+        { en: 'Tali is in a team at the pool.', he: 'טלי בקבוצה בבריכה.' },
+        { en: "Dana's team has twelve people.", he: 'בקבוצה של דנה יש שנים עשר אנשים.' },
+        { en: 'They learn chess every day.', he: 'הם לומדים שחמט כל יום.' },
+        { en: 'Who is the best in the chess team?', he: 'מי הכי טוב בקבוצת השחמט?' },
+        { en: "It isn't Dana, but she likes the game.", he: 'זאת לא דנה, אבל היא אוהבת את המשחק.' },
+        { en: "Tali's team is very fast.", he: 'הקבוצה של טלי מהירה מאוד.' },
+        { en: 'It always wins in June.', he: 'היא תמיד מנצחת ביוני.' },
+        { en: 'On her birthday, Dana has a special toy from Tali.', he: 'ביום ההולדת שלה, לדנה יש צעצוע מיוחד מטלי.' },
+        { en: 'Tali has a new book from Dana.', he: 'לטלי יש ספר חדש מדנה.' },
+        { en: 'The friends are together every month.', he: 'החברות ביחד כל חודש.' },
+        { en: 'They wait for the next birthday!', he: 'הן מחכות ליום ההולדת הבא!' },
+      ],
+      questions: [
+        { para: 0, type: 'tf', en: 'Dana and Tali are different ages.', he: 'דנה וטלי בגילים שונים.', ev: [0, 1], ok: false },
+        { para: 0, type: 'complete', en: 'Tali is in', he: 'טלי ב', ev: [3], choices: [{ en: 'a team at the pool.', he: 'קבוצה בבריכה.', ok: true }, { en: 'a chess team.', he: 'קבוצת שחמט.' }, { en: "Dana's team.", he: 'קבוצה של דנה.' }, { en: 'a new team.', he: 'קבוצה חדשה.' }] },
+        { para: 1, type: 'write2', en: "Write TWO things about Dana's team.", he: 'כתוב שני דברים על הקבוצה של דנה.', ev: [4, 5], model: ['It has twelve people.', 'They learn chess every day.'] },
+        { para: 1, type: 'fact', en: "When does Tali's team win?", he: 'מתי הקבוצה של טלי מנצחת?', ev: [9], choices: [{ en: 'in June', he: 'ביוני', ok: true }, { en: 'in July', he: 'ביולי' }, { en: 'every day', he: 'כל יום' }] },
+        { para: 2, type: 'tick2', en: 'Tick the TWO things from the birthdays.', he: 'סמן את שני הדברים מימי ההולדת.', ev: [10, 11],
+          choices: [{ en: 'Dana has a special toy.', he: 'לדנה יש צעצוע מיוחד.', ok: true }, { en: 'Dana has a new dog.', he: 'לדנה יש כלב חדש.' }, { en: 'Tali has a ball.', he: 'לטלי יש כדור.' }, { en: 'Tali has a new book.', he: 'לטלי יש ספר חדש.', ok: true }, { en: 'Dana has a blanket.', he: 'לדנה יש שמיכה.' }] },
+        { para: 2, type: 'tf', en: 'The friends are together every month.', he: 'החברות ביחד כל חודש.', ev: [12], ok: true },
+      ] },
+  ],
+
+  // The five reading moves (PRD §6.5), one line each. One is shown before a new story until all five have been.
+  storyTips: [
+    'קודם קוראים את השאלה, ורק אז מחפשים בסיפור.',
+    'מחפשים בסיפור את המילה החשובה מהשאלה.',
+    'התשובה מתחבאת במשפט שבו המילה הזאת.',
+    '<span class="en">he</span>, <span class="en">she</span> ו-<span class="en">they</span> מצביעות על השם האחרון שהופיע.',
+    '<span class="en">because</span> עונה על "למה".',
   ],
 
   // Tap-for-Hebrew in stories: words that are not in the 50 or the starter kit, and inflected forms.
@@ -345,6 +709,10 @@ window.CONTENT = {
     friend: 'חבר / חברה', friends: 'חברים', dog: 'כלב', day: 'יום', name: 'שם',
     years: 'שנים · years old = בן / בת', ages: 'גילים', toys: 'צעצועים', likes: 'אוהב / אוהבת', teams: 'קבוצות',
     nine: 'תשע', ten: 'עשר', eleven: 'אחת עשרה', twelve: 'שתים עשרה', april: 'אפריל', june: 'יוני',
+    so: 'אז', their: 'שלהם / שלהן', then: 'אחר כך', after: 'אחרי', big: 'גדול', on: 'על / ב-', from: 'מ-', no: 'לא', "isn't": 'לא (is not)',
+    washes: 'רוחץ / רוחצת', helps: 'עוזר / עוזרת', calls: 'מתקשר / מתקשרת', wins: 'מנצח / מנצחת', waits: 'wait for = לחכות ל-', takes: 'take care of = לטפל ב-',
+    hobbies: 'תחביבים', birthdays: 'ימי הולדת', dan: 'דן', "tom's": 'של תום', "dana's": 'של דנה', "tali's": 'של טלי', "noa's": 'של נועה', "roni's": 'של רוני',
+    box: 'קופסה', game: 'משחק', water: 'מים', good: 'טוב', phone: 'טלפון', new: 'חדש', two: 'שניים', book: 'ספר', ball: 'כדור', cat: 'חתול',
     dana: 'דנה', omer: 'עומר', maya: 'מאיה', tom: 'תום', roni: 'רוני', noa: 'נועה', tali: 'טלי',
   },
 
@@ -359,6 +727,7 @@ window.CONTENT = {
       terrIcons: ['🌲', '⛰️', '🏞️', '🏜️', '🏖️'],
       accent: '#2f6f4e',
       box: 'תיבת האוצר', boxIcon: '🗝️', wardrobe: 'חדר הנשק', wardrobeIcon: '🛡️', hatLabel: 'קסדות וכתרים', palLabel: 'בעלי ברית',
+      bonusName: 'האי הסודי', bonusIcon: '🏝️', bonusNew: 'שביל צדדי', midBoss: 'שומר הגשר', midBossIcon: '👹',
     },
     space: {
       id: 'space', name: 'משימת חלל', icon: '🚀', hero: 'קפטן', blurb: 'חמישה כוכבים. בקרת המשימה מבקשת לא לגעת בכפתור האדום.',
@@ -369,6 +738,7 @@ window.CONTENT = {
       terrIcons: ['🌙', '🔴', '🪐', '💫', '🔵'],
       accent: '#2b4c7e',
       box: 'קפסולת המטען', boxIcon: '📦', wardrobe: 'תא הציוד', wardrobeIcon: '🧑‍🚀', hatLabel: 'קסדות וכובעים', palLabel: 'אנשי צוות',
+      bonusName: 'הירח הסודי', bonusIcon: '🌘', bonusNew: 'מסלול צדדי', midBoss: 'שודד החלל', midBossIcon: '👾',
     },
     wizard: {
       id: 'wizard', name: 'שוליית הקוסם', icon: '🧙', hero: 'קוסם', blurb: '50 לחשים ללמוד, ודרקון אחד שלא קרא את הספר.',
@@ -379,6 +749,7 @@ window.CONTENT = {
       terrIcons: ['🕯️', '🐸', '🌳', '🏯', '☁️'],
       accent: '#5b3a8a',
       box: 'תיבת הקסמים', boxIcon: '✨', wardrobe: 'ארון הגלימות', wardrobeIcon: '🧥', hatLabel: 'כובעים', palLabel: 'בני לוויה',
+      bonusName: 'המרתף הסודי', bonusIcon: '🗝️', bonusNew: 'מעבר סודי', midBoss: 'הטרול של הגשר', midBossIcon: '👹',
     },
   },
 
@@ -536,6 +907,10 @@ window.CONTENT = {
     mapDueOne: 'קלף אחד שבטוח ששכחת אותו',
     mapNewLand: '{newTerritory} לכבוש',
     mapNewFriend: 'חבר חדש להכיר',
+    mapNewBonus: '{bonusNew} אל {bonusName}',
+    mapLeadHalf: 'חצי משימה כבר בכיס.',
+    mapSubHalf: 'החצי השני עוד כאן, ומחכה להורה.',
+    mapStart2: '▶ לחצי השני',
     mapStart: '▶ למשימה',
     mapLeadParentToo: 'המשימה של היום הושלמה. עם אבא או אמא נפתח עוד משהו.',
     mapParentToo: '👨‍👩‍👦 עוד משימה עם אבא או אמא',
@@ -573,7 +948,20 @@ window.CONTENT = {
     missionRevisit: '📖 ביקור חוזר אצל <span class="en">{name}</span>',
     missionFriend: '📖 חבר חדש מחכה בסוף',
     missionCode: '🔢 בסוף תקבל קוד להראות להורים',
+    missionBoss: '{midBossIcon} {midBoss} חוסם את הדרך',
+    missionListen: '🎧 הקלטה חדשה, וחיית מחמד בסופה',
+    missionLater: '⏳ אחר כך, עם הורה: {what}',
+    laterWriting: 'כתיבה', laterStory: 'סיפור', laterListen: 'האזנה',
     missionGo: 'יאללה!',
+
+    // a long day can be played in two sittings
+    splitTitle: 'היום המשימה ארוכה',
+    splitSub: 'אפשר לחלק אותה לשניים',
+    splitCards: '🃏 קודם הקלפים, והשאר אחר כך',
+    splitSingle: '⏱️ הכול ברצף אחד',
+    halfTitle: 'חצי משימה בכיס 🎒',
+    halfSub: 'החצי השני מחכה: {what}. אותו עושים עם הורה.',
+    halfMap: 'למפה',
 
     // cards
     roundReview: 'חזרה',
@@ -583,6 +971,30 @@ window.CONTENT = {
     askHeard: 'איזו מילה שמעת?',
     askPicture: 'איזו תמונה מתאימה?',
     askWordForPicture: 'איזו מילה מתאימה לתמונה?',
+    askNumber: 'איזה מספר זה?',
+    askListen: 'איזו תמונה שמעת?',
+
+    // word bank and sentence halves
+    bkAsk: 'כל מילה נכנסת למשפט אחד. בדיוק כמו שהיא כתובה.',
+    bkWrong: 'המילה הזאת שייכת למשפט אחר.',
+    hvAsk: 'לכל התחלה יש סוף אחד שמתאים לה.',
+    hvWrong: 'הסוף הזה שייך להתחלה אחרת.',
+    setNext: 'הלאה ←',
+
+    // the mid-boss: every right answer is a hit
+    bossIntroLead: '{midBoss} חוסם את הדרך.',
+    bossIntroSub: 'יש לו {n} חיים. כל תשובה נכונה מורידה לו אחד.',
+    bossGo: 'לקרב!',
+    bossSecL: '👂 מקשיבים',
+    bossSecV: '📚 מילים',
+    bossSecG: '⚙️ דקדוק',
+    bossSecR: '📖 קוראים',
+    bossSecW: '✍️ כותבים',
+    bossEndTitle: '{midBoss} ברח!',
+    bossEndHits: '{n} מכות מתוך {total}',
+    bossEndAll: 'הוא עוד לא הבין מה פגע בו.',
+    bossEndSome: 'הוא רץ בלי להסתכל אחורה.',
+    bossEndGo: 'ממשיכים ←',
     mastered: 'נכבש! 🏆',
     next: 'הלאה',
     practiceTitle: '🏋️ מגרש האימונים',
@@ -629,6 +1041,25 @@ window.CONTENT = {
 
     // stories
     stNew: '📖 חבר חדש',
+    stNewPair: '📖 שני חברים חדשים',
+    stLong: 'סיפור בשלושה חלקים.',
+    stPart: 'חלק {i} מתוך {n}',
+    stPick: 'איזה חלק קוראים שוב?',
+    stPickPart: 'חלק {i}',
+    stNextPart: 'לחלק הבא ←',
+    stComplete: 'איך המשפט ממשיך?',
+    stWrite2Tap: 'לגעת בשני המשפטים שעונים על השאלה.',
+    stWrite2Pen: 'לכתוב על הדף שני דברים. מותר להעתיק מהסיפור.',
+    stFind: 'איפה זה כתוב? לגעת במשפט.',
+    stReadCoach: 'קוראים בקול. להורה: ✓ נקרא כמו שכתוב · 🔁 יחזור. לא מתקנים באמצע.',
+    stAgainQ: 'שאלה אחת חזרה לסיבוב נוסף',
+    stBest: 'הסיפור נכנע תוך {now} שניות. זה השיא שלו.',
+    stTip: '💡 {tip}',
+    warmTitle: '🔥 קריאת חימום',
+    warmSub: 'פסקה מוכרת. קוראים אותה פעם אחת.',
+    warmDone: 'קראתי ✓',
+    warmBest: 'הפסקה נכנעה תוך {now} שניות. זה השיא שלה.',
+    missionWarm: '🔥 קריאת חימום קצרה',
     stRevisit: '📖 ביקור חוזר',
     stToStory: 'לסיפור ←',
     stListen: 'מקשיבים ועוקבים. אפשר לגעת בכל מילה.',
@@ -645,6 +1076,21 @@ window.CONTENT = {
     stEndRevisit: 'ביקור מוצלח',
     stGold: 'קלף זהב. כל הכוכבים.',
     stContinue: 'המשך ←',
+
+    // listening
+    lsNew: '🎧 מקשיבים',
+    lsKeys: 'שלוש מילים שכדאי להכיר קודם',
+    lsToPlay: 'להאזנה ←',
+    lsPlay: 'האזנה {i} מתוך 2',
+    lsFirst: 'קודם רק מקשיבים. השאלות באות אחר כך.',
+    lsSecond: 'ועכשיו שוב, כשהשאלות מול העיניים.',
+    lsAgain: '🔁 לשמוע שוב',
+    lsTick2: 'לסמן שתי תמונות',
+    lsDone: 'המשך ←',
+    lsEndPet: 'חיית מחמד חדשה באוסף!',
+    lsEndPlain: 'האזנה הושלמה',
+    lsFail: 'ההקלטה לא נטענת כרגע. במקומה: שיחת טלפון קצרה.',
+    lsNone: 'ההקלטה לא נטענת כרגע. היא תחכה לפעם הבאה.',
 
     // reading aloud
     rdTitle: '🗣️ קוראים בקול',
@@ -664,6 +1110,7 @@ window.CONTENT = {
     closeCombo: '🔥 הרצף הכי ארוך היום: <b>{n}</b>',
     closeVisited: 'ביקרת היום אצל',
     closeNewFriend: 'חבר חדש באוסף',
+    closePet: 'חיית מחמד חדשה באוסף',
     closeWroteOne: '✍️ משפט אחד באנגלית, {how}.',
     closeWrote: '✍️ {n} משפטים באנגלית, {how}.',
     howPen: 'בכתב יד',
@@ -674,6 +1121,7 @@ window.CONTENT = {
     // the box and what is in it
     boxTap: 'לגעת כדי לפתוח',
     boxFlag: 'הדגל שלך שם. מגיע שלל נדיר.',
+    boxBoss: 'הוא ברח והשאיר את זה מאחור.',
     tierCommon: 'שלל חדש',
     tierRare: 'נדיר',
     tierGolden: 'זהב',
@@ -713,7 +1161,11 @@ window.CONTENT = {
 
   // Leitner: sessions between reviews, by box. Box 5 is "mastered": only spot-checked (M3).
   intervals: { 1: 1, 2: 2, 3: 4, 4: 7, 5: Infinity },
+  // The Sentence-cloze cards (one of the 50 words in its word-bank sentence) are born late and all at once:
+  // at most this many in a session.
+  clozeCap: 6,
   sessionHardStopMin: 16,
+  cardsStopMin: 8,                // the cards sitting of a quest played in two sittings (PRD §7.4)
   freePlayCapMinDefault: 15,
   reviewStackCap: 40,      // about 4 minutes at his pace; the 16-minute hard stop still ends the sitting
   masteredBox: 4,          // "mastered" = Box 4–5 (PRD §2): the ⭐, the map, the stamp
