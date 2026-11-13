@@ -225,7 +225,7 @@
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0, open: (g.units || []).some(packIntroduced) };
   }
   function isDue(st, n) { if (st.box >= 5) return false; return (n - st.lastSession) >= C.intervals[st.box]; }
-  function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.values(S.cards).forEach(st => c[st.box]++); return c; }
+  function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.keys(S.cards).filter(known).forEach(cid => c[S.cards[cid].box]++); return c; }   // a skipped card isn't counted either
   // a land's flag is about its three core card types; the tile cards, born later, never take a flag down
   function landProgress(land) {
     let total = 0, mastered = 0;
@@ -391,9 +391,10 @@
     if (q.length > cap) {
       // what gives way first: recognition cards of words already in Box 3 and up (PRD §7.4)
       const easy = cid => !!parseCard(cid).word && S.cards[cid].box >= 3 && !S.cards[cid].priority;
-      const keep = q.filter(cid => !easy(cid)), drop = q.filter(easy);
-      q = keep.length >= cap ? keep.slice(0, cap) : [...keep, ...drop.slice(0, cap - keep.length)];
-      q.sort((a, b) => (S.cards[b].priority - S.cards[a].priority) || (S.cards[b].box - S.cards[a].box));   // stable: keeps the shuffle inside a box
+      // then the strongest boxes wait a session; priority cards and Box 1 (reviewed every session, §6.1) always stay
+      const rank = cid => S.cards[cid].priority > 0 ? 0 : (easy(cid) ? 9 : S.cards[cid].box);
+      const kept = new Set([...q].sort((a, b) => rank(a) - rank(b)).slice(0, cap));   // stable: keeps the shuffle inside a box
+      q = q.filter(cid => kept.has(cid));                                              // and the play order stays highest box first
     }
     // the tile cards take their place by box, after the other cards of that box
     if (tiles.length) { q.push(...tiles); q.sort((a, b) => (S.cards[b].priority - S.cards[a].priority) || (S.cards[b].box - S.cards[a].box)); }
@@ -1651,7 +1652,7 @@
     return `
       ${topbar('מסך המאמן', 'להורים בלבד', `<button class="btn small" data-action="to-map">סגור</button>`)}
       <div class="card coach">
-        <h3>הקופסאות (כל הקלפים: ${Object.keys(S.cards).length})</h3>
+        <h3>הקופסאות (כל הקלפים: ${Object.keys(S.cards).filter(known).length})</h3>
         <div class="boxes">${[1, 2, 3, 4, 5].map(b => `<div><b>${bc[b]}</b>${b}· ${sk.boxNames[b - 1]}</div>`).join('')}</div>
         <h3>היום (${todayStr()})</h3>
         ${d.session ? `<div>משימה ${d.session.n} · ${d.session.mode === 'solo' ? 'לבד' : 'עם הורה'} · ${minutes(d.session.durationMs)} דק׳ · נכון ${d.session.correct} / טעויות ${d.session.wrong} · עלו ${d.session.promoted} / ירדו ${d.session.demoted}${d.session.hardStop ? ' · נעצר בזמן' : ''}${d.session.mode === 'solo' ? ` · <b>קוד: ${d.session.code}</b>` : ''}${d.session.mode === 'solo' && minutes(d.session.durationMs) < 4 && d.session.correct > 15 ? ' · ⚠️ מהר מדי?' : ''}</div>` : '<div class="muted">עדיין לא הייתה משימה היום</div>'}
