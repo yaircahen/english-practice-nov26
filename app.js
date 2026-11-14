@@ -1972,14 +1972,15 @@
       const nextLand = C.lands.find(l => !l.bonus && !landIntroduced(l.id));
       const dueCount = hasCards ? buildReviewQueue(S.sessionCount + 1).length : 0;
 
-      // stops along the trail, bottom-right to top
+      // stops along the trail, bottom-right to top, in the order they open: a tower opens on the same
+      // day as the land before it (unitForToday), so each day lights the next stops in a row
       const L = Object.fromEntries(C.lands.map(l => [l.id, l]));
       const stops = [
         { kind: 'land', land: L[0], x: 86, y: 96 }, { kind: 'land', land: L[1], x: 62, y: 91 },
-        { kind: 'land', land: L[2], x: 36, y: 86 }, { kind: 'land', land: L[3], x: 14, y: 76 },
-        { kind: 'tower', g: C.grammar[0], x: 24, y: 62 }, { kind: 'land', land: L[4], x: 50, y: 57 },
-        { kind: 'tower', g: C.grammar[1], x: 76, y: 52 }, { kind: 'land', land: L[5], x: 84, y: 37 },
-        { kind: 'tower', g: C.grammar[2], x: 56, y: 30 }, { kind: 'tower', g: C.grammar[3], x: 28, y: 23 },
+        { kind: 'land', land: L[2], x: 36, y: 86 }, { kind: 'tower', g: C.grammar[0], x: 14, y: 76 },
+        { kind: 'land', land: L[3], x: 24, y: 62 }, { kind: 'tower', g: C.grammar[1], x: 50, y: 57 },
+        { kind: 'land', land: L[4], x: 76, y: 52 }, { kind: 'tower', g: C.grammar[2], x: 84, y: 37 },
+        { kind: 'land', land: L[5], x: 56, y: 30 }, { kind: 'tower', g: C.grammar[3], x: 28, y: 23 },
         { kind: 'boss', x: 52, y: 7 },
       ].filter(s => s.kind !== 'land' || s.land);
       // a territory that is open and not yet cleared shows the rare find that waits for its flag
@@ -2045,7 +2046,7 @@
           <svg viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs><linearGradient id="roadRainbow" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2="0" y2="0"><stop offset="0" stop-color="#ff5d5d"/><stop offset="0.2" stop-color="#ffb13d"/><stop offset="0.4" stop-color="#f6e84a"/><stop offset="0.6" stop-color="#5fd66a"/><stop offset="0.8" stop-color="#4ac3f0"/><stop offset="1" stop-color="#a98bff"/></linearGradient></defs>
             <path class="road-glow" d="${road}"/><path class="road" d="${road}"${roadLook && roadLook.css === 'road-rainbow' ? ' style="stroke:url(#roadRainbow)"' : ''}/>
-            ${bonusLands.length ? '<path class="road side" d="M 84 37 Q 93 27 85 17"/>' : ''}
+            ${bonusLands.length ? '<path class="road side" d="M 56 30 Q 70 16 85 17"/>' : ''}
           </svg>
           ${stops.map(node).join('')}${bonusNode()}
         </div>
