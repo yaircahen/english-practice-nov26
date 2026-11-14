@@ -2716,7 +2716,7 @@
   if (!S.hero) view = 'onboarding';
   else { birthTiles(); settleHalves(); }
   render();
-  if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached Drive
+  if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
   window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay };
