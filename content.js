@@ -727,7 +727,7 @@ window.CONTENT = {
       terrIcons: ['🌲', '⛰️', '🏞️', '🏜️', '🏖️'],
       accent: '#2f6f4e',
       box: 'תיבת האוצר', boxIcon: '🗝️', wardrobe: 'חדר הנשק', wardrobeIcon: '🛡️', hatLabel: 'קסדות וכתרים', palLabel: 'בעלי ברית',
-      bonusName: 'האי הסודי', bonusIcon: '🏝️', bonusNew: 'שביל צדדי', midBoss: 'שומר הגשר', midBossIcon: '👹',
+      shelf: 'מסדר המילים', shelfIcon: '🎖️', bonusName: 'האי הסודי', bonusIcon: '🏝️', bonusNew: 'שביל צדדי', midBoss: 'שומר הגשר', midBossIcon: '👹',
     },
     space: {
       id: 'space', name: 'משימת חלל', icon: '🚀', hero: 'קפטן', blurb: 'חמישה כוכבים. בקרת המשימה מבקשת לא לגעת בכפתור האדום.',
@@ -738,7 +738,7 @@ window.CONTENT = {
       terrIcons: ['🌙', '🔴', '🪐', '💫', '🔵'],
       accent: '#2b4c7e',
       box: 'קפסולת המטען', boxIcon: '📦', wardrobe: 'תא הציוד', wardrobeIcon: '🧑‍🚀', hatLabel: 'קסדות וכובעים', palLabel: 'אנשי צוות',
-      bonusName: 'הירח הסודי', bonusIcon: '🌘', bonusNew: 'מסלול צדדי', midBoss: 'שודד החלל', midBossIcon: '👾',
+      shelf: 'לוח הצוות', shelfIcon: '📋', bonusName: 'הירח הסודי', bonusIcon: '🌘', bonusNew: 'מסלול צדדי', midBoss: 'שודד החלל', midBossIcon: '👾',
     },
     wizard: {
       id: 'wizard', name: 'שוליית הקוסם', icon: '🧙', hero: 'קוסם', blurb: '50 לחשים ללמוד, ודרקון אחד שלא קרא את הספר.',
@@ -749,7 +749,7 @@ window.CONTENT = {
       terrIcons: ['🕯️', '🐸', '🌳', '🏯', '☁️'],
       accent: '#5b3a8a',
       box: 'תיבת הקסמים', boxIcon: '✨', wardrobe: 'ארון הגלימות', wardrobeIcon: '🧥', hatLabel: 'כובעים', palLabel: 'בני לוויה',
-      bonusName: 'המרתף הסודי', bonusIcon: '🗝️', bonusNew: 'מעבר סודי', midBoss: 'הטרול של הגשר', midBossIcon: '👹',
+      shelf: 'ספר הלחשים', shelfIcon: '📖', bonusName: 'המרתף הסודי', bonusIcon: '🗝️', bonusNew: 'מעבר סודי', midBoss: 'הטרול של הגשר', midBossIcon: '👹',
     },
   },
 
@@ -1133,6 +1133,12 @@ window.CONTENT = {
     wardNew: 'חדש',
     wardHint: 'מה שמסומן ב־? עוד מחכה באחת התיבות.',
     wardLocked: '{wardrobe} נפתח אחרי המשימה 🔒',
+
+    // the word shelf
+    shelfSub: '{n} מילים כבר בשורות שלך',
+    shelfHiding: '{n} מילים עוד מתחבאות כאן',
+    shelfHint: 'נגיעה בקלף הופכת אותו. 🔥 = מילה שעוד מנסה להתנגד.',
+    shelfLocked: '{shelf} נפתח אחרי המשימה 🔒',
     slot_aura: 'הילות',
     slot_road: 'שבילים למפה',
     slot_confetti: 'קונפטי',

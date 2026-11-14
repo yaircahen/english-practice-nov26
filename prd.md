@@ -1046,6 +1046,13 @@ deliberately unseen and unheard: those are the comprehension and listening metri
    then the questions; then the second play with the questions in view.
 5. **Trophy shelf**: mastered words as cards he can flip; tricky words shown with 🔥; the friend
    card collection (10 friends, 3 pets and his own), gilded ones first.
+   *Built 13 Nov (v3.2.0), widened at the owner's request:* every unlocked word, not only the
+   mastered ones, land by land (the bonus land as one section), each at its rank (the skin's box
+   name and a small ladder, from the word's first card type, as the ⭐ counts it); Box 4–5 gilded
+   and first; a tap flips to the Hebrew and says the word; 🔥 for a word with a card missed 3+
+   times; closed lands show how many words are still hiding. Opens from the map after the quest,
+   like the wardrobe; looking never moves a card. Named per skin: מסדר המילים / לוח הצוות /
+   ספר הלחשים. The friend collection is not on this screen yet (it stays on the map).
 6. **Coach (parent)**: behind a long-press. Box counts, cards promoted/demoted today, tricky
    words, reading-minute history, story track: current scaffold level, taps per sentence and read
    time per paragraph over time, questions that needed hint 3 twice, a "lower level silently"
