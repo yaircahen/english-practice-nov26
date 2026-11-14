@@ -353,8 +353,8 @@ Hard constraints:
   session plays a spoken dialogue instead (§6.7).
 - Hebrew RTL UI; English content LTR; font size ≥ 20px for English words.
 - No ads, no accounts, no data leaving the device except a manual JSON export for backup and,
-  from v3.3.0, an optional one-way automatic copy of the save to the parent's own Google Drive
-  (an Apps Script web app the parent deploys; set up from the coach screen; see `README.md`).
+  from v3.3.0, an optional one-way automatic copy of the save to one Google Sheet of the parent's
+  (an Apps Script web app inside that Sheet, limited to it; set up from the coach screen; see `README.md`).
 
 ---
 
@@ -1009,7 +1009,7 @@ deliberately unseen and unheard: those are the comprehension and listening metri
     new, empty game. Each milestone is a redeploy to the same URL.
   - Progress lives on the iPad only. The coach screen is opened on the iPad, not on a parent's
     phone. The weekly "save game" export is the backup, plus, from v3.3.0, the optional automatic
-    copy to Google Drive (`README.md`), which a parent can open from any device.
+    copy to a Google Sheet (`README.md`), which a parent can open from any device.
   - Needs Wi-Fi to load; after that a session runs without network. A service worker for true
     offline use is a v2 nicety, not needed at home.
 - Primary target: **iPad Safari**, landscape and portrait, touch only (no keyboard needed:

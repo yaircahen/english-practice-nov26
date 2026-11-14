@@ -2467,7 +2467,7 @@
           <button class="btn small" data-action="reset-all" style="border-color:#c47b3a">איפוס מלא</button>
         </div>
         <div id="importBox" class="hidden" style="margin-top:10px"><textarea class="json" id="importText" placeholder="הדבק כאן את קובץ השמירה"></textarea><button class="btn small" data-action="import">ייבא</button></div>
-        <h3>גיבוי אוטומטי ל-Google Drive</h3>
+        <h3>גיבוי אוטומטי לגיליון Google</h3>
         <div class="row wrap">
           <input class="text" style="flex:1; min-width:240px; font-size:16px; padding:6px 10px" dir="ltr" type="url" id="bkUrl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(S.settings.backupUrl || '')}">
           <button class="btn small" data-action="backup-url">שמור</button>
@@ -2636,8 +2636,8 @@
   }
 
   // ---------- automatic backup ----------
-  // Optional, set up by a parent on the coach screen. A copy of the whole save goes to the parent's own
-  // Google Drive through a small Apps Script web app (backup/apps-script.gs, setup in README.md).
+  // Optional, set up by a parent on the coach screen. A copy of the whole save goes to one Google Sheet
+  // of the parent's, through a small Apps Script web app (backup/apps-script.gs, setup in README.md).
   // One-way: nothing is ever read back. Sent 15 s after the last save, when the app goes to the
   // background, and when the network returns. Status lives under its own key so that writing it
   // does not trigger another save. `var`, not `let`: save() may run before this block is reached.
@@ -2667,7 +2667,7 @@
     } finally { bkBusy = false; }
   }
   function backupStatusHe() {
-    if (!S.settings.backupUrl) return 'כבוי. מדביקים כאן את כתובת ה-Web App מההוראות ב-README ולוחצים "שמור". הגיבוי נשלח לבד אחרי כל שינוי, ונשמר בתיקייה "Hey1 backups" ב-Drive, קובץ לכל יום.';
+    if (!S.settings.backupUrl) return 'כבוי. מדביקים כאן את כתובת ה-Web App מההוראות ב-README ולוחצים "שמור". הגיבוי נשלח לבד אחרי כל שינוי, ונשמר בגיליון Google שלכם, שורה לכל יום.';
     const b = bkStatus(), at = x => new Date(x).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
     const ok = b.okAt ? `גיבוי אחרון שהצליח: ${at(b.okAt)}.` : 'עוד לא היה גיבוי שהצליח.';
     const fail = b.failAt && b.failAt > (b.okAt || 0) ? ` ⚠️ ניסיון אחרון נכשל (${at(b.failAt)}): <span class="en" dir="ltr">${esc(b.err || '')}</span>. ינסה שוב לבד.` : '';
