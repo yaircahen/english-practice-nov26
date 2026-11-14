@@ -185,6 +185,47 @@ the freeze button, and the loot count with a switch between a box after every mi
 every second one (for when he starts asking what he gets before he begins). "איפוס המשימה של
 היום" now also takes back the loot found today.
 
+## Automatic backup to Google Drive (optional, v3.3.0)
+
+Each change to the save is also sent to a folder in your own Google Drive, about 15 seconds
+after the last change, and again when the app goes to the background. It is one-way: the game
+never reads anything back. If the iPad is offline, it sends when the network is back. The
+manual export still works as before.
+
+**One-time setup, about 5 minutes, on any computer, signed into the Google account that
+should hold the backups:**
+
+1. Open <https://script.google.com> → **New project**. Rename it to `Hey1 backup`.
+2. Delete what is in `Code.gs` and paste all of [`backup/apps-script.gs`](backup/apps-script.gs).
+   Save (⌘S).
+3. **Deploy → New deployment** → the gear icon → **Web app**. Set *Execute as*: **Me**, and
+   *Who has access*: **Anyone**. **Deploy**.
+4. Google asks to authorize: choose the account → *Advanced* → *Go to Hey1 backup (unsafe)* →
+   **Allow**. The "unsafe" warning appears for every script you write yourself. It asks for Drive
+   access so it can write the backup files.
+5. Copy the **Web app URL** (`https://script.google.com/macros/s/…/exec`). Opening it in a
+   browser should show `{"ok":true}`.
+6. On the iPad: coach screen → **גיבוי אוטומטי ל-Google Drive** → paste the URL → **שמור**. It
+   sends a first copy right away and should say "הגיבוי עובד".
+
+**Where the files are:** Drive → folder `Hey1 backups`. There is one `hey1-save-YYYY-MM-DD.json`
+per game day and `hey1-save-latest.json`. A copy with fewer sessions than the newest one, such
+as a fresh empty game, never overwrites them. It is stored next to them with `-older-` in the
+name.
+
+**To restore:** open the file in Drive, copy all of its text, and in the coach screen tap
+**⬆️ ייבוא שמירה**, paste, then tap **ייבא**. The backup URL survives an import.
+
+**Privacy:** the URL is the only key. It is kept in the game's save on the iPad and is never in
+this repo. Anyone with the URL could add files to that folder, but nobody can read them through
+it. To revoke it, go to Apps Script → Deploy → Manage deployments → archive. Then create a new
+one and paste the new URL. "איפוס מלא" also clears the URL.
+
+**Status:** the coach screen shows the last successful backup and, if the last try failed, why.
+
+The game also asks the browser to keep its storage (`navigator.storage.persist()`), so that
+Safari does not clear it after a week without visits.
+
 ## Reset the game for a fresh day-0 (e.g. after testing on the Mac)
 
 Coach screen → "איפוס מלא" (full reset). Or in the browser console: `localStorage.clear()`.

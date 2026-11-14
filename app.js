@@ -86,7 +86,7 @@
     try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) { const s = JSON.parse(raw); if (s && s.version === 1) return adopt(s); } } catch (e) { /* fall through */ }
     return freshState();
   }
-  function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); } catch (e) { toast(t('saveFailed')); } }
+  function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); } catch (e) { toast(t('saveFailed')); } scheduleBackup(); }
   function logEvent(type, data) { S.log.push(Object.assign({ t: Date.now(), type }, data || {})); if (S.log.length > 2000) S.log.splice(0, S.log.length - 2000); }
 
   const skinId = () => (S.hero && S.hero.skin) || 'map';
@@ -2467,6 +2467,13 @@
           <button class="btn small" data-action="reset-all" style="border-color:#c47b3a">איפוס מלא</button>
         </div>
         <div id="importBox" class="hidden" style="margin-top:10px"><textarea class="json" id="importText" placeholder="הדבק כאן את קובץ השמירה"></textarea><button class="btn small" data-action="import">ייבא</button></div>
+        <h3>גיבוי אוטומטי ל-Google Drive</h3>
+        <div class="row wrap">
+          <input class="text" style="flex:1; min-width:240px; font-size:16px; padding:6px 10px" dir="ltr" type="url" id="bkUrl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(S.settings.backupUrl || '')}">
+          <button class="btn small" data-action="backup-url">שמור</button>
+          ${S.settings.backupUrl ? '<button class="btn small" data-action="backup-now">גבה עכשיו</button>' : ''}
+        </div>
+        <div class="muted">${backupStatusHe()}</div>
       </div>`;
   }
 
@@ -2586,6 +2593,15 @@
       case 'export': exportSave(); break;
       case 'import-show': document.getElementById('importBox').classList.toggle('hidden'); break;
       case 'import': importSave(document.getElementById('importText').value); break;
+      case 'backup-url': {
+        const v = document.getElementById('bkUrl').value.trim();
+        if (v && !/^https:\/\/\S+$/.test(v)) { toast('צריך כתובת שמתחילה ב-https://'); break; }
+        S.settings.backupUrl = v; save(); bkSetStatus({ okAt: 0, failAt: 0, err: '' });
+        if (!v) { toast('הגיבוי האוטומטי כבוי'); render(); break; }
+        toast('בודק את הכתובת…'); sendBackup().then(ok => { toast(ok ? 'הגיבוי עובד' : 'הגיבוי נכשל, הפרטים במסך המאמן'); if (view === 'coach') render(); });
+        break;
+      }
+      case 'backup-now': toast('מגבה…'); sendBackup().then(ok => { toast(ok ? 'גובה' : 'הגיבוי נכשל, הפרטים במסך המאמן'); if (view === 'coach') render(); }); break;
       case 'reset-today': if (confirm('לאפס את המשימה של היום? הקלפים שכבר זזו נשארים במקומם; רק אפשר יהיה לעשות משימה נוספת היום. השלל שנמצא היום חוזר לתיבה.')) { if (resetToday()) { toast('אופס'); render(); } } break;
       case 'reset-all': if (confirm('למחוק את כל ההתקדמות? אין דרך חזרה.') && confirm('בטוח? כדאי לייצא שמירה קודם.')) { S = freshState(); save(); view = 'onboarding'; render(); } break;
     }
@@ -2615,9 +2631,52 @@
     if (box && ta) { box.classList.remove('hidden'); ta.value = data; ta.select(); toast('השמירה גם כאן למטה, אפשר להעתיק'); }
   }
   function importSave(text) {
-    try { const s = JSON.parse(text); if (!s || s.version !== 1 || !s.cards) throw new Error('bad'); const pin = S.settings.coachPin; S = adopt(s); if (!S.settings.coachPin) S.settings.coachPin = pin; birthTiles(); save(); toast('השמירה נטענה'); view = 'map'; render(); }
+    try { const s = JSON.parse(text); if (!s || s.version !== 1 || !s.cards) throw new Error('bad'); const pin = S.settings.coachPin, bk = S.settings.backupUrl; S = adopt(s); if (!S.settings.coachPin) S.settings.coachPin = pin; if (!S.settings.backupUrl && bk) S.settings.backupUrl = bk; birthTiles(); save(); toast('השמירה נטענה'); view = 'map'; render(); }
     catch (e) { toast('הקובץ לא תקין'); }
   }
+
+  // ---------- automatic backup ----------
+  // Optional, set up by a parent on the coach screen. A copy of the whole save goes to the parent's own
+  // Google Drive through a small Apps Script web app (backup/apps-script.gs, setup in README.md).
+  // One-way: nothing is ever read back. Sent 15 s after the last save, when the app goes to the
+  // background, and when the network returns. Status lives under its own key so that writing it
+  // does not trigger another save. `var`, not `let`: save() may run before this block is reached.
+  var BK_KEY = STORAGE_KEY + ':backup', bkTimer = null, bkBusy = false;
+  function bkStatus() { try { return JSON.parse(localStorage.getItem(BK_KEY)) || {}; } catch (e) { return {}; } }
+  function bkSetStatus(o) { try { localStorage.setItem(BK_KEY, JSON.stringify(Object.assign(bkStatus(), o))); } catch (e) { /* status only */ } }
+  function scheduleBackup(ms) {
+    if (!S.settings.backupUrl) return;
+    if (!bkStatus().pending) bkSetStatus({ pending: true });
+    clearTimeout(bkTimer); bkTimer = setTimeout(sendBackup, ms == null ? 15000 : ms);
+  }
+  async function sendBackup(leaving) {
+    const url = S.settings.backupUrl; clearTimeout(bkTimer);
+    if (!url || bkBusy) return false;
+    bkBusy = true; bkSetStatus({ pending: false });
+    const body = JSON.stringify({ app: 'hey1', day: todayStr(), sentAt: new Date().toISOString(), save: S });
+    try {
+      // text/plain keeps it a "simple" request (no CORS preflight, which Apps Script does not answer).
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body, keepalive: !!leaving && body.length < 60000, redirect: 'follow' });
+      const j = await r.json();
+      if (!j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+      bkSetStatus({ okAt: Date.now(), err: '' });
+      return true;
+    } catch (e) {
+      bkSetStatus({ pending: true, failAt: Date.now(), err: String((e && e.message) || e).slice(0, 160) });
+      return false;
+    } finally { bkBusy = false; }
+  }
+  function backupStatusHe() {
+    if (!S.settings.backupUrl) return 'כבוי. מדביקים כאן את כתובת ה-Web App מההוראות ב-README ולוחצים "שמור". הגיבוי נשלח לבד אחרי כל שינוי, ונשמר בתיקייה "Hey1 backups" ב-Drive, קובץ לכל יום.';
+    const b = bkStatus(), at = x => new Date(x).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
+    const ok = b.okAt ? `גיבוי אחרון שהצליח: ${at(b.okAt)}.` : 'עוד לא היה גיבוי שהצליח.';
+    const fail = b.failAt && b.failAt > (b.okAt || 0) ? ` ⚠️ ניסיון אחרון נכשל (${at(b.failAt)}): <span class="en" dir="ltr">${esc(b.err || '')}</span>. ינסה שוב לבד.` : '';
+    return ok + fail + (b.pending && !fail ? ' יש שינוי שעוד לא נשלח.' : '');
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && bkStatus().pending) sendBackup(true); });
+  window.addEventListener('online', () => { if (bkStatus().pending) scheduleBackup(2000); });
+  // Ask the browser not to evict this site's storage (Safari may clear a site unused for 7 days).
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) { /* not supported */ }
 
   // Coach access: a 2-second press on the star counter, then a parent PIN (set on first use).
   let pressTimer = null;
@@ -2657,7 +2716,8 @@
   if (!S.hero) view = 'onboarding';
   else { birthTiles(); settleHalves(); }
   render();
+  if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached Drive
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, planFor, phase2, settleHalves, isLongDay };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay };
 })();
