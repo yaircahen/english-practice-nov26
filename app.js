@@ -26,6 +26,7 @@
   const CZ = {};
   BANK.forEach(set => set.items.forEach(it => { CZ[it.w] = Object.assign({ mates: set.items.filter(x => x !== it).map(x => x.a) }, it); }));
   const HALVES = C.halves || {};
+  const HALVES_M = C.halvesMeaning || [];                    // fixed sets whose halves are joined by meaning (prd.md §4.4)
   const LISTEN = (C.listening && C.listening.items) || [];
   const LITEM = Object.fromEntries(LISTEN.map(x => [x.id, x]));
   const CZ_CAP = C.clozeCap == null ? 6 : C.clozeCap;
@@ -70,7 +71,7 @@
       streak: { frozen: {}, told: '' },                      // frozen[date] = 'auto' (the week's free one) | 'coach'
       reading: { again: [], seen: {}, history: [] },         // reading minute: ids marked "again" · seen[id] = session · history: [{ date, n, items }]
       // M3. Absent from an older save; same rule.
-      sets: { bankSeq: 0, history: [] },                     // word-bank and sentence-halves sets: history: [{ date, n, kind, sid, misses }]
+      sets: { bankSeq: 0, hvSeq: 0, history: [] },           // word-bank and sentence-halves sets: history: [{ date, n, kind, sid, misses }]
       listening: { done: {}, runs: [] },                     // done[id] = { stars, total, date } · runs: [{ id, date, n, plays, stars, total, hints, fallback, for }]
       boss: { mid: null },                                   // mid = { date, n, hits, total, sec, misses }
     };
@@ -221,6 +222,7 @@
     if (w.kind === 'num') return w.twin ? ['num', 'lineup'] : ['num'];
     if (w.kind === 'month') return ['lineup'];
     if (w.kind === 'adj') return [hasPic(w) ? 'img' : 'rec'];
+    if (w.kind === 'near') return ['rec'];                    // an everyday word (land 8): its meaning, and no more
     const types = ['rec', 'lineup']; if (w.emoji) types.push('img'); return types;
   }
   // what a new land's first round asks: the placement round (a number pair's Sound-lineup waits for the next review)
@@ -281,23 +283,26 @@
   function packIntroduced(id) { return S.packsIntroduced.some(p => p.id === id); }
   function towerProgress(g) {
     let total = 0, mastered = 0;
-    (g.units || []).forEach(u => packCards(u).forEach(cid => { const st = S.cards[cid]; if (st) { total++; if (st.box >= 4) mastered++; } }));
+    (g.units || []).forEach(u => packCards(u).forEach(cid => { const st = S.cards[cid]; if (st) { total++; if (st.box >= MASTERED_BOX) mastered++; } }));
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0, open: (g.units || []).some(packIntroduced) };
   }
-  // "mastered" is Box 4–5 (PRD §2), as on the map; Box 5 can't be reached in a two-week run
-  const MASTERED_BOX = C.masteredBox || 4;
+  // "mastered" is Box 3–5 (PRD §2), as on the map
+  const MASTERED_BOX = C.masteredBox || 3;
+  const STAR_RECS = new Set(C.words.map(w => cardId(w.id, 'rec')));   // the 50 cards the ⭐ counts
   function isDue(st, n) { if (st.box >= 5) return false; return (n - st.lastSession) >= C.intervals[st.box]; }
   function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.keys(S.cards).filter(known).forEach(cid => c[S.cards[cid].box]++); return c; }   // a skipped card isn't counted either
   // a land's flag is about its three core card types; the tile cards, born later, never take a flag down
   function landProgress(land) {
     let total = 0, mastered = 0;
-    land.words.forEach(wid => cardTypesFor(WORDS[wid]).forEach(type => { const st = S.cards[cardId(wid, type)]; if (st) { total++; if (st.box >= 4) mastered++; } }));
+    land.words.forEach(wid => cardTypesFor(WORDS[wid]).forEach(type => { const st = S.cards[cardId(wid, type)]; if (st) { total++; if (st.box >= MASTERED_BOX) mastered++; } }));
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0 };
   }
   function landIntroduced(id) { return S.landsIntroduced.some(l => l.id === id); }
+  // a land with a last day (`until`) that has passed unopened stays shut: no new cards in the last days before the test
+  const landShut = l => !!l.until && todayStr() > l.until && !landIntroduced(l.id);
   function nextLandForToday() {
     if (S.landsIntroduced.some(l => l.date === todayStr())) return null;
-    return C.lands.find(l => !landIntroduced(l.id)) || null;
+    return C.lands.find(l => !landIntroduced(l.id) && !landShut(l)) || null;
   }
   function masteredWordCount() {
     return C.words.filter(w => { const st = S.cards[cardId(w.id, 'rec')]; return st && st.box >= MASTERED_BOX; }).length;
@@ -447,7 +452,10 @@
     // one promotion per card per day (PRD §6.1): a card already reviewed in today's earlier session waits
     const seenToday = todayNs();
     const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
-    const byRank = (a, b) => (S.cards[b].priority - S.cards[a].priority) || (S.cards[b].box - S.cards[a].box);   // stable: keeps the shuffle inside a box
+    // a word still short of its ⭐ (its Recognition card below the mastered box) is never cut, and plays right after the
+    // priority cards: the time budget ends the review from the back, and the ⭐ must reach 50 by day 11
+    const star = cid => S.cards[cid].box < MASTERED_BOX && STAR_RECS.has(cid);
+    const byRank = (a, b) => (S.cards[b].priority - S.cards[a].priority) || (star(b) - star(a)) || (S.cards[b].box - S.cards[a].box);   // stable: keeps the shuffle inside a box
     const wrap = q => q.map(cid => ({ cid, retry: false, retries: 0 }));
     // the letter-tile cards are the light ones: a few a session, highest box first; the rest stay due.
     // Those few always get their turn (a full stack would otherwise crowd them out every day), and each
@@ -459,25 +467,27 @@
     const due = all.filter(cid => !isTile(cid) && !isCz(cid));
     if (short) {
       // the short review in front of a long sitting, or behind the mid-boss: Box 1 and the highest box due (PRD §7.4)
-      const plain = due.filter(cid => !S.cards[cid].priority);
+      // words short of their ⭐ come first here too
+      const plain = due.filter(cid => !S.cards[cid].priority && !star(cid));
       const top = Math.max(0, ...plain.map(cid => S.cards[cid].box));
       const b1 = shuffle(plain.filter(cid => S.cards[cid].box === 1)), hi = top > 1 ? shuffle(plain.filter(cid => S.cards[cid].box === top)) : [];
-      const q = [...shuffle(due.filter(cid => S.cards[cid].priority > 0)), ...b1.slice(0, Math.max(1, cap - 2)), ...hi].slice(0, cap);
+      const q = [...shuffle(due.filter(cid => S.cards[cid].priority > 0)), ...shuffle(due.filter(cid => !S.cards[cid].priority && star(cid))), ...b1.slice(0, Math.max(1, cap - 2)), ...hi].slice(0, cap);
       return wrap([...q, ...cz, ...tiles].sort(byRank));
     }
     cap = Math.max(8, cap - 2 * tiles.length - cz.length);
     const pri = due.filter(cid => S.cards[cid].priority > 0);
     const rest = due.filter(cid => S.cards[cid].priority === 0);
     const byBox = {}; rest.forEach(cid => { const b = S.cards[cid].box; (byBox[b] = byBox[b] || []).push(cid); });
-    let q = [...shuffle(pri)];
-    for (const b of [4, 3, 2, 1]) if (byBox[b]) q.push(...shuffle(byBox[b]));
+    const starNow = rest.filter(star);
+    let q = [...shuffle(pri), ...shuffle(starNow)];
+    for (const b of [4, 3, 2, 1]) if (byBox[b]) q.push(...shuffle(byBox[b].filter(cid => !star(cid))));
     if (q.length > cap) {
       // what gives way first: recognition-type cards of words already in Box 3 and up (PRD §7.4)
       const easy = cid => !!parseCard(cid).word && S.cards[cid].box >= 3 && !S.cards[cid].priority;
       // then the strongest boxes wait a session; priority cards and Box 1 (reviewed every session, §6.1) always stay
       // a card cut today comes back sooner: each session it waits past due moves it up, so nothing is cut for good
       const over = cid => n - S.cards[cid].lastSession - C.intervals[S.cards[cid].box];
-      const rank = cid => S.cards[cid].priority > 0 ? -1000 : S.cards[cid].box === 1 ? -999 : -3 * over(cid) + (easy(cid) ? 9 : S.cards[cid].box);
+      const rank = cid => S.cards[cid].priority > 0 ? -1000 : star(cid) ? -999 : S.cards[cid].box === 1 ? -998 : -3 * over(cid) + (easy(cid) ? 9 : S.cards[cid].box);
       const kept = new Set([...q].sort((a, b) => rank(a) - rank(b)).slice(0, cap));   // stable: keeps the shuffle inside a box
       q = q.filter(cid => kept.has(cid));                                              // and the play order stays highest box first
     }
@@ -519,14 +529,12 @@
 
   // The mid-boss (PRD §8, day 6): once, with a parent, from the day after the last of the 50 words is in.
   const midBossDue = () => !S.boss.mid && phase2() && packIntroduced('u1') && BANK.length > 0;
-  // A new recording only with a parent, and never two days running: a recording, a day of cards, the next one.
+  // A new recording only with a parent, one a day. (Until 15 Nov there was a day of cards between two
+  // recordings; it went so all three fit before the mock, the run being two days behind the plan.)
+  // After the recordings come the unheard dialogues (PRD §6.7), in the order they are listed.
   function listeningForSession(mode) {
     if (mode !== 'parent' || !phase2() || S.listening.runs.some(r => r.date === todayStr())) return null;
-    const next = LISTEN.find(x => !x.fallback && !S.listening.done[x.id]); if (!next) return null;
-    const last = S.listening.runs.filter(r => !r.fallback).slice(-1)[0];
-    const n = (today().half || {}).n || S.sessionCount + 1;
-    // two sessions can share a day (a solo one, then one with a parent), so the gap is counted in days as well as in sessions
-    return last && (n - last.n < 2 || last.date >= addDays(todayStr(), -1)) ? null : next;
+    return LISTEN.find(x => !x.fallback && !S.listening.done[x.id]) || null;
   }
   const estListening = x => x.min || 4;
   // after a solo session, a parent session the same day is worth it only when it opens something new
@@ -823,6 +831,14 @@
       const rows = shuffle(set.items).map(it => ({ w: it.w, t: it.t, a: it.a, he: it.he, tries: 0, done: false }));
       return { kind: 'bank', sid: set.id, rows, tiles: shuffle(rows.map((r, i) => ({ id: i, text: r.a, used: false }))), cur: 0, bad: -1, solved: false, misses: [] };
     }
+    // two halves sets of every three are joined by meaning, as the test's are; the third is drawn from the families,
+    // where agreement decides
+    const k = S.sets.hvSeq || 0;
+    if (HALVES_M.length && k % 3 !== 2) {
+      const set = HALVES_M[(k - Math.floor(k / 3)) % HALVES_M.length];
+      const rows = shuffle(set.items).map(it => Object.assign({ tries: 0, done: false }, it));
+      return { kind: 'halves', sid: set.id, rows, tiles: shuffle(rows.map((r, i) => ({ id: i, text: r.b, used: false }))), cur: 0, bad: -1, solved: false, misses: [] };
+    }
     const rows = shuffle(sample(Object.keys(HALVES), 5).map(f => Object.assign({ fam: f, tries: 0, done: false }, sample(HALVES[f], 1)[0])));
     return { kind: 'halves', sid: rows.map(r => r.fam).sort().join('+'), rows, tiles: shuffle(rows.map((r, i) => ({ id: i, text: r.b, used: false }))), cur: 0, bad: -1, solved: false, misses: [] };
   }
@@ -847,7 +863,7 @@
     const order = v.rows.map((_, i) => i); const next = [...order.slice(v.cur + 1), ...order.slice(0, v.cur)].find(i => !v.rows[i].done);
     if (next == null) {
       v.solved = true; item.answered = true; R.done++;
-      if (v.kind === 'bank') S.sets.bankSeq++;
+      if (v.kind === 'bank') S.sets.bankSeq++; else S.sets.hvSeq = (S.sets.hvSeq || 0) + 1;
       S.sets.history.push({ date: todayStr(), n: R.n, kind: v.kind, sid: v.sid, misses: v.misses }); if (S.sets.history.length > 60) S.sets.history.shift();
       logEvent('set', { kind: v.kind, sid: v.sid, misses: v.misses.length });
     } else v.cur = next;
@@ -999,8 +1015,10 @@
     const two = spec.frame.endsWith('2'), be = spec.frame.startsWith('be');
     const verb = be ? (two ? 'are' : 'is') : (two ? 'have' : 'has');
     const other = be ? (two ? 'is' : 'are') : (two ? 'has' : 'have');
-    const tokens = [...(two ? [spec.who[0], 'and', spec.who[1]] : [spec.who[0]]), verb, ...(be ? [spec.x] : ['a', spec.x])];
-    return { spec, two, be, verb, other, tokens, model: tokens.join(' ') + '.' };
+    // a noun takes `a`, unless it is one that is written without it (flowers, money)
+    const noA = !be && !!(WR.nouns.find(n => n.w === spec.x) || {}).noA;
+    const tokens = [...(two ? [spec.who[0], 'and', spec.who[1]] : [spec.who[0]]), verb, ...(be || noA ? [spec.x] : ['a', spec.x])];
+    return { spec, two, be, noA, verb, other, tokens, model: tokens.join(' ') + '.' };
   }
   function wPicture(it) {
     const adj = it.be ? WR.adjs.find(a => a.w === it.spec.x) : null;
@@ -1016,10 +1034,11 @@
     const extra = noun ? `<div class="wfig"><div class="wface">${noun.e}</div><div class="wname">&nbsp;</div></div>` : (adj && adj.size ? `<div class="wfig"><div class="wbody door">🚪</div><div class="wname">&nbsp;</div></div>` : '');
     return `<div class="wpic">${it.spec.who.map(fig).join('')}${extra}</div>`;
   }
+  // the word bank on paper: bare words, as the practice copy's bank gives them (`dog`, not `a dog`)
   function wBank(it) {
     const list = it.be ? WR.adjs : WR.nouns;
     const others = sample(list.filter(x => x.w !== it.spec.x), 2).map(x => x.w);
-    return shuffle([it.spec.x, ...others]).map(x => it.be ? x : `a ${x}`);
+    return shuffle([it.spec.x, ...others]);
   }
   function newBuild(it, marks) {
     const target = marks ? [...it.tokens, '.'] : it.tokens.slice();
@@ -1146,7 +1165,7 @@
           <ol class="wchecks">
             <li>${t('wCheck1')}</li>
             <li>${t('wCheck2', { a: pair[0], b: pair[1] })}</li>
-            <li>${t(w.rung >= 4 ? 'wCheck3Bank' : 'wCheck3Screen')}</li>
+            <li>${w.rung >= 4 ? (it.be ? t('wCheck3Bank') : t(it.noA ? 'wCheck3BankNoA' : 'wCheck3BankA', { x: it.spec.x })) : t('wCheck3Screen')}</li>
           </ol>
           <div class="center" style="font-size:26px; font-weight:700">${t('wHow')}</div>
           <div class="row wrap" style="justify-content:center; gap:14px">
@@ -2004,7 +2023,7 @@
       };
       const road = smoothPath(stops.map(s => [s.x, s.y]));
       // the bonus land (PRD §4.1c) is a side path off the trail, from the last word land
-      const bonusLands = C.lands.filter(l => l.bonus);
+      const bonusLands = C.lands.filter(l => l.bonus && !landShut(l));
       const bonusNode = () => {
         if (!bonusLands.length) return '';
         const open = bonusLands.filter(l => landIntroduced(l.id)); const nb = nextLandForToday();
@@ -2402,7 +2421,7 @@
         ${againEn ? `<div>חוזרים בפעם הבאה: <span class="en">${againEn}</span></div>` : ''}
         <div class="muted">מסמנים ולא מתקנים באמצע המשפט. הסימונים נשמרים רק כאן; הם לא מזיזים קלפים ולא נראים במשחק.</div>
         <h3>קלפי בנייה מאותיות</h3>
-        <div>${tiles.length} קלפים · ${tiles.filter(cid => S.cards[cid].box >= 4).length} בקופסה 4 ומעלה · עד ${TILE_CAP} במשימה</div>
+        <div>${tiles.length} קלפים · ${tiles.filter(cid => S.cards[cid].box >= MASTERED_BOX).length} בקופסה ${MASTERED_BOX} ומעלה · עד ${TILE_CAP} במשימה</div>
         <div class="muted">קלף כזה נולד כשקלף המשמעות של המילה מגיע לקופסה 3.</div>
         <h3>רצף והקפאות</h3>
         <div>רצף: ${streak()} ימים · ההקפאה החינמית של השבוע: ${freezeLeft() ? 'עוד לא נוצלה' : 'נוצלה'}</div>
@@ -2428,7 +2447,7 @@
         <div class="muted">המספר לפי משקלי המבחן מיועד להורים בלבד. במשחק רואים רק כמה מכות חטף הבוס.</div>
         <h3>בנק מילים וחצאי משפטים</h3>
         ${setRows ? `<table><tr><th>מתי</th><th>סוג</th><th>טעויות בניסיון הראשון</th></tr>${setRows}</table>` : '<div class="muted">מתחילים יום אחרי שכל 50 המילים נפתחו: סט אחד מכל סוג בתוך החזרה.</div>'}
-        <div>קלפי מילה במשפט: ${czs.length} · ${czs.filter(cid => S.cards[cid].box >= 4).length} בקופסה 4 ומעלה · עד ${CZ_CAP} במשימה</div>
+        <div>קלפי מילה במשפט: ${czs.length} · ${czs.filter(cid => S.cards[cid].box >= MASTERED_BOX).length} בקופסה ${MASTERED_BOX} ומעלה · עד ${CZ_CAP} במשימה</div>
         <h3>האזנה</h3>
         ${lRows ? `<table><tr><th>מתי</th><th>מה</th><th>כוכבים</th><th>השמעות</th><th>תשובות שנחשפו</th></tr>${lRows}</table>` : '<div class="muted">עוד לא התחילה. הקלטה ראשונה ביום המיני-בוס, ואחר כך כל משימה שנייה עם הורה.</div>'}
         <div class="muted">ההקלטות מתנגנות מהאתר של ECB וצריכות Wi-Fi. אם הקלטה לא נטענת, באה במקומה שיחה קצרה בקול של המכשיר, וההקלטה מחכה למשימה הבאה עם הורה.</div>`;
@@ -2452,6 +2471,13 @@
         ${tricky.length ? `<table><tr><th>קלף</th><th>סוג</th><th>טעויות</th><th>קופסה</th></tr>${tricky.map(([cid, st]) => { const p = parseCard(cid); return `<tr><td class="en">${esc(cardLabel(cid))}</td><td>${{ rec: 'משמעות', lineup: 'שמיעה→קריאה', img: 'תמונה', tile: 'בנייה מאותיות', gc: 'דקדוק', np: 'כינוי גוף', sd: 'same / different', num: 'מספר', cz: 'מילה במשפט', lp: 'האזנה לתמונה' }[p.type] || p.type}</td><td>${st.misses}</td><td>${st.box}</td></tr>`; }).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
         <h3>היסטוריה</h3>
         ${sessions.length ? `<table><tr><th>תאריך</th><th>#</th><th>מצב</th><th>נכון/טעות</th><th>עלו/ירדו</th><th>דק׳</th><th>קוד</th></tr>${sessions.flatMap(([date, v]) => daySessions(v).reverse().map(r => `<tr><td>${date}</td><td>${r.n}</td><td>${r.mode === 'solo' ? 'לבד' : 'הורה'}</td><td><bdi>${r.correct}</bdi>/<bdi>${r.wrong}</bdi></td><td><bdi>${r.promoted}</bdi>/<bdi>${r.demoted}</bdi></td><td>${minutes(r.durationMs)}</td><td class="en">${r.mode === 'solo' ? r.code : ''}</td></tr>`)).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
+        <h3>המבחן לדוגמה</h3>
+        <div class="row wrap">
+          <a class="btn small" href="mock.html">🖨️ המבחן להדפסה</a>
+          <a class="btn small" href="mock.html?view=key">מפתח תשובות</a>
+          <a class="btn small" href="mock.html?view=coach">דף למאמן</a>
+        </div>
+        <div class="muted">תשעה עמודים במבנה של עותק התרגול, משימה מול משימה, עם תוכן שהוא עוד לא ראה ולא שמע. מיועד ליום 12 (יום שישי). ההסבר איך להריץ נמצא ב"דף למאמן".</div>
         <h3>הגדרות</h3>
         <div class="row wrap">
           <label>מגרש האימונים, דקות ביום: <input class="text" style="width:90px; font-size:18px; padding:6px 10px" type="number" min="0" max="60" id="capInput" value="${S.settings.freePlayCapMin}"></label>
@@ -2726,5 +2752,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard };
 })();
