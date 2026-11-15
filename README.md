@@ -185,6 +185,55 @@ the freeze button, and the loot count with a switch between a box after every mi
 every second one (for when he starts asking what he gets before he begins). "איפוס המשימה של
 היום" now also takes back the loot found today.
 
+## Automatic backup to a Google Sheet (optional, v3.3.0)
+
+Each change to the save is also sent to one Google Sheet of yours, about 15 seconds after the
+last change, and again when the app goes to the background. It is one-way: the game never reads
+anything back. If the iPad is offline, it sends when the network is back. The manual export still
+works as before.
+
+The script lives inside that one Sheet and is marked `@OnlyCurrentDoc`, so Google asks only for
+access to **the spreadsheet it is installed in**. It gets no access to your Drive or your other
+files.
+
+**One-time setup, about 5 minutes, on a computer:**
+
+1. In Google Sheets, create a blank spreadsheet and name it `Hey1 backup`.
+2. **Extensions → Apps Script**. Delete what is in `Code.gs`, paste all of
+   [`backup/apps-script.gs`](backup/apps-script.gs), and save (⌘S).
+3. **Deploy → New deployment** → the gear icon → **Web app**. Set *Execute as*: **Me**, and
+   *Who has access*: **Anyone**. **Deploy**.
+4. Authorize: choose the account → *Advanced* → *Go to … (unsafe)* → **Allow**. The "unsafe"
+   warning appears for every script you write yourself. The permission listed should be "View and
+   manage spreadsheets that this application has been installed in". If it asks for all of Drive,
+   the `@OnlyCurrentDoc` line was not pasted.
+5. Copy the **Web app URL** (`https://script.google.com/macros/s/…/exec`). Opening it in a
+   browser should show `{"ok":true}`.
+6. On the iPad: coach screen → **גיבוי אוטומטי לגיליון Google** → paste the URL → **שמור**. It
+   sends a first copy right away and should say "הגיבוי עובד".
+
+**What's in the Sheet:**
+- **`backups` tab:** one row per game day, holding the day, when it was saved, the number of
+  sessions and the size. The save itself follows, split over several cells because a cell holds
+  at most 50,000 characters.
+- **`older` tab:** a copy with fewer sessions than the newest one, such as a fresh empty game,
+  never overwrites a row. It goes here instead.
+
+**To restore:** reopen the Sheet; a **Hey1** menu appears. Click a row, then choose **Hey1 →
+Show save of the selected row** → **Copy**. In the coach screen tap **⬆️ ייבוא שמירה**, paste,
+then tap **ייבא**. The first use of the menu asks for one more permission, to show a dialog.
+The backup URL survives an import.
+
+**Privacy:** the URL is the only key. It is kept in the game's save on the iPad and is never in
+this repo. Anyone with the URL could add rows to that Sheet, but nobody can read anything through
+it. To revoke it, go to Apps Script → Deploy → Manage deployments → archive. Then create a new one
+and paste the new URL. "איפוס מלא" also clears the URL.
+
+**Status:** the coach screen shows the last successful backup and, if the last try failed, why.
+
+The game also asks the browser to keep its storage (`navigator.storage.persist()`), so that
+Safari does not clear it after a week without visits.
+
 ## Reset the game for a fresh day-0 (e.g. after testing on the Mac)
 
 Coach screen → "איפוס מלא" (full reset). Or in the browser console: `localStorage.clear()`.
