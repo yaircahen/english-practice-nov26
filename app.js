@@ -2695,8 +2695,15 @@
       const p = prompt('קוד מאמן');
       if (!p || p.trim() !== S.settings.coachPin) { if (p !== null) toast('לא הקוד'); return; }
     }
+    // The finger that did the long press is still down while the code dialog is open. When it lifts, the browser
+    // sends a click to whatever is now under it: on this screen that is the close button. Swallow that click.
+    coachOpenedAt = Date.now();
     view = 'coach'; render();
   }
+  let coachOpenedAt = 0;
+  $app.addEventListener('click', e => {
+    if (Date.now() - coachOpenedAt < 1200) { e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true);
 
   // animate counters on the close screen
   const origRender = render;
