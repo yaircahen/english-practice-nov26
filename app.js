@@ -2458,7 +2458,7 @@
           <a class="btn small" href="mock.html?view=key">מפתח תשובות</a>
           <a class="btn small" href="mock.html?view=coach">דף למאמן</a>
         </div>
-        <div class="muted">חמישה עמודים במבנה של עותק התרגול, עם תוכן שהוא עוד לא ראה ולא שמע. מיועד ליום 12 (יום שישי). ההסבר איך להריץ נמצא ב"דף למאמן".</div>
+        <div class="muted">תשעה עמודים במבנה של עותק התרגול, משימה מול משימה, עם תוכן שהוא עוד לא ראה ולא שמע. מיועד ליום 12 (יום שישי). ההסבר איך להריץ נמצא ב"דף למאמן".</div>
         <h3>הגדרות</h3>
         <div class="row wrap">
           <label>מגרש האימונים, דקות ביום: <input class="text" style="width:90px; font-size:18px; padding:6px 10px" type="number" min="0" max="60" id="capInput" value="${S.settings.freePlayCapMin}"></label>

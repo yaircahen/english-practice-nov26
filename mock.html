@@ -6,9 +6,11 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Unit 1 Test</title>
   <!--
-    The mock (PRD §6.4): the practice copy's five sections and point weights, all content new.
-    Three views, each printed on its own: the test (5 pages, A4), the answer key, a page for the coach.
+    The mock (PRD §6.4): the practice copy's sections, tasks and points, with all content new.
+    Three views, each printed on its own: the test (9 pages, A4), the answer key, two pages for the coach.
     Everything on the pages comes from CONTENT.mock in content.js; this file only lays it out.
+    The layout follows the scan of the practice copy: one section to a page, the task line on the left with its
+    points, the Hebrew and Arabic instruction on the right.
     Open with ?view=test | key | coach.
   -->
   <style>
@@ -29,8 +31,8 @@
     main { display: none; }
     body.v-test #test, body.v-key #key, body.v-coach #coach { display: block; }
 
-    .page { width: 210mm; min-height: 297mm; margin: 8mm auto; padding: 11mm 15mm 12mm; background: #fff; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); position: relative; font-size: 13pt; line-height: 1.4; }
-    .foot { position: absolute; bottom: 5mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 9pt; color: #444; }
+    .page { width: 210mm; min-height: 297mm; margin: 8mm auto; padding: 13mm 18mm 13mm; background: #fff; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); position: relative; font-size: 13.5pt; line-height: 1.4; }
+    .foot { position: absolute; bottom: 6mm; right: 18mm; font-size: 10pt; font-weight: 700; }
 
     @page { size: A4; margin: 0; }
     @media print {
@@ -41,106 +43,131 @@
       .page:last-child { break-after: auto; }
     }
 
-    /* the test */
-    .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 10mm; border-bottom: 2.5px solid #111; padding-bottom: 5px; margin-bottom: 9px; }
-    .head h1 { font-size: 21pt; margin: 0; }
-    .head .who { display: flex; gap: 8mm; font-size: 12pt; }
-    .head .who span { display: inline-block; border-bottom: 1.2px solid #111; }
-    .sec { display: flex; justify-content: space-between; align-items: baseline; border-top: 2.5px solid #111; border-bottom: 1.2px solid #111; padding: 3px 2px; margin: 0 0 7px; font-weight: 700; font-size: 14.5pt; }
-    .sec small { font-size: 10pt; font-weight: 400; }
-    .sec + .ins { margin-top: 0; }
-    .ins { margin: 11px 0 7px; }
-    .ins .l1 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-weight: 700; }
-    .ins .pts { font-weight: 400; font-size: 11pt; white-space: nowrap; }
-    .ins .tr { direction: rtl; text-align: right; font-size: 10pt; line-height: 1.35; color: #222; margin-top: 1px; }
-    .ins .tr span { display: inline-block; margin-inline-end: 12px; }
-    .sub { font-weight: 700; margin: 9px 0 4px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-    .sub .pts { font-weight: 400; font-size: 11pt; white-space: nowrap; }
-    .sub .tr, .wlines .tr, .tr.inl { font-weight: 400; font-size: 10pt; color: #222; }
+    /* ---- the test ---- */
+    .top { display: flex; align-items: flex-end; gap: 8mm; margin-bottom: 9mm; }
+    .top .tab { font-weight: 900; font-size: 26pt; line-height: 1; padding: 5mm 7mm 3mm 3mm; border: 2px solid #111; border-bottom: 0; border-radius: 8px 8px 0 0; white-space: nowrap; }
+    .top .who { flex: 1; display: flex; justify-content: flex-end; gap: 7mm; font-size: 13pt; border-bottom: 5px solid #111; padding-bottom: 3mm; }
+    .top .who i { display: inline-block; border-bottom: 1.5px dotted #111; }
+    .mini { position: absolute; top: 9mm; right: 18mm; border: 1.5px solid #111; border-radius: 4px; padding: 2mm 5mm; font-weight: 700; font-size: 11pt; }
+    .page.more { padding-top: 26mm; }
+
+    h2.sec { font-size: 18pt; font-weight: 900; margin: 0 0 5mm; letter-spacing: .2px; }
+    h2.sec small { font-size: 11.5pt; font-weight: 700; }
+    .task { display: flex; justify-content: space-between; align-items: flex-start; gap: 8mm; margin: 8mm 0 5mm; }
+    h2.sec + .task { margin-top: 0; }
+    .task .en { font-size: 14.5pt; }
+    .task .en b.n { font-weight: 900; margin-inline-end: 3.5mm; }
+    .task .en small { font-size: 10pt; font-weight: 700; white-space: nowrap; }
+    .task .tr { font-size: 9.5pt; line-height: 1.4; text-align: right; max-width: 82mm; color: #111; }
+    .ind { margin-inline-start: 9mm; }
 
     ol.q { list-style: none; margin: 0; padding: 0; counter-reset: q; }
-    ol.q > li { counter-increment: q; display: flex; gap: 6px; margin: 0 0 8px; align-items: baseline; }
-    ol.q > li::before { content: counter(q) "."; min-width: 1.5em; }
-    ol.q.abc > li::before { content: counter(q, lower-alpha) "."; }
-    ol.q.loose > li { margin-bottom: 11px; }
-    .blank { display: inline-block; min-width: 27mm; border-bottom: 1.3px solid #111; height: 1.05em; margin: 0 4px; vertical-align: baseline; }
+    ol.q > li { counter-increment: q; display: flex; gap: 2mm; margin: 0 0 3.2mm; align-items: baseline; }
+    ol.q > li::before { content: counter(q) "."; min-width: 7mm; }
+    .blank { display: inline-block; min-width: 30mm; border-bottom: 1.3px dotted #111; height: 1.05em; margin: 0 1.5mm; vertical-align: baseline; }
     .blank.wide { min-width: 40mm; }
-    .opts { display: inline-flex; flex-wrap: wrap; gap: 2px 9mm; }
-    .opts.pair { gap: 0 3mm; font-weight: 700; }
-    .right { margin-inline-start: auto; white-space: nowrap; }
-    .tl { list-style: none; margin: 0; padding: 0 0 0 2em; }
-    .tl li { display: flex; gap: 9px; align-items: center; margin: 0 0 5px; }
-    .grow { flex: 1; }
-    .stack { display: flex; flex-direction: column; gap: 3px; }
+    .bankline { font-weight: 700; margin: 0 0 5mm; padding-inline-start: 9mm; display: flex; flex-wrap: wrap; gap: 1mm 4mm; align-items: center; }
+    .bankline.mid { justify-content: center; padding: 0; }
+    .bankline i { font-style: normal; font-size: 9pt; }
+    .bankline.tight { margin-bottom: 1.5mm; }
 
-    .pics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4mm; margin: 5px 0 2px; }
-    .pic { border: 1.5px solid #111; border-radius: 6px; height: 27mm; display: flex; align-items: center; justify-content: center; font-size: 25pt; white-space: nowrap; }
-    .pic.cake { gap: 5px; }
-    .pic.cake b { font: 700 20pt Arial, sans-serif; }
-    .numbox { width: 12mm; height: 11mm; border: 1.5px solid #111; margin: 4px auto 0; }
-    .ticks { display: flex; gap: 9mm; }
-    .tick { text-align: center; font-size: 22pt; line-height: 1.2; }
-    .box { display: inline-block; width: 6mm; height: 6mm; border: 1.5px solid #111; vertical-align: middle; flex: none; }
-    .tick .box { display: block; margin: 3px auto 0; }
+    /* Listening 1: six pictures, a letter and a box for the number in the corner */
+    .lpics { display: grid; grid-template-columns: 62mm 62mm; gap: 9mm 15mm; justify-content: center; margin-top: 9mm; }
+    .lp { position: relative; border: 1.5px solid #111; height: 55mm; display: flex; align-items: center; justify-content: center; font-size: 38pt; white-space: nowrap; gap: 3mm; }
+    .lp b.d { font: 700 30pt Arial, sans-serif; }
+    .tag { position: absolute; top: -1.5px; left: -1.5px; display: flex; font: 700 11pt Arial, sans-serif; }
+    .tag b { background: #111; color: #fff; width: 7.5mm; height: 7.5mm; display: flex; align-items: center; justify-content: center; }
+    .tag i { width: 8.5mm; height: 7.5mm; border: 1.5px solid #111; border-inline-start: 0; background: #fff; }
+    @media print { .tag b { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 
-    .match { display: flex; justify-content: space-between; gap: 20mm; padding: 0 6mm; }
-    .match ol { flex: 1; }
-    .match ol.q > li { margin-bottom: 7px; }
-    .match .he { direction: rtl; font-size: 14pt; }
-    .match .he li { display: flex; gap: 8px; align-items: center; margin: 0 0 4.5px; list-style: none; }
-    .match ul { list-style: none; margin: 0; padding: 0; flex: 1; }
-    .sq { display: inline-block; width: 9mm; height: 7.5mm; border: 1.5px solid #111; flex: none; }
+    /* a sentence to complete, with its endings underneath */
+    .mc { margin: 0 0 3.5mm; }
+    .mc .stem { display: flex; gap: 2mm; }
+    .mc .stem .qn { min-width: 7mm; }
+    .mc ol { list-style: none; margin: 1mm 0 0; padding: 0 0 0 9mm; }
+    .mc.flat ol { padding-left: 0; }
+    .mc li { display: flex; gap: 3mm; margin: 0 0 1.2mm; }
+    .mc li .l { min-width: 6mm; }
 
-    .bank { border: 1.5px solid #111; border-radius: 6px; padding: 6px 12px; display: flex; flex-wrap: wrap; gap: 4px 11mm; justify-content: center; font-weight: 700; margin: 6px 0 10px; }
+    .tpics { display: flex; gap: 3mm; margin-top: 3mm; }
+    .tp { position: relative; flex: 1; border: 1.5px solid #111; height: 27mm; display: flex; align-items: center; justify-content: center; font-size: 22pt; white-space: nowrap; }
+    .yn { border-collapse: collapse; margin-inline-start: 9mm; }
+    .yn th { font-weight: 400; padding: 0 5mm 1mm; }
+    .yn td { padding: 2.2mm 0; }
+    .yn td.s { padding-inline-end: 14mm; }
+    .yn td.c { text-align: center; width: 17mm; }
+    .yn td.c + td.c, .yn th + th + th { border-inline-start: 1.5px solid #111; }
+    .yn td.c i { display: inline-block; width: 7mm; border-bottom: 1.3px solid #111; height: 1em; }
 
-    .halves { display: flex; gap: 12mm; }
-    .halves > div { flex: 1; }
-    .halves h4 { margin: 0 0 5px; font-size: 13pt; text-align: center; border-bottom: 1.2px solid #111; }
-    .halves ol.q > li { align-items: center; margin-bottom: 9px; }
+    /* Vocabulary 1 and Reading 1: two columns, A and B */
+    .ab { display: flex; gap: 14mm; margin-inline-start: 9mm; }
+    .ab h4 { margin: 0 0 3mm; font-size: 12.5pt; }
+    .ab .a h4 { padding-inline-start: 9mm; }
+    .ab .b h4 { padding-inline-start: 21mm; }
+    .ab .a li, .ab .b li { height: 9.2mm; margin: 0; align-items: center; }
+    .ab .b ol { list-style: none; margin: 0; padding: 0; }
+    .ab .b li { display: flex; gap: 3mm; align-items: center; }
+    .ab .b li i { display: inline-block; width: 10mm; border-bottom: 1.3px solid #111; height: 7mm; }
+    .ab .b li .l { min-width: 6mm; }
+    .ab .b li .w { direction: rtl; unicode-bidi: isolate; font-size: 12pt; }
 
-    .passage { border: 1.5px solid #111; border-radius: 4px; padding: 8px 16px 4px; font-size: 14pt; line-height: 1.62; margin: 6px 0 8px; }
-    .passage h3 { margin: 0 0 3px; text-align: center; font-size: 15pt; }
-    .passage p { margin: 0 0 6px; }
+    .halves { display: grid; grid-template-columns: 9mm 82mm 1fr 14mm 56mm; row-gap: 12mm; align-items: center; margin-top: 4mm; }
+    .halves .hd { font-weight: 700; font-size: 12.5pt; }
+    .halves .bx { border: 1.5px solid #111; border-radius: 9px; padding: 0 4mm; height: 23mm; display: flex; align-items: center; }
+    .halves .ln { display: flex; align-items: center; gap: 2mm; }
+    .halves .ln i { display: inline-block; width: 6mm; border-bottom: 1.3px dotted #111; height: 1em; }
 
-    /* two rows: the picture row stands on one ground line, the names sit under it */
-    .scene { border: 1.5px solid #111; border-radius: 6px; padding: 6mm 4mm 3mm; margin: 6px 0 8px; display: grid; grid-template-rows: auto auto; grid-auto-flow: column; grid-auto-columns: auto; }
+    .passage { border: 1.5px solid #111; padding: 4mm 6mm 2mm; font-size: 13.5pt; line-height: 1.5; margin: 0 0 2mm; }
+    .passage p { margin: 0 0 2.5mm; }
+    .w2 { list-style: none; margin: 0 0 0 9mm; padding: 0; counter-reset: q; }
+    .w2 li { counter-increment: q; display: flex; gap: 2mm; align-items: flex-end; height: 10mm; }
+    .w2 li::before { content: counter(q) "."; }
+    .w2 li i { width: 60mm; border-bottom: 1.3px dotted #111; }
+    .tf li { justify-content: flex-start; }
+    .tf li .s { flex: 0 0 112mm; }
+    .tf li b { white-space: nowrap; }
+    .t2 { list-style: none; margin: 1mm 0 0 9mm; padding: 0; counter-reset: q; }
+    .t2 li { counter-increment: q; display: flex; gap: 3mm; align-items: baseline; margin: 0 0 1.6mm; }
+    .t2 li i { display: inline-block; width: 8mm; border-bottom: 1.3px solid #111; height: 1em; }
+    .t2 li span::before { content: counter(q) ".\00a0\00a0"; }
+
+    /* Writing: the bank above the picture, the people on one ground line, each with a name label */
+    .scene { border: 1.5px solid #111; padding: 6mm 3mm 3mm; margin: 2mm 0 5mm; display: grid; grid-template-rows: auto auto; grid-auto-flow: column; }
     .scene .up { display: flex; align-items: flex-end; justify-content: center; border-bottom: 1.5px solid #111; }
     .scene .up svg { display: block; }
-    .scene .up.gap { min-width: 5mm; }   /* the space between two children takes what is left, so a thing stays by its owner */
-    .scene .dn { text-align: center; font-weight: 700; font-size: 13pt; padding-top: 3px; }
-    .scene .obj { font-size: 30pt; line-height: 1.05; }
-    .scene .obj.held { padding-bottom: 29mm; margin-inline-start: -4mm; font-size: 24pt; }
+    .scene .up.gap { min-width: 3mm; }   /* the space between two figures takes what is left, so a thing stays by its owner */
+    .scene .dn { text-align: center; padding-top: 2mm; }
+    .scene .dn span { display: inline-block; border: 1.2px solid #111; padding: 0 2mm; font-size: 11.5pt; background: #fff; }
+    .scene .obj { font-size: 24pt; line-height: 1.05; }
+    .scene .obj.held { padding-bottom: 21mm; margin-inline-start: -3mm; font-size: 22pt; }
     .wlines { list-style: none; margin: 0; padding: 0; counter-reset: w; }
-    .wlines li { counter-increment: w; display: flex; align-items: flex-end; gap: 8px; height: 13.5mm; }
-    .wlines li::before { content: counter(w) "."; min-width: 1.5em; }
-    .wlines li::after { content: ""; flex: 1; border-bottom: 1.3px solid #111; }
-    .wlines li.gap { height: auto; display: block; font-weight: 700; margin-top: 9px; counter-increment: none; }
-    .wlines li.gap::before, .wlines li.gap::after { content: none; }
+    .wlines li { counter-increment: w; display: flex; align-items: flex-end; gap: 3mm; height: 13mm; }
+    .wlines li::before { content: counter(w) "."; min-width: 6mm; }
+    .wlines li::after { content: ""; flex: 1; border-bottom: 1.3px dotted #111; }
 
-    /* the key and the coach's page */
+    /* ---- the key and the coach's pages ---- */
     .key h2, .coach h2 { font-size: 13pt; margin: 9px 0 3px; border-bottom: 1.2px solid #111; padding-bottom: 2px; }
     .key .title, .coach .title { font-size: 19pt; margin: 0 0 2px; }
-    .key { font-size: 11.5pt; line-height: 1.35; }
-    .key .row { display: flex; flex-wrap: wrap; gap: 3px 9mm; margin: 2px 0; }
-    .key .row b { font-weight: 700; }
+    .key { font-size: 11.5pt; line-height: 1.4; }
+    .key .row { display: flex; flex-wrap: wrap; gap: 2px 8mm; margin: 2px 0; }
     .key .n { display: inline-block; min-width: 1.4em; color: #333; }
+    .key .row > .long { flex: 1; }
     .key .he { direction: rtl; unicode-bidi: isolate; }
-    .key .kpics { display: flex; gap: 5mm; margin: 4px 0; }
-    .key .kpics div { border: 1.2px solid #111; border-radius: 5px; padding: 2px 7px; text-align: center; font-size: 15pt; }
-    .key .kpics div b { display: block; font: 700 13pt Arial, sans-serif; }
+    .key .kpics { display: flex; gap: 4mm; margin: 4px 0; }
+    .key .kpics div { border: 1.2px solid #111; padding: 2px 7px; text-align: center; font-size: 14pt; white-space: nowrap; }
+    .key .kpics div b { display: block; font: 700 12.5pt Arial, sans-serif; }
     .key .kpics div i { font: 700 12pt Arial, sans-serif; }
     .key .checks { direction: rtl; text-align: right; margin: 5px 0 0; padding-inline-start: 22px; font-size: 12pt; line-height: 1.6; }
-        .coach { direction: rtl; font-family: -apple-system, "Rubik", Arial, "Liberation Sans", sans-serif; font-size: 12pt; line-height: 1.55; }
+    .key .checks .en, .coach .en { direction: ltr; unicode-bidi: isolate; white-space: nowrap; font-family: Arial, sans-serif; }
+    .coach { direction: rtl; font-family: -apple-system, "Rubik", Arial, "Liberation Sans", sans-serif; font-size: 12pt; line-height: 1.55; }
     .coach ol, .coach ul { margin: 4px 0; padding-inline-start: 22px; }
     .coach li { margin-bottom: 3px; }
-    .coach .en { direction: ltr; unicode-bidi: isolate; font-family: Arial, sans-serif; }
-    .coach .script { direction: ltr; text-align: left; font-family: Arial, sans-serif; font-size: 12.5pt; line-height: 1.6; border: 1.2px solid #111; border-radius: 5px; padding: 6px 12px; margin: 4px 0; }
+    .coach .script { direction: ltr; text-align: left; font-family: Arial, sans-serif; font-size: 12.5pt; line-height: 1.55; border: 1.2px solid #111; border-radius: 5px; padding: 6px 12px; margin: 4px 0; }
     .coach .script b { display: inline-block; min-width: 4.2em; }
     .coach table { border-collapse: collapse; width: 100%; margin-top: 4px; font-size: 11.5pt; }
-    .coach th, .coach td { border: 1.2px solid #111; padding: 3px 8px; text-align: right; }
+    .coach th, .coach td { border: 1.2px solid #111; padding: 6px 8px; text-align: right; }
     .coach td.num, .coach th.num { text-align: center; width: 22mm; }
     .coach td:first-child { white-space: nowrap; }
-    .coach td { padding: 6px 8px; }
     .coach .note { font-size: 11pt; color: #222; }
   </style>
 </head>
@@ -150,8 +177,8 @@
     <button data-view="key">מפתח תשובות</button>
     <button data-view="coach">דף למאמן</button>
     <span class="sep"></span>
-    <button data-play="a">🔊 האזנה א</button>
-    <button data-play="b">🔊 האזנה ב</button>
+    <button data-play="a">🔊 האזנה 1</button>
+    <button data-play="b">🔊 האזנה 2</button>
     <button data-play="stop">■</button>
     <span class="sep"></span>
     <button id="print">הדפסה</button>
@@ -166,235 +193,265 @@
   <script>
   (function () {
     'use strict';
-    const C = window.CONTENT, M = C.mock;
-    const WORDS = Object.fromEntries(C.words.map(w => [w.id, w]));
+    const M = window.CONTENT.mock;
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const abc = i => 'abcdefghij'[i];
     const sum = a => a.reduce((x, y) => x + y, 0);
     const blank = (t, wide) => esc(t).replace('___', `<span class="blank${wide ? ' wide' : ''}"></span>`);
     const emo = s => `<span class="emo">${s}</span>`;
     // a picture string: emoji, and a number where the picture has one (the cake)
-    const picHtml = s => { const m = /^(\S+) (\d+)$/.exec(s); return m ? `<div class="pic cake">${emo(m[1])}<b>${m[2]}</b></div>` : `<div class="pic">${emo(s)}</div>`; };
+    const picParts = s => { const m = /^(\S+) (\d+)$/.exec(s); return m ? { e: m[1], d: m[2] } : { e: s }; };
+
+    const L = M.listening, V = M.vocab, G = M.grammar, R = M.reading, W = M.writing, ST = R.story;
+    const DQ = L.dialogue.questions, spoken = L.pics.items.filter(it => it.say);
+    const ofType = (qs, ...ts) => qs.filter(q => ts.includes(q.type));
 
     // ---------- points (the weights are content settings) ----------
-    const L = M.listening, V = M.vocab, G = M.grammar, R = M.reading, W = M.writing, ST = R.story;
     const P = {
-      lA: L.pics.pts * L.pics.items.length, lB: L.dialogue.pts * L.dialogue.questions.length,
-      vA: V.match.pts * V.match.items.length, vB: V.bank.pts * V.bank.items.length,
-      gA: G.be.pts * G.be.items.length, gB: G.circle.pts * G.circle.items.length, gC: G.have.pts * G.have.items.length,
-      rA: R.halves.pts * R.halves.items.length, rB: sum(ST.questions.map(q => q.pts)),
+      l1: L.pics.pts * spoken.length, l2: sum(DQ.map(q => q.pts)),
+      v1: V.match.pts * V.match.items.length, v2: V.bank.pts * V.bank.items.length,
+      g1: G.be.pts * G.be.items.length, g2: G.circle.pts * G.circle.items.length, g3: G.have.pts * G.have.items.length,
+      r1: R.halves.pts * R.halves.items.length, r2: sum(ST.questions.map(q => q.pts)),
       w: W.pts * (W.be + W.have),
     };
-    const SEC = { l: P.lA + P.lB, v: P.vA + P.vB, g: P.gA + P.gB + P.gC, r: P.rA + P.rB, w: P.w };
+    const SEC = { l: P.l1 + P.l2, v: P.v1 + P.v2, g: P.g1 + P.g2 + P.g3, r: P.r1 + P.r2, w: P.w };
     const TOTAL = sum(Object.values(SEC));
 
     // ---------- small builders ----------
-    // an instruction in the test's three languages, with the points on the right
-    const ins = (en, he, ar, pts) => `<div class="ins"><div class="l1"><span>${en}</span>${pts ? `<span class="pts">(${pts} points)</span>` : ''}</div><div class="tr"><span lang="he">${he}</span><span lang="ar">${ar}</span></div></div>`;
-    const sec = (n, en, he, ar, pts) => `<div class="sec"><span>${n}. ${en} <small>· ${he} · ${ar}</small></span>${pts ? `<span>${pts} points</span>` : ''}</div>`;
-    const page = (n, of, inner, cls) => `<section class="page ${cls || ''}">${inner}<div class="foot"><span>${esc(M.title)}</span><span>${n} / ${of}</span></div></section>`;
-    const sub = (en, he, pts) => `<div class="sub"><span>${en} <span class="tr" dir="rtl">${he}</span></span><span class="pts">(${pts} points)</span></div>`;
+    const x = (n, p) => `${n} x ${p} point${p === 1 ? '' : 's'}`;
+    const secH = (en, pts) => `<h2 class="sec">${en} <small>(${pts} points)</small></h2>`;
+    // a task line: its number, the English instruction and the points on the left; Hebrew and Arabic on the right
+    const task = (n, en, pts, he, ar) => `<div class="task"><div class="en">${n ? `<b class="n">${n}</b>` : ''}${en}${pts ? ` <small>(${pts})</small>` : ''}</div><div class="tr" dir="rtl"><div lang="he">${he}</div><div lang="ar">${ar}</div></div></div>`;
+    const page = (n, inner) => `<section class="page${n > 1 ? ' more' : ''}">${n > 1 ? `<div class="mini">${esc(M.title)}</div>` : ''}${inner}<div class="foot">${n}</div></section>`;
+    const bank = (words, cls) => `<div class="bankline ${cls || ''}">${words.map(esc).join('<i>●</i>').replace(/(<i>●<\/i>)/g, ' $1 ')}</div>`;
+    // a sentence to complete: the stem, then its endings a to d, one to a line
+    const mc = (q, n, cls) => `<div class="mc ${cls || ''}"><div class="stem">${n ? `<span class="qn">${n}.</span>` : ''}<span>${esc(q.en.includes('...') ? q.en + '.' : q.en + ' ... .')}</span></div><ol>${q.choices.map((c, j) => `<li><span class="l">${abc(j)}.</span><span>${esc(c.en)}</span></li>`).join('')}</ol></div>`;
+    const mcKey = q => { const j = q.choices.findIndex(c => c.ok); return `${abc(j)}. ${esc(q.choices[j].en)}`; };
 
-    // a child for the writing picture: line art, so it prints the same on any printer.
+    // a figure for the writing picture: line art, so it prints the same on any printer.
     // The body and the legs carry the height; the head stays one size.
-    function kidSvg(g, mood, size) {
+    function kidSvg(g, mood, size, look) {
       const T = { tall: 54, mid: 38, short: 25 }[size], Lg = { tall: 60, mid: 40, short: 24 }[size];
       const cx = 25, r = 13, hy = r + 4, sh = hy + r + 4, hip = sh + T, hem = g === 'f' ? hip + 6 : hip, foot = hip + Lg, H = foot + 3;
       const st = 'fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+      const stw = st.replace('fill="none"', 'fill="#fff"'), old = look === 'old';
       const hair = g === 'f'
         ? `<path d="M${cx - r - 2} ${hy + r + 8} Q${cx - r - 7} ${hy - r - 7} ${cx} ${hy - r - 3} Q${cx + r + 7} ${hy - r - 7} ${cx + r + 2} ${hy + r + 8} L${cx + r - 5} ${hy + r} L${cx - r + 5} ${hy + r}Z" fill="#111"/>` : '';
       const fringe = g === 'f'
         ? `<path d="M${cx - r + 1} ${hy - 4} Q${cx} ${hy - r - 2} ${cx + r - 1} ${hy - 4} Q${cx} ${hy - 9} ${cx - r + 1} ${hy - 4}Z" fill="#111"/>`
-        : `<path d="M${cx - r} ${hy - 3} A${r} ${r} 0 0 1 ${cx + r} ${hy - 3} Q${cx + 3} ${hy - 9} ${cx - r} ${hy - 3}Z" fill="#111"/>`;
-      const eyes = `<circle cx="${cx - 5}" cy="${hy - 1}" r="1.7" fill="#111"/><circle cx="${cx + 5}" cy="${hy - 1}" r="1.7" fill="#111"/>`;
-      const mouth = mood === 'happy' ? `<path d="M${cx - 7} ${hy + 4} Q${cx} ${hy + 13} ${cx + 7} ${hy + 4}Z" fill="#fff" ${st.replace('fill="none"', '')}/>`
+        : old ? `<path d="M${cx - r - 1} ${hy - 4} q-3 4 0 9M${cx + r + 1} ${hy - 4} q3 4 0 9" ${st}/>`
+          : `<path d="M${cx - r} ${hy - 3} A${r} ${r} 0 0 1 ${cx + r} ${hy - 3} Q${cx + 3} ${hy - 9} ${cx - r} ${hy - 3}Z" fill="#111"/>`;
+      const eyes = `<circle cx="${cx - 5}" cy="${hy - 1}" r="1.7" fill="#111"/><circle cx="${cx + 5}" cy="${hy - 1}" r="1.7" fill="#111"/>`
+        + (old ? `<circle cx="${cx - 5}" cy="${hy - 1}" r="4.2" ${st.replace('stroke-width="2"', 'stroke-width="1.4"')}/><circle cx="${cx + 5}" cy="${hy - 1}" r="4.2" ${st.replace('stroke-width="2"', 'stroke-width="1.4"')}/>` : '');
+      const mouth = mood === 'happy' ? `<path d="M${cx - 7} ${hy + 4} Q${cx} ${hy + 13} ${cx + 7} ${hy + 4}Z" ${stw}/>`
         : mood === 'sad' ? `<path d="M${cx - 5.5} ${hy + 9} Q${cx} ${hy + 3.5} ${cx + 5.5} ${hy + 9}" ${st}/><path d="M${cx + 8} ${hy + 1.5} q-2 3.8 0 4.8 q2 -1 0 -4.8Z" fill="#111"/>`
+        : old ? `<path d="M${cx - 6} ${hy + 6} q3 -3 6 0 q3 -3 6 0" ${st}/><path d="M${cx - 6} ${hy + 8} Q${cx} ${hy + 19} ${cx + 6} ${hy + 8}Z" ${stw.replace('stroke-width="2"', 'stroke-width="1.4"')}/>`
         : `<path d="M${cx - 4} ${hy + 6} L${cx + 4} ${hy + 6}" ${st}/>`;
       const body = g === 'f'
-        ? `<path d="M${cx - 8} ${sh} L${cx + 8} ${sh} L${cx + 16} ${hem} L${cx - 16} ${hem}Z" fill="#fff" ${st.replace('fill="none"', '')}/>`
-        : `<rect x="${cx - 10}" y="${sh}" width="20" height="${T}" rx="4" fill="#fff" ${st.replace('fill="none"', '')}/>`;
+        ? `<path d="M${cx - 8} ${sh} L${cx + 8} ${sh} L${cx + 16} ${hem} L${cx - 16} ${hem}Z" ${stw}/>`
+        : `<rect x="${cx - 10}" y="${sh}" width="20" height="${T}" rx="4" ${stw}/>`;
       const legs = `<path d="M${cx - 5} ${hem} L${cx - 6} ${foot} l-5 0M${cx + 5} ${hem} L${cx + 6} ${foot} l5 0" ${st}/>`;
-      const sx = g === 'f' ? 8 : 10;
+      const sx = g === 'f' ? 8 : 10, hand = sh + T * 0.72;
       const arms = mood === 'happy'
         ? `<path d="M${cx - sx} ${sh + 4} L${cx - 23} ${sh - 11}M${cx + sx} ${sh + 4} L${cx + 23} ${sh - 11}" ${st}/>`
-        : `<path d="M${cx - sx} ${sh + 4} L${cx - 20} ${sh + T * 0.72}M${cx + sx} ${sh + 4} L${cx + 20} ${sh + T * 0.72}" ${st}/>`;
+        : `<path d="M${cx - sx} ${sh + 4} L${cx - 20} ${hand}M${cx + sx} ${sh + 4} L${cx + 20} ${hand}" ${st}/>`;
+      const stick = old ? `<path d="M${cx - 20} ${foot} L${cx - 20} ${hand - 4} q0 -5 5 -5" ${st.replace('stroke-width="2"', 'stroke-width="2.6"')}/>` : '';
       const neck = `<path d="M${cx} ${hy + r} L${cx} ${sh}" ${st}/>`;
-      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 ${H}" width="${50 * 0.42}mm" height="${H * 0.42}mm" aria-hidden="true">${hair}${neck}${arms}${legs}${body}<circle cx="${cx}" cy="${hy}" r="${r}" fill="#fff" ${st.replace('fill="none"', '')}/>${fringe}${eyes}${mouth}</svg>`;
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 ${H}" width="${50 * 0.35}mm" height="${H * 0.35}mm" aria-hidden="true">${hair}${neck}${arms}${legs}${body}${stick}<circle cx="${cx}" cy="${hy}" r="${r}" ${stw}/>${fringe}${eyes}${mouth}</svg>`;
     }
-    // one child or one thing is a column of the picture: what stands on the ground, and the name under it
-    const col = (up, dn, cls) => `<div class="up ${cls || ''}">${up}</div><div class="dn">${dn || ''}</div>`;
+    // one figure or one thing is a column of the picture: what stands on the ground, and the name label under it
+    const col = (up, dn, cls) => `<div class="up ${cls || ''}">${up}</div><div class="dn">${dn ? `<span>${dn}</span>` : ''}</div>`;
     function figHtml(f) {
-      const kid = i => col(kidSvg(f.g[i], f.mood, f.size), esc(f.who[i]));
-      const obj = col(`<span class="obj emo${f.has === 'book' ? ' held' : ''}">${f.e}</span>`);
+      const kid = i => col(kidSvg(f.g[i], f.mood, f.size, f.look), esc(f.who[i]));
+      const obj = col(`<span class="obj emo${f.has === 'book' || f.many ? ' held' : ''}">${f.e}</span>`);
       return kid(0) + obj + (f.who.length > 1 ? kid(1) : '');
     }
     const names = f => f.who.join(' and ');
     const beSentence = f => `${names(f)} ${f.who.length > 1 ? 'are' : 'is'} ${f.adj}.`;
-    const haveSentence = f => `${names(f)} ${f.who.length > 1 ? 'have' : 'has'} a ${f.has}.`;
+    const haveSentence = f => `${names(f)} ${f.who.length > 1 ? 'have' : 'has'} ${f.many ? '' : 'a '}${f.has}.`;
 
-    // a reading or listening question, as printed
-    function qHtml(q, lab = abc) {
-      if (q.type === 'tf') return `<span class="grow">${esc(q.en)}</span><span class="right opts pair">True&nbsp; / &nbsp;False</span>`;
-      if (q.type === 'yn') return `<span class="grow">${esc(q.en)}</span><span class="right opts pair">Yes&nbsp; / &nbsp;No</span>`;
-      if (q.type === 'mc' || q.type === 'fact' || q.type === 'complete') {
-        const stem = q.type === 'complete' ? esc(q.en) + ' …' : esc(q.en);
-        return `<span class="stack grow"><span>${stem}</span><span class="opts">${q.choices.map((c, i) => `<span>${lab(i)}. ${esc(c.en)}</span>`).join('')}</span></span>`;
-      }
-      return esc(q.en);
+    // the tasks of the reading passage, in the printed order: neighbours of one kind (the true / false pair) are one task
+    function storyTasks() {
+      const out = [];
+      ST.questions.forEach(q => { const last = out[out.length - 1]; if (last && last.type === q.type && q.type === 'tf') last.qs.push(q); else out.push({ type: q.type, qs: [q] }); });
+      return out;
     }
-    const num = i => i + 1;
-    const qKey = (q, lab = abc) => q.type === 'tf' ? (q.ok ? 'True' : 'False') : q.type === 'yn' ? (q.ok ? 'Yes' : 'No')
-      : q.choices ? q.choices.map((c, i) => c.ok ? `${lab(i)}. ${esc(c.en)}` : '').filter(Boolean).join(' · ') : '';
 
-    // ---------- the test: five pages ----------
+    // ---------- the test: nine pages, broken where the practice copy breaks ----------
     function renderTest() {
-      const dq = L.dialogue.questions, plain = dq.filter(q => q.type !== 'tick2'), tick = dq.find(q => q.type === 'tick2');
+      const nPics = L.pics.items.length;
       const p1 = `
-        <div class="head"><h1>${esc(M.title)}</h1><div class="who"><span>Name: <span style="min-width:48mm">&nbsp;</span></span><span>Class: <span style="min-width:16mm">&nbsp;</span></span></div></div>
-        ${sec(1, 'Listening', 'האזנה', 'الاستماع', SEC.l)}
-        ${ins('A. Listen. Write the numbers 1–' + L.pics.items.length + ' under the pictures.', 'הקשיבו. כתבו את המספרים 1–' + L.pics.items.length + ' מתחת לתמונות.', 'استمعوا واكتبوا الأرقام 1–' + L.pics.items.length + ' تحت الصور.', P.lA)}
-        <div class="pics">${L.pics.order.map(n => `<div>${picHtml(L.pics.items[n - 1].pic)}<div class="numbox"></div></div>`).join('')}</div>
-        ${ins(`B. Listen to ${esc(L.dialogue.who.a)} and ${esc(L.dialogue.who.b)}. Circle the right answers.`, 'הקשיבו ליעל ולנועם. הקיפו את התשובות הנכונות.', 'استمعوا إلى ياعيل ونوعام. ضعوا دائرة حول الإجابات الصحيحة.', P.lB)}
-        <ol class="q loose">${plain.map(q => `<li>${qHtml(q)}</li>`).join('')}
-          <li><span class="stack grow"><span>${esc(tick.en)}</span><span class="tr inl" dir="rtl">סמנו ✓ מתחת לשתי התמונות הנכונות. · ضعوا إشارة ✓ تحت الصورتين الصحيحتين.</span><span class="ticks">${tick.choices.map(c => `<span class="tick">${emo(c.e)}<span class="box"></span></span>`).join('')}</span></span></li>
-        </ol>`;
+        <div class="top"><div class="tab">${esc(M.title)}</div><div class="who"><span>Name: <i style="width:52mm">&nbsp;</i></span><span>Grade: <i style="width:14mm">&nbsp;</i></span></div></div>
+        ${secH('Listening 1', P.l1)}
+        ${task('', 'Listen and number.', x(spoken.length, L.pics.pts),
+          'האזינו ומספרו את התמונות לפי הסדר שבו אתם שומעים עליהן.' + (nPics > spoken.length ? '<br>יש תמונה אחת מיותרת.' : ''),
+          'استمعوا ورقّموا الصور حسب الترتيب الذي تسمعون عنها.' + (nPics > spoken.length ? '<br>توجد صورة زائدة واحدة.' : ''))}
+        <div class="lpics">${L.pics.order.map((n, i) => { const p = picParts(L.pics.items[n - 1].pic); return `<div class="lp"><span class="tag"><b>${abc(i)}</b><i></i></span>${emo(p.e)}${p.d ? `<b class="d">${p.d}</b>` : ''}</div>`; }).join('')}</div>`;
 
+      const cs = ofType(DQ, 'complete'), tk = ofType(DQ, 'tick2')[0], yn = ofType(DQ, 'yn');
       const p2 = `
-        ${sec(2, 'Vocabulary', 'אוצר מילים', 'المفردات', SEC.v)}
-        ${ins('A. Match. Write the number of the English word next to the Hebrew word.', 'כתבו את מספר המילה באנגלית ליד המילה בעברית.', 'اكتبوا رقم الكلمة الإنجليزية بجانب الكلمة بالعبرية.', P.vA)}
-        <div class="match">
-          <ol class="q">${V.match.items.map(id => `<li>${esc(WORDS[id].en)}</li>`).join('')}</ol>
-          <ul class="he">${V.match.order.map(n => `<li><span class="sq"></span><span>${esc(WORDS[V.match.items[n - 1]].he)}</span></li>`).join('')}</ul>
-        </div>
-        ${ins('B. Complete the sentences. Use the words in the box.', 'השלימו את המשפטים בעזרת המילים שבמסגרת.', 'أكملوا الجمل بالكلمات التي في الإطار.', P.vB)}
-        <div class="bank">${V.bank.order.map(n => `<span>${esc(V.bank.items[n - 1].a)}</span>`).join('')}</div>
-        <ol class="q loose">${V.bank.items.map(it => `<li><span>${blank(it.t, true)}</span></li>`).join('')}</ol>
-        ${sec(3, 'Grammar', 'דקדוק', 'القواعد', SEC.g)}
-        ${ins('A. Write <u>am</u>, <u>is</u> or <u>are</u>.', 'כתבו am, is או are.', 'اكتبوا am أو is أو are.', P.gA)}
-        <ol class="q loose">${G.be.items.map(it => `<li><span>${blank(it.t)}</span></li>`).join('')}</ol>`;
+        ${secH('Listening 2', P.l2)}
+        ${task('', 'Listen.', '', L.dialogue.intro.he, L.dialogue.intro.ar)}
+        ${task(1, 'Circle the answers.', x(cs.length, cs[0].pts), 'הקיפו את התשובה הנכונה כדי להשלים כל משפט.', 'ضعوا دائرة حول الإجابة الصحيحة لإكمال كل جملة.')}
+        <div class="ind">${cs.map((q, i) => mc(q, i + 1)).join('')}</div>
+        ${task(2, 'Tick (✓) two pictures.', x(2, tk.pts / 2), tk.ins.he, tk.ins.ar)}
+        <div class="ind">${esc(tk.en)} ... .
+          <div class="tpics">${tk.choices.map((c, i) => `<div class="tp"><span class="tag"><b>${i + 1}</b><i></i></span>${emo(c.e)}</div>`).join('')}</div>
+        </div>`;
+      // the Yes / No task has a sheet to itself, as on the practice copy
+      const p2b = `
+        ${task(3, 'Tick (✓) <i>Yes</i> or <i>No</i>.', x(yn.length, yn[0].pts), 'סמנו ב-✓ Yes או No בהתאם לכל משפט.', 'ضعوا ✓ في Yes أو No بالنسبة لكل جملة.')}
+        <table class="yn"><tr><th></th><th>Yes</th><th>No</th></tr>${yn.map((q, i) => `<tr><td class="s">${i + 1}.&nbsp; ${esc(q.en)}</td><td class="c"><i></i></td><td class="c"><i></i></td></tr>`).join('')}</table>`;
 
       const p3 = `
-        ${sec(3, 'Grammar', 'דקדוק', 'القواعد')}
-        ${ins('B. Circle the right words.', 'הקיפו את המילים הנכונות.', 'ضعوا دائرة حول الكلمات الصحيحة.', P.gB)}
-        <ol class="q loose">${G.circle.items.map(it => `<li><span>${esc(it.t).replace('___', `<span class="opts pair">( ${esc(it.o[0])} &nbsp;/&nbsp; ${esc(it.o[1])} )</span>`)}</span></li>`).join('')}</ol>
-        ${ins('C. Write <u>have</u> or <u>has</u>.', 'כתבו have או has.', 'اكتبوا have أو has.', P.gC)}
-        <ol class="q loose">${G.have.items.map(it => `<li><span>${blank(it.t)}</span></li>`).join('')}</ol>
-        ${sec(4, 'Reading', 'הבנת הנקרא', 'فهم المقروء', SEC.r)}
-        ${ins('A. Match A to B. Write the letter in the box.', 'התאימו בין A ל-B. כתבו את האות במשבצת.', 'لائموا بين A و B. اكتبوا الحرف في المربع.', P.rA)}
+        ${secH('Vocabulary', SEC.v)}
+        ${task(1, 'Match A to B.', x(V.match.items.length, V.match.pts), 'התאימו את המילים ב-A לתרגומים שלהן ב-B.', 'لائموا الكلمات في A لترجمتها في B.')}
+        <div class="ab">
+          <div class="a"><h4>A</h4><ol class="q">${V.match.items.map(it => `<li>${esc(it.en)}</li>`).join('')}</ol></div>
+          <div class="b"><h4>B</h4><ol>${V.match.order.map((n, i) => { const it = V.match.items[n - 1]; return `<li><i></i><span class="l">${abc(i)}.</span><span class="w">${esc(it.he)} / ${esc(it.ar)}</span></li>`; }).join('')}</ol></div>
+        </div>
+        ${task(2, 'Complete the sentences.', x(V.bank.items.length, V.bank.pts), 'השלימו את המשפטים עם המילים שלמטה.', 'أكملوا الجمل بالكلمات الواردة أدناه.')}
+        ${bank(V.bank.order.map(n => V.bank.items[n - 1].a), 'mid')}
+        <ol class="q ind">${V.bank.items.map(it => `<li><span>${blank(it.t, true)}</span></li>`).join('')}</ol>`;
+
+      const opts3 = it => esc(it.t).replace('___', it.o.map(esc).join(' / '));
+      const p4 = `
+        ${secH('Grammar', SEC.g)}
+        ${task(1, 'Complete the sentences.', x(G.be.items.length, G.be.pts), 'השלימו את המשפטים עם am, is או are.', 'أكملوا الجمل بـ am، is أو are.')}
+        ${bank(['am', 'is', 'are'])}
+        <ol class="q ind">${G.be.items.map(it => `<li><span>${blank(it.t)}</span></li>`).join('')}</ol>
+        ${task(2, 'Circle the answers.', x(G.circle.items.length, G.circle.pts), 'הקיפו את התשובה הנכונה כדי להשלים כל משפט.', 'ضعوا دائرة حول الإجابة الصحيحة لإكمال كل جملة.')}
+        <ol class="q ind">${G.circle.items.map(it => `<li><span>${opts3(it)}</span></li>`).join('')}</ol>
+        ${task(3, 'Complete the sentences.', x(G.have.items.length, G.have.pts), 'השלימו את המשפטים עם have או has.', 'أكملوا الجمل بـ have أو has.')}
+        ${bank(['have', 'has'])}
+        <ol class="q ind">${G.have.items.map(it => `<li><span>${blank(it.t)}</span></li>`).join('')}</ol>`;
+
+      const H = R.halves;
+      const p5 = `
+        ${secH('Reading 1', P.r1)}
+        ${task('', 'Match A to B.', x(H.items.length, H.pts), 'התאימו את A ל-B כדי לחבר משפטים.', 'لائموا A مع B لتأليف جمل.')}
         <div class="halves">
-          <div><h4>A</h4><ol class="q">${R.halves.items.map(it => `<li><span class="grow">${esc(it.a)}</span><span class="sq"></span></li>`).join('')}</ol></div>
-          <div><h4>B</h4><ol class="q abc">${R.halves.order.map(n => `<li><span>${esc(R.halves.items[n - 1].b)}</span></li>`).join('')}</ol></div>
+          <span></span><span class="hd" style="padding-inline-start:4mm">A</span><span></span><span></span><span class="hd" style="padding-inline-start:4mm">B</span>
+          ${H.items.map((it, i) => `<span>${i + 1}.</span><div class="bx">${esc(it.a)}</div><span></span><span class="ln"><i></i>${abc(i)}.</span><div class="bx">${esc(H.items[H.order[i] - 1].b)}</div>`).join('')}
         </div>`;
 
-      const by = t => ST.questions.filter(q => q.type === t);
-      const w2 = by('write2')[0], tfs = by('tf'), mcs = ST.questions.filter(q => q.type === 'complete' || q.type === 'fact'), t2 = by('tick2')[0];
-      const p4 = `
-        ${sec(4, 'Reading', 'הבנת הנקרא', 'فهم المقروء')}
-        ${ins('B. Read the text. Answer the questions.', 'קראו את הקטע וענו על השאלות.', 'اقرأوا النص وأجيبوا عن الأسئلة.', P.rB)}
-        <div class="passage"><h3>${esc(ST.title)}</h3>${ST.paras.map(p => `<p>${p.map(i => esc(ST.sentences[i].en)).join(' ')}</p>`).join('')}</div>
-        ${sub('1. ' + esc(w2.en), 'כתבו שני דברים.', w2.pts)}
-        <ol class="q abc loose"><li><span class="blank grow"></span></li><li><span class="blank grow"></span></li></ol>
-        ${sub('2. Circle True or False.', 'הקיפו True או False.', sum(tfs.map(q => q.pts)))}
-        <ol class="q abc">${tfs.map(q => `<li>${qHtml(q)}</li>`).join('')}</ol>
-        ${sub('3. Circle the right answer.', 'הקיפו את התשובה הנכונה.', sum(mcs.map(q => q.pts)))}
-        <ol class="q abc">${mcs.map(q => `<li>${qHtml(q, num)}</li>`).join('')}</ol>
-        ${sub('4. ' + esc(t2.en).replace('Tick', 'Tick (✓)'), 'סמנו ✓ ליד שני המשפטים הנכונים.', t2.pts)}
-        <ul class="tl">${t2.choices.map(c => `<li><span class="box"></span><span>${esc(c.en)}</span></li>`).join('')}</ul>`;
+      // the passage and its first tasks on one sheet, the rest on the next, as the practice copy breaks them
+      const tasks = storyTasks();
+      const taskHtml = (t, n) => {
+        const q = t.qs[0];
+        if (t.type === 'write2') return task(n, 'Answer the question.', x(q.any || q.model.length, q.pts / (q.any || q.model.length)), 'ענו על השאלה.', 'أجيبوا عن السؤال.')
+          + `<div class="ind">${esc(q.en)}</div><ol class="w2">${'<li><i></i></li>'.repeat(q.any || q.model.length)}</ol>`;
+        if (t.type === 'tf') return task(n, 'Circle <i>true</i> or <i>false</i>.', x(t.qs.length, q.pts), 'קראו את המשפטים. הקיפו true (נכון) או false (לא נכון) לגבי כל משפט.', 'اقرأوا الجمل. ضعوا دائرة حول true (صحيح) أو false (غير صحيح) بالنسبة لكل جملة.')
+          + `<ol class="q ind tf">${t.qs.map(s => `<li><span class="s">${esc(s.en)}</span><b>true / false</b></li>`).join('')}</ol>`;
+        if (t.type === 'tick2') return task(n, 'Tick (✓) the two answers.', x(2, q.pts / 2), 'סמנו ✓ ליד שתי התשובות הנכונות.', 'ضعوا ✓ بجانب الإجابتين الصحيحتين.')
+          + `<div class="ind">${esc(q.en)}</div><ol class="t2">${q.choices.map(c => `<li><i></i><span>${esc(c.en)}</span></li>`).join('')}</ol>`;
+        return task(n, 'Circle the answer.', x(1, q.pts), 'הקיפו את התשובה הנכונה כדי להשלים את המשפט.', 'ضعوا دائرة حول الإجابة الصحيحة لإكمال الجملة.')
+          + `<div class="ind">${mc(q, 0, 'flat')}</div>`;
+      };
+      const cut = 2;
+      const p6 = `
+        ${secH('Reading 2', P.r2)}
+        ${task('', 'Read the text.', '', 'קראו את הקטע.', 'اقرأوا النص.')}
+        <div class="passage">${ST.paras.map(p => `<p>${p.map(i => esc(ST.sentences[i].en)).join(' ')}</p>`).join('')}</div>
+        ${tasks.slice(0, cut).map((t, i) => taskHtml(t, i + 1)).join('')}`;
+      const p7 = tasks.slice(cut).map((t, i) => taskHtml(t, cut + i + 1)).join('');
 
-      const p5 = `
-        ${sec(5, 'Writing', 'כתיבה', 'الكتابة', SEC.w)}
-        ${ins(`Look at the picture. Write ${W.be + W.have} sentences about the children. Use the words in the box.`, 'הסתכלו בתמונה. כתבו חמישה משפטים על הילדים. היעזרו במילים שבמסגרת.', 'انظروا إلى الصورة. اكتبوا خمس جمل عن الأولاد. استعينوا بالكلمات التي في الإطار.', P.w)}
+      const heN = ['', 'משפט אחד', 'שני משפטים', 'שלושה משפטים', 'ארבעה משפטים', 'חמישה משפטים'], arN = ['', 'جملة واحدة', 'جملتين', 'ثلاث جمل', 'أربع جمل', 'خمس جمل'];
+      const p8 = `
+        ${secH('Writing', P.w)}
+        ${task('', 'Write sentences.', x(W.be + W.have, W.pts),
+          `כתבו ${heN[W.be + W.have]} על התמונה:<br>• כתבו ${heN[W.be]} עם הפועל is / are.<br>• כתבו ${heN[W.have]} עם הפועל have / has.<br>השתמשו בכללי דקדוק, בכתיב ובסימני פיסוק נכונים.`,
+          `اكتبوا ${arN[W.be + W.have]} عن الصورة:<br>• اكتبوا ${arN[W.be]} مع الفعل is / are.<br>• اكتبوا ${arN[W.have]} مع الفعل have / has.<br>استعملوا القواعد النحوية، الإملاء وعلامات الترقيم الصحيحة.`)}
+        ${bank(W.bank.slice(0, Math.ceil(W.bank.length / 2)), 'mid tight')}${bank(W.bank.slice(Math.ceil(W.bank.length / 2)), 'mid')}
         <div class="scene" style="grid-template-columns:${W.figs.map(f => `repeat(${f.who.length + 1}, max-content)`).join(' 1fr ')}">${W.figs.map(figHtml).join(col('', '', 'gap'))}</div>
-        <div class="bank">${W.bank.map(w => `<span>${esc(w)}</span>`).join('')}</div>
-        <ol class="wlines">
-          <li class="gap">Write ${W.be} sentences with <u>is</u> or <u>are</u>. <span class="tr" dir="rtl">שני משפטים עם is או are · جملتان مع is أو are</span></li>
-          ${'<li></li>'.repeat(W.be)}
-          <li class="gap">Write ${W.have} sentences with <u>have</u> or <u>has</u>. <span class="tr" dir="rtl">שלושה משפטים עם have או has · ثلاث جمل مع have أو has</span></li>
-          ${'<li></li>'.repeat(W.have)}
-        </ol>`;
+        <ol class="wlines">${'<li></li>'.repeat(W.be + W.have)}</ol>`;
 
-      const pages = [p1, p2, p3, p4, p5];
-      document.getElementById('test').innerHTML = pages.map((p, i) => page(i + 1, pages.length, p)).join('');
+      document.getElementById('test').innerHTML = [p1, p2, p2b, p3, p4, p5, p6, p7, p8].map((p, i) => page(i + 1, p)).join('');
     }
 
     // ---------- the key: what he checks his sheet against, with the coach beside him ----------
     function renderKey() {
-      const dq = L.dialogue.questions, plain = dq.filter(q => q.type !== 'tick2'), tick = dq.find(q => q.type === 'tick2');
-      const row = (items, lead) => `<div class="row">${lead ? `<b>${lead}</b>` : ''}${items.map((x, i) => `<span><span class="n">${i + 1}.</span> <b>${x}</b></span>`).join('')}</div>`;
-      const by = t => ST.questions.filter(q => q.type === t);
-      const w2 = by('write2')[0], tfs = by('tf'), mcs = ST.questions.filter(q => q.type === 'complete' || q.type === 'fact'), t2 = by('tick2')[0];
+      const row = (items, lead) => `<div class="row">${lead ? `<b>${lead}</b>` : ''}${items.map((v, i) => `<span><span class="n">${i + 1}.</span> <b>${v}</b></span>`).join('')}</div>`;
+      const cs = ofType(DQ, 'complete'), tk = ofType(DQ, 'tick2')[0], yn = ofType(DQ, 'yn');
+      const ticks = q => q.choices.map((c, i) => c.ok ? i + 1 : 0).filter(Boolean);
+      const tasks = storyTasks();
+      const storyKey = (t, n) => {
+        const q = t.qs[0];
+        if (t.type === 'write2') return `<div class="row"><b>${n}</b><span>${q.any && q.any < q.model.length ? `any ${q.any} of: ` : ''}<b>${q.model.map(esc).join('</b> · <b>')}</b></span></div>`;
+        if (t.type === 'tf') return row(t.qs.map(s => s.ok ? 'true' : 'false'), n);
+        if (t.type === 'tick2') return `<div class="row"><b>${n}</b><span class="long"><b>${ticks(q).join('</b> and <b>')}</b> &nbsp;${q.choices.filter(c => c.ok).map(c => esc(c.en)).join(' &nbsp;·&nbsp; ')}</span></div>`;
+        return `<div class="row"><b>${n}</b><span><b>${mcKey(q)}</b></span></div>`;
+      };
       const html = `
         <h1 class="title">${esc(M.title)} · Answers</h1>
         <div class="he" style="font-size:12pt">בודקים ביחד, משפט אחרי משפט.</div>
-        <h2>1. Listening</h2>
-        <div><b>A.</b> the pictures, left to right:</div>
-        <div class="kpics">${L.pics.order.map(n => `<div>${L.pics.items[n - 1].pic.replace(/^(\S+)( \d+)?$/, (m, e, d) => emo(e) + (d ? `<i>${d}</i>` : ''))}<b>${n}</b></div>`).join('')}</div>
-        ${row(plain.map(q => qKey(q)).concat([tick.choices.filter(c => c.ok).map(c => `${emo(c.e)} ${esc(c.en)}`).join(' + ')]), 'B.')}
-        <h2>2. Vocabulary</h2>
-        <div><b>A.</b> the Hebrew words, top to bottom:</div>
-        <div class="row">${V.match.order.map(n => `<span><b>${n}</b> <span class="he">${esc(WORDS[V.match.items[n - 1]].he)}</span></span>`).join('')}</div>
-        ${row(V.bank.items.map(it => esc(it.a)), 'B.')}
-        <h2>3. Grammar</h2>
-        ${row(G.be.items.map(it => esc(it.a)), 'A.')}
-        ${row(G.circle.items.map(it => esc(it.a)), 'B.')}
-        ${row(G.have.items.map(it => esc(it.a)), 'C.')}
-        <h2>4. Reading</h2>
-        <div><b>A.</b></div>
+        <h2>Listening 1</h2>
+        <div class="kpics">${L.pics.order.map((n, i) => { const it = L.pics.items[n - 1], p = picParts(it.pic); return `<div>${abc(i)} &nbsp;${emo(p.e)}${p.d ? `<i>${p.d}</i>` : ''}<b>${it.say ? n : '–'}</b></div>`; }).join('')}</div>
+        <h2>Listening 2</h2>
+        ${row(cs.map(mcKey), '1')}
+        <div class="row"><b>2</b><span>pictures <b>${ticks(tk).join('</b> and <b>')}</b> &nbsp;${tk.choices.filter(c => c.ok).map(c => emo(c.e)).join(' &nbsp;')}</span></div>
+        ${row(yn.map(q => q.ok ? 'Yes' : 'No'), '3')}
+        <h2>Vocabulary</h2>
+        <div class="row"><b>1</b>${V.match.order.map((n, i) => `<span>${abc(i)}. <b>${n}</b> <span class="he">${esc(V.match.items[n - 1].he)}</span></span>`).join('')}</div>
+        ${row(V.bank.items.map(it => esc(it.a)), '2')}
+        <h2>Grammar</h2>
+        ${row(G.be.items.map(it => esc(it.a)), '1')}
+        ${row(G.circle.items.map(it => esc(it.a)), '2')}
+        ${row(G.have.items.map(it => esc(it.a)), '3')}
+        <h2>Reading 1</h2>
         <div class="row">${R.halves.items.map((it, i) => `<span><span class="n">${i + 1}.</span> <b>${abc(R.halves.order.indexOf(i + 1))}</b> &nbsp;${esc(it.a)} ${esc(it.b)}</span>`).join('')}</div>
-        <div><b>B.</b></div>
-        <div class="row"><span><span class="n">1.</span> <b>${w2.model.map(esc).join('</b> &nbsp;·&nbsp; <b>')}</b></span></div>
-        <div class="row"><span><span class="n">2.</span> ${tfs.map((q, i) => `${abc(i)}. <b>${qKey(q)}</b>`).join(' &nbsp; ')}</span></div>
-        <div class="row"><span><span class="n">3.</span> ${mcs.map((q, i) => `${abc(i)}. <b>${qKey(q, num)}</b>`).join(' &nbsp; ')}</span></div>
-        <div class="row"><span><span class="n">4.</span> <b>${t2.choices.filter(c => c.ok).map(c => esc(c.en)).join('</b> &nbsp;·&nbsp; <b>')}</b></span></div>
-        <h2>5. Writing</h2>
+        <h2>Reading 2</h2>
+        ${tasks.map((t, i) => storyKey(t, i + 1)).join('')}
+        <h2>Writing</h2>
         <div><u>is</u> / <u>are</u> · any ${W.be}:</div>
         <div class="row">${W.figs.map(f => `<b>${esc(beSentence(f))}</b>`).join('')}</div>
         <div><u>have</u> / <u>has</u> · any ${W.have}:</div>
         <div class="row">${W.figs.map(f => `<b>${esc(haveSentence(f))}</b>`).join('')}</div>
         <ol class="checks">
           <li>השם ראשון, באות גדולה.</li>
-          <li>המילה הקטנה הנכונה: ילד אחד מקבל <span class="en">is</span> / <span class="en">has</span>, שני ילדים מקבלים <span class="en">are</span> / <span class="en">have</span>.</li>
-          <li>כל מילה מהמסגרת מועתקת בדיוק, ונקודה בסוף.</li>
+          <li>המילה הקטנה הנכונה: אחד מקבל <span class="en">is</span> / <span class="en">has</span>, שניים מקבלים <span class="en">are</span> / <span class="en">have</span>. לפני דבר אחד בא <span class="en">a</span>, כמו <span class="en">a dog</span>. לפני <span class="en">flowers</span> לא.</li>
+          <li>כל מילה מהרשימה מועתקת בדיוק, ונקודה בסוף.</li>
         </ol>`;
       document.getElementById('key').innerHTML = `<section class="page key">${html}</section>`;
     }
 
-    // ---------- the coach's page: how to run it, the listening text, the points ----------
+    // ---------- the coach's pages: how to run it and the listening text; the points ----------
     function renderCoach() {
       const nums = ['one', 'two', 'three', 'four', 'five', 'six'];
-      const tr = (name, how, pts) => `<tr><td>${name}</td><td>${how}</td><td class="num">${pts}</td><td class="num"></td></tr>`;
-      const by = t => ST.questions.filter(q => q.type === t);
+      const tr = (name, how, pts) => `<tr><td><span class="en">${name}</span></td><td>${how}</td><td class="num">${pts}</td><td class="num"></td></tr>`;
+      const cs = ofType(DQ, 'complete'), tk = ofType(DQ, 'tick2')[0], yn = ofType(DQ, 'yn');
+      const each = t => { const q = t.qs[0]; return t.type === 'write2' ? `${q.pts / (q.any || q.model.length)} לכל דבר` : t.type === 'tf' ? `${q.pts} לכל משפט` : t.type === 'tick2' ? `${q.pts / 2} לכל סימון נכון` : `${q.pts}`; };
       const html = `
         <h1 class="title">דף למאמן</h1>
-        <div class="note">מבחן לדוגמה במבנה של עותק התרגול: חמישה חלקים, ${TOTAL} נקודות. כל התוכן חדש: השמות, התמונה, הקטע והשיחה.</div>
+        <div class="note">מבחן לדוגמה במבנה של עותק התרגול: אותם חלקים, אותן משימות ואותו ניקוד, ${TOTAL} נקודות. כל התוכן חדש: השמות, התמונות, הקטע והשיחה.</div>
         <h2>איך מריצים</h2>
         <ol>
-          <li>מדפיסים את חמשת עמודי המבחן: הכפתור "המבחן" ואז "הדפסה", על דפי A4. המפתח והדף הזה מודפסים בנפרד, או נשארים על המסך.</li>
+          <li>מדפיסים את תשעת עמודי המבחן: הכפתור "המבחן" ואז "הדפסה", על דפי A4. המפתח והדף הזה מודפסים בנפרד, או נשארים על המסך.</li>
           <li>עט, שולחן שקט, והמסך לא מולו. בלי שעון.</li>
-          <li>מתחילים בהאזנה. הכפתורים "האזנה א" ו"האזנה ב" משמיעים כל חלק פעמיים, בקול של המכשיר. אם הקולות לא ברורים, קוראים בקול את הטקסט שלמטה, פעמיים, בקצב רגיל.</li>
+          <li>מתחילים בהאזנה. הכפתורים "האזנה 1" ו"האזנה 2" משמיעים כל חלק פעמיים, בקול של המכשיר. אם הקולות לא ברורים, קוראים בקול את הטקסט שלמטה, פעמיים, בקצב רגיל.</li>
           <li>בשאר החלקים לא מקריאים ולא מתרגמים.</li>
           <li>בסוף בודקים ביחד מול "מפתח תשובות": הוא מסמן על הדף שלו, ואתם לצידו.</li>
         </ol>
-        <div class="note"><b>בלי מדפסת:</b> פותחים את "המבחן" על האייפד והוא כותב את התשובות על דף רגיל. את קטע הקריאה (עמוד 4) כדאי להעתיק ביד לדף, כי שם הקריאה מהנייר חשובה במיוחד.</div>
-        <h2>האזנה א</h2>
-        <div class="script">${L.pics.items.map((it, i) => `<div><b>Number ${nums[i]}.</b> ${esc(it.say)}</div>`).join('')}</div>
-        <h2>האזנה ב</h2>
+        <div class="note"><b>בלי מדפסת:</b> פותחים את "המבחן" על האייפד והוא כותב את התשובות על דף רגיל. את קטע הקריאה (עמוד 7) כדאי להעתיק ביד לדף, כי שם הקריאה מהנייר חשובה במיוחד.</div>
+        <h2>האזנה 1</h2>
+        <div class="script">${spoken.map((it, i) => `<div><b>Number ${nums[i]}.</b> ${esc(it.say)}</div>`).join('')}</div>
+        <h2>האזנה 2</h2>
         <div class="script">${L.dialogue.lines.map(l => `<div><b>${esc(L.dialogue.who[l.who])}:</b> ${esc(l.en)}</div>`).join('')}</div>
-</section><section class="page coach" lang="he">
+        </section><section class="page coach" lang="he">
         <h1 class="title">ניקוד</h1>
         <div class="note">הדף הזה נשאר אצלכם.</div>
         <table>
           <tr><th>חלק</th><th>איך סופרים</th><th class="num">נקודות</th><th class="num">שלו</th></tr>
-          ${tr('<span class="en">Listening A</span>', `${L.pics.items.length} תמונות, ${L.pics.pts} לכל אחת`, P.lA)}
-          ${tr('<span class="en">Listening B</span>', `${L.dialogue.questions.length} שאלות, ${L.dialogue.pts} לכל אחת (בשאלת התמונות: 1 לכל תמונה נכונה)`, P.lB)}
-          ${tr('<span class="en">Vocabulary A</span>', `${V.match.items.length} מילים, ${V.match.pts} לכל אחת`, P.vA)}
-          ${tr('<span class="en">Vocabulary B</span>', `${V.bank.items.length} משפטים, ${V.bank.pts} לכל אחד. המילה מועתקת בדיוק כמו במסגרת (<span class="en">begins</span>, לא <span class="en">begin</span>)`, P.vB)}
-          ${tr('<span class="en">Grammar A</span>', `${G.be.items.length} משפטים, ${G.be.pts} לכל אחד`, P.gA)}
-          ${tr('<span class="en">Grammar B</span>', `${G.circle.items.length} משפטים, ${G.circle.pts} לכל אחד`, P.gB)}
-          ${tr('<span class="en">Grammar C</span>', `${G.have.items.length} משפטים, ${G.have.pts} לכל אחד`, P.gC)}
-          ${tr('<span class="en">Reading A</span>', `${R.halves.items.length} משפטים, ${R.halves.pts} לכל אחד`, P.rA)}
-          ${tr('<span class="en">Reading B</span>', `שאלה 1: ${by('write2')[0].pts / 2} לכל דבר · שאלה 2: ${by('tf')[0].pts} לכל משפט · שאלה 3: 2 לכל תשובה · שאלה 4: ${by('tick2')[0].pts / 2} לכל סימון נכון`, P.rB)}
-          ${tr('<span class="en">Writing</span>', `${W.be + W.have} משפטים, ${W.pts} לכל משפט ששלוש הבדיקות שבמפתח עוברות בו`, P.w)}
+          ${tr('Listening 1', `${spoken.length} תמונות, ${L.pics.pts} לכל אחת. התמונה המיותרת נשארת ריקה`, P.l1)}
+          ${tr('Listening 2', `משימה 1: ${cs.length} משפטים, ${cs[0].pts} לכל אחד · משימה 2: ${tk.pts / 2} לכל תמונה נכונה · משימה 3: ${yn[0].pts} לכל משפט`, P.l2)}
+          ${tr('Vocabulary 1', `${V.match.items.length} מילים, ${V.match.pts} לכל אחת`, P.v1)}
+          ${tr('Vocabulary 2', `${V.bank.items.length} משפטים, ${V.bank.pts} לכל אחד. המילה מועתקת בדיוק כמו ברשימה (<span class="en">washes</span>, לא <span class="en">wash</span>)`, P.v2)}
+          ${tr('Grammar 1', `${G.be.items.length} משפטים, ${G.be.pts} לכל אחד`, P.g1)}
+          ${tr('Grammar 2', `${G.circle.items.length} משפטים, ${G.circle.pts} לכל אחד`, P.g2)}
+          ${tr('Grammar 3', `${G.have.items.length} משפטים, ${G.have.pts} לכל אחד`, P.g3)}
+          ${tr('Reading 1', `${R.halves.items.length} משפטים, ${R.halves.pts} לכל אחד`, P.r1)}
+          ${tr('Reading 2', storyTasks().map((t, i) => `משימה ${i + 1}: ${each(t)}`).join(' · '), P.r2)}
+          ${tr('Writing', `${W.be + W.have} משפטים, ${W.pts} לכל משפט ששלוש הבדיקות שבמפתח עוברות בו`, P.w)}
           <tr><th colspan="2">סך הכול</th><th class="num">${TOTAL}</th><th class="num"></th></tr>
         </table>`;
       document.getElementById('coach').innerHTML = `<section class="page coach" lang="he">${html}</section>`;
@@ -410,7 +467,6 @@
     }
     // on a screen narrower than a sheet (an iPad held upright is just wide enough), the sheets shrink to fit
     function fit() {
-      const sheet = document.querySelector('.page'); if (!sheet) return;
       const w = 210 * 96 / 25.4 + 24, z = Math.min(1, window.innerWidth / w);
       document.querySelectorAll('main').forEach(m => { m.style.zoom = z < 1 ? z : ''; });
     }
@@ -428,7 +484,7 @@
         const other = v => v.lang.startsWith('en') && (!this.v1 || v.name !== this.v1.name);
         this.v2 = vs.find(v => pref2.includes(v.name) && other(v)) || vs.find(v => v.lang === 'en-GB' && other(v)) || null;
       },
-      // one line; resolves when it has been said (or after 12 s, if the device never reports the end)
+      // one line; resolves when it has been said (or after 15 s, if the device never reports the end)
       line(text, who) {
         return new Promise(res => {
           let done = false; const fin = () => { if (!done) { done = true; res(); } };
@@ -440,7 +496,7 @@
             u.onend = u.onerror = fin;
             speechSynthesis.speak(u);
           } catch (e) { fin(); }
-          setTimeout(fin, 12000);
+          setTimeout(fin, 15000);
         });
       },
       stop() { this.run++; try { if (this.ok()) speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
@@ -452,14 +508,14 @@
       if (part === 'stop') return status('');
       if (!Say.ok()) return status('אין קול במכשיר הזה. הטקסט נמצא ב"דף למאמן".');
       Say.pick();
-      const my = Say.run, live = () => my === Say.run, name = part === 'a' ? 'האזנה א' : 'האזנה ב';
+      const my = Say.run, live = () => my === Say.run, name = part === 'a' ? 'האזנה 1' : 'האזנה 2';
       const nums = ['one', 'two', 'three', 'four', 'five', 'six'];
       for (let pass = 1; pass <= 2 && live(); pass++) {
         status(`${name} · השמעה ${pass} מתוך 2`);
         if (part === 'a') {
-          for (let i = 0; i < L.pics.items.length && live(); i++) {
+          for (let i = 0; i < spoken.length && live(); i++) {
             await Say.line(`Number ${nums[i]}.`); await wait(500); if (!live()) return;
-            await Say.line(L.pics.items[i].say); await wait(3500); if (!live()) return;
+            await Say.line(spoken[i].say); await wait(3500); if (!live()) return;
           }
         } else {
           for (const l of L.dialogue.lines) { await Say.line(l.en, l.who); await wait(600); if (!live()) return; }

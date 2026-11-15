@@ -716,71 +716,98 @@ window.CONTENT = {
     dana: 'דנה', omer: 'עומר', maya: 'מאיה', tom: 'תום', roni: 'רוני', noa: 'נועה', tali: 'טלי',
   },
 
-  // The mock (PRD §6.4): a clone of the practice copy's five sections and point weights, with all content new.
+  // The mock (PRD §6.4): a clone of the practice copy, task by task, with all content new.
   // `mock.html` prints it (the test, the key, a page for the coach); the final boss will read the same data.
+  // The shape follows the scan of the practice copy (read 15 Nov): the tasks, how many items each has, how many
+  // choices a question offers, and the points. Only the shape: none of the publisher's sentences are here.
   // Nothing here is used anywhere else in the game: the names, the passage (C5) and the dialogue stay unseen
   // and unheard until the mock. Do not move C5 into `stories` or the dialogue into `listening`.
+  // The practice copy's own names are kept out too (Ben, Adam, Lily, Linda, Kate, Carl, Dave, Liz, Pete, Jen,
+  // Nancy, Alice, Mark; Dan, Dana and Tom are the game's as well).
   // pts = the points one item is worth (the weights are settings, PRD §10).
   // order = the printed order of a column that is shuffled on paper (item numbers, 1-based), so the key is fixed.
   mock: {
     title: 'Unit 1 Test',
     listening: {
-      // A: "number the pictures as you hear them". say = the spoken sentence, pic = its picture.
-      pics: { pts: 2, order: [4, 2, 5, 1, 3], items: [
-        { say: 'Lia gives the dog a ball.',            pic: '👧⚽🐶' },
-        { say: 'Ben puts the toys in the box.',        pic: '👦🧸📦' },
+      // Listening 1, "listen and number": six pictures, five of them spoken. The item without `say` is the extra picture.
+      pics: { pts: 2, order: [4, 2, 5, 6, 1, 3], items: [
+        { say: 'Lia gives the dog a ball.',             pic: '👧⚽🐶' },
+        { say: 'Amit puts the toys in the box.',        pic: '👦🧸📦' },
         { say: 'Gal and Uri are at the pool together.', pic: '🏊🏊' },
-        { say: 'It is her birthday. She is fifteen.',  pic: '🎂 15' },
-        { say: 'Ella has a brush and a hat.',          pic: '👧🪥🎩' },
+        { say: 'It is her birthday. She is fifteen.',   pic: '🎂 15' },
+        { say: 'Ella has a brush and a hat.',           pic: '👧🪥🎩' },
+        { pic: '🎂 50' },
       ] },
-      // B: an unheard dialogue, two voices, played twice. Question types as in `listening` above.
-      dialogue: { pts: 2, who: { a: 'Yael', b: 'Noam' },
+      // Listening 2: an unheard dialogue, two voices, played twice. Three tasks, in this order: three sentences to
+      // complete (four endings each), two pictures to tick out of five, two statements to mark Yes or No.
+      // pts on a tick2 is for both ticks together. intro and ins are the instruction lines that name the speakers.
+      dialogue: { who: { a: 'Yael', b: 'Noam' },
+        intro: { he: 'האזינו לשיחה בין יעל לנועם ביום ההולדת שלו.', ar: 'استمعوا إلى الحوار بين ياعيل ونوعام في عيد ميلاده.' },
         lines: [
-          { who: 'a', en: 'Hello, Noam! Is it your birthday today?' },
-          { who: 'b', en: 'Yes, it is! I am eleven today.' },
-          { who: 'a', en: 'Happy birthday! What is in the big box? A new toy?' },
+          { who: 'a', en: 'Hello, Noam! Happy birthday!' },
+          { who: 'b', en: 'Thank you, Yael! I am eleven today.' },
+          { who: 'a', en: 'What is in the big box? Is it a new toy?' },
           { who: 'b', en: "No, it isn't a toy. It is a dog! I have a new dog." },
           { who: 'a', en: 'A dog! Is it big?' },
-          { who: 'b', en: "No, it isn't. It is young, and it is very fast." },
-          { who: 'a', en: 'I have a ball and a brush for your dog.' },
-          { who: 'b', en: 'Thank you, Yael! You are a good friend.' },
+          { who: 'b', en: "No, she isn't. She is small and very young. Her name is Luna." },
+          { who: 'a', en: 'A young dog needs a lot of help.' },
+          { who: 'b', en: 'Yes. Mom says I need to wash Luna every month and brush her every day.' },
+          { who: 'a', en: 'I have a ball for Luna. Dogs like to play with a ball.' },
+          { who: 'b', en: "Thank you! Luna has a blanket and a bed, but she doesn't have a ball." },
+          { who: 'a', en: 'Can I play with Luna today?' },
+          { who: 'b', en: 'Yes! Come to my house at five. We can play with her together.' },
         ],
         questions: [
-          { type: 'mc', en: 'How old is Noam today?', he: 'בן כמה נועם היום?', choices: [{ en: 'ten' }, { en: 'eleven', ok: true }, { en: 'twelve' }] },
-          { type: 'yn', en: "Is it Noam's birthday today?", he: 'היום יום ההולדת של נועם?', ok: true },
-          { type: 'mc', en: 'What is in the big box?', he: 'מה יש בקופסה הגדולה?', choices: [{ en: 'a toy' }, { en: 'a cat' }, { en: 'a dog', ok: true }] },
-          { type: 'yn', en: 'Is the dog big?', he: 'הכלב גדול?', ok: false },
-          { type: 'tick2', en: 'What does Yael have for the dog? Tick the TWO pictures.', he: 'מה יש ליעל בשביל הכלב? שתי תמונות', choices: [{ e: '🧸', en: 'a toy' }, { e: '⚽', en: 'a ball', ok: true }, { e: '📕', en: 'a book' }, { e: '🎩', en: 'a hat' }, { e: '🪥', en: 'a brush', ok: true }] },
+          { type: 'complete', pts: 2, en: 'In the big box there is', he: 'בקופסה הגדולה יש', choices: [{ en: 'a new toy' }, { en: 'a big ball' }, { en: 'a young dog', ok: true }, { en: 'a blanket' }] },
+          { type: 'complete', pts: 2, en: 'Luna is', he: 'לונה היא', choices: [{ en: 'big and fast' }, { en: 'small and young', ok: true }, { en: 'old and small' }, { en: 'young and big' }] },
+          { type: 'complete', pts: 2, en: 'Yael has ... for Luna', he: 'ליעל יש ... בשביל לונה', choices: [{ en: 'a blanket' }, { en: 'a bed' }, { en: 'a brush' }, { en: 'a ball', ok: true }] },
+          { type: 'tick2', pts: 2, en: 'Mom says Noam needs to', he: 'אימא אומרת שנועם צריך',
+            ins: { he: 'סמנו ב-✓ את שתי התמונות שמראות מה אימא אומרת שנועם צריך לעשות כדי לטפל בכלבה.', ar: 'ضعوا ✓ بجانب الصورتين اللتين تظهران ما تقول الأم إنه يجب على نوعام أن يفعله للعناية بالكلبة.' },
+            choices: [{ e: '⚽🐕', en: 'play with a ball' }, { e: '🧼🐕', en: 'wash the dog', ok: true }, { e: '🍖🐕', en: 'give the dog food' }, { e: '🪥🐕', en: 'brush the dog', ok: true }, { e: '🛏️🐕', en: 'put the dog on the bed' }] },
+          { type: 'yn', pts: 1, en: 'Noam is twelve today.', he: 'נועם בן שתים עשרה היום.', ok: false },
+          { type: 'yn', pts: 1, en: 'Yael can play with Luna today.', he: 'יעל יכולה לשחק עם לונה היום.', ok: true },
         ] },
     },
     vocab: {
-      // A: English → Hebrew. w = word ids; the Hebrew is the word's own `he`. `same` and `different` are both in.
-      match: { pts: 1, order: [7, 3, 10, 1, 8, 5, 2, 9, 6, 4],
-        items: ['because', 'people', 'better', 'important', 'together', 'break', 'always', 'different', 'every', 'same'] },
-      // B: the word bank gives the exact form to copy (begins, washes). Each word fits one sentence only.
-      bank: { pts: 2, order: [3, 1, 5, 4, 2], items: [
-        { t: 'The next game ___ in June.',             a: 'begins',   he: 'המשחק הבא מתחיל ביוני.' },
-        { t: 'Every month Gal ___ his old blanket.',   a: 'washes',   he: 'כל חודש גל שוטף את השמיכה הישנה שלו.' },
-        { t: 'The pool is big. Fifty ___ are in the water.', a: 'people', he: 'הבריכה גדולה. חמישים אנשים נמצאים במים.' },
-        { t: 'Mika is young, ___ she is very tall.',   a: 'but',      he: 'מיקה צעירה, אבל היא גבוהה מאוד.' },
-        { t: 'Ben has ___ toys in his box.',           a: 'a lot of', he: 'לבן יש הרבה צעצועים בקופסה שלו.' },
+      // 1: English to its translation. The practice copy gives each translation in Hebrew and in Arabic, and mixes
+      // words from the 50 with the bonus land's (a month, a number, a picture adjective). `same` and `different` are both in.
+      match: { pts: 1, order: [8, 2, 10, 5, 3, 7, 1, 9, 6, 4], items: [
+        { en: 'always',    he: 'תמיד',        ar: 'دائمًا' },
+        { en: 'better',    he: 'יותר טוב',    ar: 'أفضل' },
+        { en: 'different', he: 'שונה',        ar: 'مختلف' },
+        { en: 'important', he: 'חשוב',        ar: 'مهم' },
+        { en: 'June',      he: 'יוני',        ar: 'حزيران، يونيو' },
+        { en: 'people',    he: 'אנשים',       ar: 'ناس' },
+        { en: 'same',      he: 'אותו הדבר',   ar: 'نفس الشيء' },
+        { en: 'tall',      he: 'גבוה',        ar: 'طويل' },
+        { en: 'thirteen',  he: 'שלוש עשרה',   ar: 'ثلاثة عشر' },
+        { en: 'together',  he: 'ביחד',        ar: 'معًا' },
+      ] },
+      // 2: five words for five sentences, each in the exact form to copy (washes, wins). As on the practice copy the
+      // bank holds a number word and a two-word phrase. Each word fits one sentence only.
+      bank: { pts: 2, order: [5, 2, 3, 1, 4], items: [
+        { t: 'We are at the pool ___.',                 a: 'every day', he: 'אנחנו בבריכה כל יום.' },
+        { t: 'My mom is ___ years old.',                a: 'forty',     he: 'אימא שלי בת ארבעים.' },
+        { t: 'Every month Gal ___ his old blanket.',    a: 'washes',    he: 'כל חודש גל שוטף את השמיכה הישנה שלו.' },
+        { t: 'The game in June is very ___.',           a: 'important', he: 'המשחק ביוני חשוב מאוד.' },
+        { t: 'My team is very good. It always ___.',    a: 'wins',      he: 'הקבוצה שלי טובה מאוד. היא תמיד מנצחת.' },
       ] },
     },
     grammar: {
       be: { pts: 2, items: [
         { t: 'Lia ___ ten years old.',                a: 'is' },
-        { t: 'Ben and Uri ___ in the same team.',     a: 'are' },
+        { t: 'Amit and Uri ___ on the same team.',    a: 'are' },
         { t: 'I ___ at the pool with my friends.',    a: 'am' },
         { t: 'My dog ___ very fast.',                 a: 'is' },
         { t: 'The toys ___ in the box.',              a: 'are' },
       ] },
-      // o = the two forms printed in brackets, in this order
+      // o = the three forms printed in the sentence, in this order
       circle: { pts: 1, items: [
-        { t: 'Shira ___ sad.',                o: ["isn't", "aren't"], a: "isn't" },
-        { t: '___ Ben and Uri friends?',      o: ['Is', 'Are'],       a: 'Are' },
-        { t: 'I ___ old.',                    o: ['am not', "isn't"], a: 'am not' },
-        { t: '___ your birthday in May?',     o: ['Is', 'Are'],       a: 'Is' },
-        { t: 'The games ___ hard.',           o: ["isn't", "aren't"], a: "aren't" },
+        { t: 'Shira ___ sad.',                o: ['am not', "isn't", "aren't"], a: "isn't" },
+        { t: 'The games ___ hard.',           o: ['am not', "isn't", "aren't"], a: "aren't" },
+        { t: 'I ___ old.',                    o: ['am not', "isn't", "aren't"], a: 'am not' },
+        { t: '___ your birthday in May?',     o: ['Am', 'Is', 'Are'],           a: 'Is' },
+        { t: '___ Gal and Uri friends?',      o: ['Is', 'Am', 'Are'],           a: 'Are' },
       ] },
       have: { pts: 1, items: [
         { t: 'Gal ___ a new ball.',                 a: 'has' },
@@ -791,55 +818,70 @@ window.CONTENT = {
       ] },
     },
     reading: {
-      // A: one sentence from each family of `halves` above (am, is, are, obj, bec), so no beginning takes two endings.
-      halves: { pts: 2, order: [2, 5, 1, 4, 3], items: [
-        { a: 'I',                         b: 'am in a chess team.',        he: 'אני בקבוצת שחמט.' },
-        { a: 'My birthday',               b: 'is in July.',                he: 'יום ההולדת שלי ביולי.' },
-        { a: 'Gal and Shira',             b: 'are the same age.',          he: 'גל ושירה באותו גיל.' },
-        { a: 'Ben has',                   b: 'a new brush for his dog.',   he: 'לבן יש מברשת חדשה בשביל הכלב שלו.' },
-        { a: 'We like the pool because',  b: 'it is big.',                 he: 'אנחנו אוהבים את הבריכה כי היא גדולה.' },
+      // Reading 1: the practice copy's halves are joined by what they mean, not by am / is / are agreement as the
+      // game's `halves` families are. Taken as a set, each beginning has one ending.
+      halves: { pts: 2, order: [4, 1, 5, 3, 2], items: [
+        { a: "Yael's birthday is",                   b: 'in July.',                  he: 'יום ההולדת של יעל ביולי.' },
+        { a: 'There are fifteen people',             b: 'on my team.',               he: 'יש חמישה עשר אנשים בקבוצה שלי.' },
+        { a: 'Please wait for',                      b: 'me at the pool.',           he: 'בבקשה חכו לי בבריכה.' },
+        { a: 'It is hard to learn',                  b: 'chess.',                    he: 'קשה ללמוד שחמט.' },
+        { a: 'Mika has a lot of friends because',    b: 'she always helps people.',  he: 'למיקה יש הרבה חברים כי היא תמיד עוזרת לאנשים.' },
       ] },
-      // B: C5, the unseen passage. The same shape as a tier-C story; pts is per question (a write2 or a tick2 is two halves).
-      story: { id: 'C5', tier: 'C', title: 'Yoni and Ella', emoji: '♟️',
-        paras: [[0, 1, 2, 3], [4, 5, 6, 7, 8], [9, 10, 11, 12, 13]],
+      // Reading 2: C5, the unseen passage. The practice copy's passage is a child speaking in the first person, three
+      // paragraphs, 23 short sentences, about 135 words, with everyday verbs (like, go, want, can, don't) beyond
+      // to be and have. The questions are printed in this order; a question is worth pts (a write2 or a tick2 is two
+      // halves). any = how many of the model answers are asked for.
+      story: { id: 'C5', tier: 'C', title: 'Ella and Yoni', emoji: '♟️',
+        paras: [[0, 1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12, 13], [14, 15, 16, 17, 18, 19, 20]],
         sentences: [
-          { en: 'Yoni and Ella are best friends.', he: 'יוני ואלה הם החברים הכי טובים.' },
-          { en: 'Yoni is eleven years old and Ella is twelve.', he: 'יוני בן אחת עשרה ואלה בת שתים עשרה.' },
-          { en: 'They are different ages, but they are in the same team.', he: 'הם בגילים שונים, אבל הם באותה קבוצה.' },
-          { en: 'It is a chess team with fifteen people.', he: 'זאת קבוצת שחמט עם חמישה עשר אנשים.' },
-          { en: 'Who is the best in the team?', he: 'מי הכי טוב בקבוצה?' },
-          { en: 'It is Ella, because she learns chess every day.', he: 'זאת אלה, כי היא לומדת שחמט כל יום.' },
-          { en: 'She always wins.', he: 'היא תמיד מנצחת.' },
-          { en: "Yoni isn't the best, but he likes the game.", he: 'יוני לא הכי טוב, אבל הוא אוהב את המשחק.' },
-          { en: 'He also likes the pool.', he: 'הוא אוהב גם את הבריכה.' },
-          { en: 'Ella has a young dog.', he: 'לאלה יש כלב צעיר.' },
-          { en: 'The dog has an old blanket and a new ball.', he: 'לכלב יש שמיכה ישנה וכדור חדש.' },
-          { en: 'Yoni helps Ella with the dog.', he: 'יוני עוזר לאלה עם הכלב.' },
-          { en: 'He washes it with a special brush.', he: 'הוא רוחץ אותו עם מברשת מיוחדת.' },
-          { en: 'Ella is happy because Yoni is a good friend.', he: 'אלה שמחה כי יוני חבר טוב.' },
+          { en: 'Hello!', he: 'שלום!' },
+          { en: 'My name is Ella.', he: 'קוראים לי אלה.' },
+          { en: "I'm eleven years old.", he: 'אני בת אחת עשרה.' },
+          { en: 'I like to read books, ride my bike and play chess.', he: 'אני אוהבת לקרוא ספרים, לרכוב על האופניים שלי ולשחק שחמט.' },
+          { en: 'My best friend is Yoni.', he: 'החבר הכי טוב שלי הוא יוני.' },
+          { en: 'He is also eleven years old.', he: 'גם הוא בן אחת עשרה.' },
+          { en: 'Yoni likes to swim, draw and play chess.', he: 'יוני אוהב לשחות, לצייר ולשחק שחמט.' },
+          { en: 'Yoni and I are on a chess team.', he: 'יוני ואני בקבוצת שחמט.' },
+          { en: 'We learn chess together two times a week.', he: 'אנחנו לומדים שחמט ביחד פעמיים בשבוע.' },
+          { en: 'There are thirty kids on the team.', he: 'בקבוצה יש שלושים ילדים.' },
+          { en: 'Some kids are very young.', he: 'כמה ילדים צעירים מאוד.' },
+          { en: 'One boy is six years old.', he: 'ילד אחד בן שש.' },
+          { en: 'Some kids are big.', he: 'כמה ילדים גדולים.' },
+          { en: 'Three girls are seventeen years old.', he: 'שלוש בנות הן בנות שבע עשרה.' },
+          { en: 'The team has a big game every month.', he: 'לקבוצה יש משחק גדול כל חודש.' },
+          { en: 'The games are hard, but they are always fun.', he: 'המשחקים קשים, אבל הם תמיד כיף.' },
+          { en: 'The big kids are very good.', he: 'הילדים הגדולים טובים מאוד.' },
+          { en: 'They win a lot of games.', he: 'הם מנצחים בהרבה משחקים.' },
+          { en: "Yoni and I don't win a lot of games.", he: 'יוני ואני לא מנצחים בהרבה משחקים.' },
+          { en: 'I want to play like the big kids.', he: 'אני רוצה לשחק כמו הילדים הגדולים.' },
+          { en: 'Perhaps I can learn chess every day.', he: 'אולי אוכל ללמוד שחמט כל יום.' },
         ],
         questions: [
-          { para: 2, type: 'write2', pts: 4, en: 'Write TWO things the dog has.', he: 'כתוב שני דברים שיש לכלב.', ev: [10], model: ['an old blanket', 'a new ball'] },
-          { para: 0, type: 'tf', pts: 2, en: 'Yoni and Ella are the same age.', he: 'יוני ואלה באותו גיל.', ev: [1, 2], ok: false },
-          { para: 0, type: 'tf', pts: 2, en: 'Yoni and Ella are in the same team.', he: 'יוני ואלה באותה קבוצה.', ev: [2], ok: true },
-          { para: 0, type: 'complete', pts: 2, en: 'The team has', he: 'בקבוצה יש', ev: [3], choices: [{ en: 'five people.', he: 'חמישה אנשים.' }, { en: 'fifteen people.', he: 'חמישה עשר אנשים.', ok: true }, { en: 'fifty people.', he: 'חמישים אנשים.' }] },
-          { para: 1, type: 'complete', pts: 2, en: 'Ella is the best because', he: 'אלה הכי טובה כי', ev: [5], choices: [{ en: 'she is twelve.', he: 'היא בת שתים עשרה.' }, { en: 'she has a dog.', he: 'יש לה כלב.' }, { en: 'she learns chess every day.', he: 'היא לומדת שחמט כל יום.', ok: true }] },
-          { para: 2, type: 'fact', pts: 2, en: 'Who washes the dog?', he: 'מי רוחץ את הכלב?', ev: [11, 12], choices: [{ en: 'Yoni', he: 'יוני', ok: true }, { en: 'Ella', he: 'אלה' }, { en: 'the team', he: 'הקבוצה' }] },
-          { type: 'tick2', pts: 6, en: 'Tick the TWO true things about Yoni.', he: 'סמן את שני הדברים הנכונים על יוני.', ev: [1, 8],
-            choices: [{ en: 'He is twelve years old.', he: 'הוא בן שתים עשרה.' }, { en: 'He likes the pool.', he: 'הוא אוהב את הבריכה.', ok: true }, { en: 'He has a young dog.', he: 'יש לו כלב צעיר.' }, { en: 'He always wins.', he: 'הוא תמיד מנצח.' }, { en: 'He is eleven years old.', he: 'הוא בן אחת עשרה.', ok: true }] },
+          { para: 0, type: 'write2', pts: 4, en: 'What does Yoni like to do? Write two things.', he: 'מה יוני אוהב לעשות? כתבו שני דברים.', ev: [6], any: 2, model: ['swim', 'draw', 'play chess'] },
+          { para: 0, type: 'tf', pts: 2, en: 'Ella and Yoni are the same age.', he: 'אלה ויוני באותו גיל.', ev: [2, 5], ok: true },
+          { para: 1, type: 'tf', pts: 2, en: 'Ella and Yoni are on different teams.', he: 'אלה ויוני בקבוצות שונות.', ev: [7], ok: false },
+          { para: 1, type: 'complete', pts: 4, en: 'Ella and Yoni', he: 'אלה ויוני', ev: [8],
+            choices: [{ en: 'ride bikes together', he: 'רוכבים על אופניים ביחד' }, { en: 'learn chess together', he: 'לומדים שחמט ביחד', ok: true }, { en: 'play chess every day', he: 'משחקים שחמט כל יום' }, { en: 'win a lot of games', he: 'מנצחים בהרבה משחקים' }] },
+          { para: 1, type: 'tick2', pts: 4, en: 'What do we know about the chess team?', he: 'מה אנחנו יודעים על קבוצת השחמט?', ev: [9, 10, 12],
+            choices: [{ en: 'The team has a game every week.', he: 'לקבוצה יש משחק כל שבוע.' }, { en: 'There are thirty kids on the team.', he: 'בקבוצה יש שלושים ילדים.', ok: true }, { en: 'The young kids win a lot of games.', he: 'הילדים הצעירים מנצחים בהרבה משחקים.' }, { en: 'There are big kids and young kids on the team.', he: 'בקבוצה יש ילדים גדולים וילדים צעירים.', ok: true }, { en: 'The games are not fun.', he: 'המשחקים לא כיף.' }] },
+          { para: 2, type: 'complete', pts: 4, en: 'Ella wants to learn chess every day because', he: 'אלה רוצה ללמוד שחמט כל יום כי', ev: [18, 19, 20],
+            choices: [{ en: 'she likes the young kids', he: 'היא אוהבת את הילדים הצעירים' }, { en: 'the games are every month', he: 'המשחקים הם כל חודש' }, { en: 'Yoni is her best friend', he: 'יוני הוא החבר הכי טוב שלה' }, { en: 'she wants to play better', he: 'היא רוצה לשחק יותר טוב', ok: true }] },
         ] },
     },
-    // The writing task as the test sets it: a labelled picture and a word bank; two sentences with is / are and
-    // three with have / has. Each child shows one thing to say with is / are and holds one thing to say with has / have.
+    // The writing task as the practice copy sets it: a picture of people with name labels, and above it a word bank
+    // of adjectives and bare nouns (ball, not a ball: the article is his to add). Five sentences: two with is / are,
+    // three with have / has. Each figure shows one thing to say with is / are and has one thing to say with has / have.
     // who = one name, or two for a pair (are / have). size: tall · mid · short. mood: happy · sad · none.
+    // look: 'old' draws a stick, glasses and no hair. many: true = a plural noun, written without `a`.
     writing: { pts: 2, be: 2, have: 3,
       figs: [
-        { who: ['Ben'],        g: ['m'],      mood: 'happy', size: 'mid',   adj: 'happy', has: 'dog',  e: '🐕' },
-        { who: ['Shira'],      g: ['f'],      mood: 'sad',   size: 'mid',   adj: 'sad',   has: 'book', e: '📕' },
-        { who: ['Gal', 'Uri'], g: ['m', 'm'], mood: 'none',  size: 'tall',  adj: 'tall',  has: 'ball', e: '⚽' },
-        { who: ['Lia'],        g: ['f'],      mood: 'none',  size: 'short', adj: 'short', has: 'cat',  e: '🐈' },
+        { who: ['Amit'],       g: ['m'],      mood: 'happy', size: 'mid',   adj: 'happy', has: 'dog',     e: '🐕' },
+        { who: ['Shira'],      g: ['f'],      mood: 'sad',   size: 'mid',   adj: 'sad',   has: 'book',    e: '📕' },
+        { who: ['Gal', 'Uri'], g: ['m', 'm'], mood: 'none',  size: 'tall',  adj: 'tall',  has: 'ball',    e: '⚽' },
+        { who: ['Lia'],        g: ['f'],      mood: 'none',  size: 'short', adj: 'short', has: 'cat',     e: '🐈' },
+        { who: ['Dov'],        g: ['m'],      mood: 'none',  size: 'mid',   adj: 'old',   has: 'flowers', e: '💐', look: 'old', many: true },
       ],
-      bank: ['tall', 'a dog', 'sad', 'a ball', 'short', 'a book', 'happy', 'a cat'],
+      bank: ['tall', 'dog', 'sad', 'flowers', 'old', 'ball', 'short', 'book', 'happy', 'cat'],
     },
   },
 
