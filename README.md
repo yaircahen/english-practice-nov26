@@ -10,6 +10,7 @@ Design: `prd.md`. Static web app, no build step, no backend.
 | `styles.css` | reading-friendly styles |
 | `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
 | `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
+| `mock.html` | the printable mock (M4): the test, the answer key and a page for the coach. It reads `mock` in `content.js` and nothing else |
 | `prd.md` | the design (v4): the one to build from |
 | `archive/prd-v3.md` | the previous version of the design, kept as written for the record |
 | `.claude/launch.json` | local dev server definition (uses the venv) |
@@ -171,11 +172,52 @@ dialogue's two voices can be told apart; that the door-and-figure pictures for `
 show; that the word-bank and halves sets are comfortable to tap; that in a long story the
 sentences are easy to tap for "write two things".
 
+## What M4 added so far (15 Nov, the mock, v3.3.0)
+
+Built first of M4's test-facing list, because it is the one piece that works on paper even if every
+screen after it slips. The rest of the list (the five-sentence writing task, unheard dialogues in
+the quest, the test-mode screen, the final boss) is not built yet.
+
+- **`mock.html`** is the day-12 mock (prd.md §6.4): the practice copy's five sections and point
+  weights (Listening 20, Vocabulary 20, Grammar 20, Reading 30, Writing 10), with content he has
+  not met: ten new names, a new picture and word bank, an unseen passage (C5, "Yoni and Ella", 14
+  sentences in three paragraphs) and an unheard dialogue.
+- **Three views**, each printed on its own with the "הדפסה" button, on A4:
+  `mock.html` is the test (5 pages), `mock.html?view=key` the answer key (1 page),
+  `mock.html?view=coach` the page for the coach (how to run it, the listening text, the points; 2
+  pages). The coach screen links to all three.
+- **Listening**: "האזנה א" and "האזנה ב" in the bar speak each part twice in the device's voices, the
+  dialogue in two voices as in the game. If the voices are not clear, the text to read aloud is on
+  the coach's page.
+- **No printer**: the test view on the iPad and answers on plain paper; copy the passage (page 4)
+  out by hand, as §6.4 says.
+- **The content** is `mock` in `content.js`, kept apart from `stories` and `listening` so that the
+  game never shows the passage or plays the dialogue before the mock. The final boss will read the
+  same data.
+
+How it was made, and what to look at before he sits it:
+
+- The practice-copy scan is not in this repo, so the layout follows prd.md §4.4, not the scan. The
+  number of items per task is inferred from §0 (15 grammar items, 5 halves, 2 true/false). **The
+  listening part's split (5 pictures at 2 points, 5 questions at 2 points) and the reading
+  passage's split (4 + 4 + 6 + 6) are guesses.** The weights are in `mock` (`pts`), not in the code.
+- The instructions are in English, Hebrew and Arabic, as on the practice copy. The Arabic lines
+  were not read by an Arabic speaker.
+- The children in the writing picture are line drawings and print the same anywhere. The dog, cat,
+  ball, book and the listening pictures are emoji: they come out in the printing device's own
+  style, and on a black-and-white printer in grey.
+- Checked in the browser only: the three views as A4 PDFs (5, 1 and 2 pages), no sheet running
+  over, the player's order and its stop button against a stand-in voice, the fit on an upright
+  iPad, the game still starting from the day-8 sample save. **Not tried on the iPad or on a real
+  printer; the real device voices were not heard.**
+
 ## Coach screen (hidden)
 
 On the map, press and hold the small ⭐ counter (top left) for 2 seconds. The first time, you
 set a 4-digit parent PIN; after that it asks for it. Nothing on screen hints at this. Export the
 save from there once a week. The PIN can be changed from the coach screen; a full reset clears it.
+
+Added in 3.3.0: "המבחן לדוגמה", three links to the mock: the test, the key and the coach's page.
 
 Added in 3.0.0: the mid-boss by the test's five sections, the misses inside the word-bank and
 halves sets, the listening log, and on a day played in two sittings the first sitting's code.

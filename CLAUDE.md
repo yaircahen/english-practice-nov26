@@ -22,6 +22,7 @@ A game for one child (Gilad) to prepare for an English test on 22 Nov 2026 (Hey!
 - To simulate the next day, rewrite every `YYYY-MM-DD` in the localStorage JSON one day back and reload.
 - Sessions can be driven from the page via `window.__game`: `state`, `session`, `view`, `startSession`, `streak`, `settleStreak`, `grantLoot`, `buildReviewQueue`. Patch `__game.Audio.speak` and `afterSpeech` to skip speech waits. The level-1 story keeps "לשאלות" disabled until the read-aloud ends, so tap a word first.
 - More handles on `window.__game`: `planFor(mode)`, `isLongDay(plan)`, `phase2()`, `settleHalves()`. A set (word bank, sentence halves) and a mid-boss sentence are queue items without a `cid`; read `session.current.view`.
+- `mock.html` is the printable mock (`?view=test`, `key` or `coach`); its content is `mock` in `content.js`. Keep that content out of `stories` and `listening`, or the game shows it before the mock. `window.__mock` has `play`, `Say`, `setView` and the point totals; stub `speechSynthesis` to test the player.
 - ECB's audio host is usually not reachable from a cloud sandbox. Stub `**/*.mp3` with a short WAV to test the recording player, and abort the route to test the fallback dialogue.
 - Screenshots can lag one frame behind a script that just changed the screen. Wait, or take a second one.
 - Progress is tied to the page's origin. A new address means a fresh save.

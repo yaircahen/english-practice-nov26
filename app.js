@@ -2452,6 +2452,13 @@
         ${tricky.length ? `<table><tr><th>קלף</th><th>סוג</th><th>טעויות</th><th>קופסה</th></tr>${tricky.map(([cid, st]) => { const p = parseCard(cid); return `<tr><td class="en">${esc(cardLabel(cid))}</td><td>${{ rec: 'משמעות', lineup: 'שמיעה→קריאה', img: 'תמונה', tile: 'בנייה מאותיות', gc: 'דקדוק', np: 'כינוי גוף', sd: 'same / different', num: 'מספר', cz: 'מילה במשפט', lp: 'האזנה לתמונה' }[p.type] || p.type}</td><td>${st.misses}</td><td>${st.box}</td></tr>`; }).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
         <h3>היסטוריה</h3>
         ${sessions.length ? `<table><tr><th>תאריך</th><th>#</th><th>מצב</th><th>נכון/טעות</th><th>עלו/ירדו</th><th>דק׳</th><th>קוד</th></tr>${sessions.flatMap(([date, v]) => daySessions(v).reverse().map(r => `<tr><td>${date}</td><td>${r.n}</td><td>${r.mode === 'solo' ? 'לבד' : 'הורה'}</td><td><bdi>${r.correct}</bdi>/<bdi>${r.wrong}</bdi></td><td><bdi>${r.promoted}</bdi>/<bdi>${r.demoted}</bdi></td><td>${minutes(r.durationMs)}</td><td class="en">${r.mode === 'solo' ? r.code : ''}</td></tr>`)).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
+        <h3>המבחן לדוגמה</h3>
+        <div class="row wrap">
+          <a class="btn small" href="mock.html">🖨️ המבחן להדפסה</a>
+          <a class="btn small" href="mock.html?view=key">מפתח תשובות</a>
+          <a class="btn small" href="mock.html?view=coach">דף למאמן</a>
+        </div>
+        <div class="muted">חמישה עמודים במבנה של עותק התרגול, עם תוכן שהוא עוד לא ראה ולא שמע. מיועד ליום 12 (יום שישי). ההסבר איך להריץ נמצא ב"דף למאמן".</div>
         <h3>הגדרות</h3>
         <div class="row wrap">
           <label>מגרש האימונים, דקות ביום: <input class="text" style="width:90px; font-size:18px; padding:6px 10px" type="number" min="0" max="60" id="capInput" value="${S.settings.freePlayCapMin}"></label>

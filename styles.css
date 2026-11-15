@@ -129,6 +129,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn.ghost { background: transparent; border-bottom-color: transparent; color: var(--fg); font-weight: 600; }
 .btn.small { min-height: 44px; padding: 6px 14px; font-size: 17px; border-bottom-width: 4px; }
 .btn.block { width: 100%; }
+a.btn { text-decoration: none; }
 .btn.speak { font-size: 30px; min-width: 64px; border-radius: 50%; width: 64px; height: 64px; padding: 0; border-bottom-width: 5px; }
 .btn:disabled { opacity: .5; cursor: default; transform: none; }
 
