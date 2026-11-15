@@ -6,7 +6,7 @@ Design: `prd.md`. Static web app, no build step, no backend.
 
 | File | What |
 |---|---|
-| `index.html` | the page shell; bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
+| `index.html` | the page shell (now `3.4.0`); bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
 | `styles.css` | reading-friendly styles |
 | `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
 | `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
@@ -214,6 +214,24 @@ How it was made, and what to look at before he sits it:
   button against a stand-in voice, the fit on an upright iPad, the game still starting from the
   day-8 sample save. **Not tried on the iPad or on a real printer; the real device voices were not
   heard.**
+
+## What 3.4.0 changed in the game (15 Nov, after the scan of the practice copy)
+
+Two of the five gaps that prd.md §4.4 lists between the test and what the game trains:
+
+- **The writing bank is bare.** On paper (rung 4) the bank shows `dog`, not `a dog`, as the
+  practice copy's bank does. Two nouns were added that are written without `a`: `flowers` and
+  `money` ("Omer has flowers."). They come up on every rung, tiles included. The third check on
+  the "בודקים יחד" screen now says "`a` לפני `dog`" or "בלי `a` לפני `flowers`".
+- **C3 and C4 are retold in the test's style.** One of the two friends speaks in the first
+  person: three paragraphs, 20 sentences, 147 and 137 words, with `like to`, `want`, `can` and
+  `don't`. The friends, their cards and the order of the stories are the same. The questions are
+  the test's kinds, with `same` or `different` in every true-or-false. C1 and C2 are unchanged.
+  A save in which C3 or C4 was already read keeps its stars and card; a re-read shows the new text.
+
+Played in the browser from the day-8 sample save: the writing minute at rungs 2 and 4, and each of
+the two stories at support levels 1, 3 and 4, every question answered as marked with no hint.
+**Not tried on the iPad.**
 
 ## Coach screen (hidden)
 

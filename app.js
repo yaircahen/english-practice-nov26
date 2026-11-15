@@ -999,8 +999,10 @@
     const two = spec.frame.endsWith('2'), be = spec.frame.startsWith('be');
     const verb = be ? (two ? 'are' : 'is') : (two ? 'have' : 'has');
     const other = be ? (two ? 'is' : 'are') : (two ? 'has' : 'have');
-    const tokens = [...(two ? [spec.who[0], 'and', spec.who[1]] : [spec.who[0]]), verb, ...(be ? [spec.x] : ['a', spec.x])];
-    return { spec, two, be, verb, other, tokens, model: tokens.join(' ') + '.' };
+    // a noun takes `a`, unless it is one that is written without it (flowers, money)
+    const noA = !be && !!(WR.nouns.find(n => n.w === spec.x) || {}).noA;
+    const tokens = [...(two ? [spec.who[0], 'and', spec.who[1]] : [spec.who[0]]), verb, ...(be || noA ? [spec.x] : ['a', spec.x])];
+    return { spec, two, be, noA, verb, other, tokens, model: tokens.join(' ') + '.' };
   }
   function wPicture(it) {
     const adj = it.be ? WR.adjs.find(a => a.w === it.spec.x) : null;
@@ -1016,10 +1018,11 @@
     const extra = noun ? `<div class="wfig"><div class="wface">${noun.e}</div><div class="wname">&nbsp;</div></div>` : (adj && adj.size ? `<div class="wfig"><div class="wbody door">🚪</div><div class="wname">&nbsp;</div></div>` : '');
     return `<div class="wpic">${it.spec.who.map(fig).join('')}${extra}</div>`;
   }
+  // the word bank on paper: bare words, as the practice copy's bank gives them (`dog`, not `a dog`)
   function wBank(it) {
     const list = it.be ? WR.adjs : WR.nouns;
     const others = sample(list.filter(x => x.w !== it.spec.x), 2).map(x => x.w);
-    return shuffle([it.spec.x, ...others]).map(x => it.be ? x : `a ${x}`);
+    return shuffle([it.spec.x, ...others]);
   }
   function newBuild(it, marks) {
     const target = marks ? [...it.tokens, '.'] : it.tokens.slice();
@@ -1146,7 +1149,7 @@
           <ol class="wchecks">
             <li>${t('wCheck1')}</li>
             <li>${t('wCheck2', { a: pair[0], b: pair[1] })}</li>
-            <li>${t(w.rung >= 4 ? 'wCheck3Bank' : 'wCheck3Screen')}</li>
+            <li>${w.rung >= 4 ? (it.be ? t('wCheck3Bank') : t(it.noA ? 'wCheck3BankNoA' : 'wCheck3BankA', { x: it.spec.x })) : t('wCheck3Screen')}</li>
           </ol>
           <div class="center" style="font-size:26px; font-weight:700">${t('wHow')}</div>
           <div class="row wrap" style="justify-content:center; gap:14px">
@@ -2666,5 +2669,5 @@
   render();
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, planFor, phase2, settleHalves, isLongDay };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, planFor, phase2, settleHalves, isLongDay, startWriting, startStory };
 })();
