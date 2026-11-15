@@ -6,7 +6,7 @@ Design: `prd.md`. Static web app, no build step, no backend.
 
 | File | What |
 |---|---|
-| `index.html` | the page shell (now `3.5.0`); bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
+| `index.html` | the page shell (now `3.5.1`); bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
 | `styles.css` | reading-friendly styles |
 | `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
 | `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
@@ -244,11 +244,10 @@ screen fix) was merged in first.
   families. Each set was checked by hand, pair by pair; the rule for writing one is in the
   comment above them.
 - **Listening in the test's form.** Every question to complete has four endings in words, with
-  no picture beside them, and the Yes / No lines are statements. **The fourth ending of each
-  recording question was written without the transcript**: each was chosen to be impossible
-  beside the right answer, but please check them against the transcripts (`rec1`: a duck, at
-  school, a hat · `rec2`: a new phone, green, the Robo-Cat · `rec3`: a cat, in a big pool, at
-  school).
+  no picture beside them, and the Yes / No lines are statements. Every question, right answer
+  and wrong ending of the three recordings was checked against the owner's transcripts (15 Nov,
+  v3.5.1). The last question of the third recording now asks for a reason, as the practice
+  copy's listening does.
 - **One unheard dialogue** ("Maya and Dan", `dlg1`): 12 lines in two device voices, and six
   questions in the practice copy's order. It is the listening item after the three recordings,
   and it needs no day of rest before it.

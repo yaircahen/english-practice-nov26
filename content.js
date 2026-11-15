@@ -465,8 +465,9 @@ window.CONTENT = {
   // Question types: mc (a sentence to complete, one ending of four) · yn (a statement: Yes / No) · tick2 (two
   // pictures of five). ok marks the right ones. The practice copy's listening asks exactly these (prd.md §4.4):
   // the endings are words to read, with no picture beside them, and the Yes / No lines are statements.
-  // The fourth ending of each recording question was added on 15 Nov without the transcript at hand: it was
-  // chosen to be impossible beside the right answer, but check it against the transcript when you can.
+  // Every question, right answer and wrong ending of the three recordings was checked against the owner's
+  // transcripts on 15 Nov. A wrong ending is either something the recording says about someone else (the
+  // bird is brown, the dog runs behind a tree) or something it never says.
   // pet = the card a finished recording adds to the friend collection. min = planning estimate, in minutes.
   // fallback: true = an app-written dialogue, spoken by the device, that stands in when a recording will not load.
   // A dialogue that is not a fallback is unheard material (PRD §6.7): it comes after the recordings, in the
@@ -492,17 +493,17 @@ window.CONTENT = {
           { type: 'yn', en: 'The Robo-Dog is big.', he: 'ה-Robo-Dog גדול.', ok: false },
           { type: 'mc', en: 'The Robo-Dog is ... .', he: 'הצבע של ה-Robo-Dog הוא ...', choices: [{ en: 'brown' }, { en: 'black and white', ok: true }, { en: 'yellow' }, { en: 'green' }] },
           { type: 'tick2', en: 'What can the Robo-Bird do?', he: 'מה ה-Robo-Bird יודע לעשות?', choices: [{ e: '🚶', en: 'walk' }, { e: '🗣️', en: 'talk', ok: true }, { e: '🪑', en: 'sit' }, { e: '🕊️', en: 'fly', ok: true }, { e: '🦘', en: 'jump' }] },
-          { type: 'mc', en: 'In the end, the pet for the child is ... .', he: 'בסוף, מה שנבחר הוא ...', choices: [{ en: 'the Robo-Bird' }, { en: 'a rabbit' }, { en: 'the Robo-Cat' }, { en: 'the Robo-Dog', ok: true }] },
+          { type: 'mc', en: 'In the end the child wants to buy ... .', he: 'בסוף הילד רוצה לקנות ...', choices: [{ en: 'the Robo-Bird' }, { en: 'a rabbit' }, { en: 'a Robo-Cat' }, { en: 'the Robo-Dog', ok: true }] },
         ] },
       { id: 'rec3', kind: 'recording', src: '28111206/ELM_MP3_HEY_U1_p40_41_ex2_3.mp3', min: 6, title: 'Splash and Sandy', emoji: '🦆',
         keys: [{ en: 'duck', he: 'ברווז' }, { en: 'swim', he: 'לשחות' }, { en: 'garden', he: 'גינה' }],
         pet: { name: 'Splash & Sandy', emoji: '🦆', facts: ['🦆 + 🐶', '🏊 pool', 'best friends'] },
         questions: [
-          { type: 'mc', en: 'Splash is ... .', he: 'Splash הוא ...', choices: [{ en: 'a dog' }, { en: 'a duck', ok: true }, { en: 'a girl' }, { en: 'a cat' }] },
           { type: 'tick2', en: 'What do Splash and Sandy do together?', he: 'מה הם עושים ביחד?', choices: [{ e: '♟️', en: 'learn chess' }, { e: '🏊', en: 'swim', ok: true }, { e: '📕', en: 'read' }, { e: '😴', en: 'sleep', ok: true }, { e: '📞', en: 'call friends' }] },
-          { type: 'mc', en: 'Splash and Sandy swim ... .', he: 'הם שוחים ...', choices: [{ en: 'in the sea' }, { en: 'in a big pool' }, { en: 'in a small pool', ok: true }, { en: 'at school' }] },
+          { type: 'mc', en: 'Splash and Sandy swim ... .', he: 'הם שוחים ...', choices: [{ en: 'in the sea' }, { en: 'in a big pool in the garden' }, { en: 'in a small pool in the garden', ok: true }, { en: 'in a small pool at school' }] },
           { type: 'yn', en: 'Splash and Sandy eat different food.', he: 'הם אוכלים אוכל שונה.', ok: false },
           { type: 'mc', en: 'Splash and Sandy sleep ... .', he: 'הם ישנים ...', choices: [{ en: 'behind a tree' }, { en: 'in the pool' }, { en: 'at school' }, { en: 'on a blanket', ok: true }] },
+          { type: 'mc', en: 'Every day people come to the house because ... .', he: 'כל יום אנשים באים לבית כי ...', choices: [{ en: 'they want to swim in the pool' }, { en: 'they like to watch the duck and the dog', ok: true }, { en: 'they have food for the dog' }, { en: 'they want to buy a pet' }] },
         ] },
       { id: 'dlg0', kind: 'dialogue', fallback: true, min: 3, title: 'Tom and Roni', emoji: '📞',
         keys: [{ en: 'home', he: 'בית' }, { en: 'young', he: 'צעיר' }, { en: 'very', he: 'מאוד' }],
