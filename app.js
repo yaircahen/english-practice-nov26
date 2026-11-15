@@ -2685,9 +2685,18 @@
       const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body, keepalive: !!leaving && body.length < 60000, redirect: 'follow' });
       const j = await r.json();
       if (!j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
-      bkSetStatus({ okAt: Date.now(), err: '' });
+      bkSetStatus({ okAt: Date.now(), err: '', blind: false });
       return true;
     } catch (e) {
+      // iPad Safari can fail on Google's redirect to the reply ("Load failed") after the script has
+      // already run. Send once more without asking for the reply: it cannot be read, but it arrives.
+      if (e instanceof TypeError) {
+        try {
+          await fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body, keepalive: !!leaving && body.length < 60000 });
+          bkSetStatus({ okAt: Date.now(), err: '', blind: true });
+          return true;
+        } catch (e2) { e = e2; }
+      }
       bkSetStatus({ pending: true, failAt: Date.now(), err: String((e && e.message) || e).slice(0, 160) });
       return false;
     } finally { bkBusy = false; }
@@ -2695,7 +2704,7 @@
   function backupStatusHe() {
     if (!S.settings.backupUrl) return 'כבוי. מדביקים כאן את כתובת ה-Web App מההוראות ב-README ולוחצים "שמור". הגיבוי נשלח לבד אחרי כל שינוי, ונשמר בגיליון Google שלכם, שורה לכל יום.';
     const b = bkStatus(), at = x => new Date(x).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
-    const ok = b.okAt ? `גיבוי אחרון שהצליח: ${at(b.okAt)}.` : 'עוד לא היה גיבוי שהצליח.';
+    const ok = b.okAt ? (b.blind ? `גיבוי אחרון נשלח: ${at(b.okAt)} (הדפדפן לא מציג את אישור גוגל, אפשר לוודא בגיליון).` : `גיבוי אחרון שהצליח: ${at(b.okAt)}.`) : 'עוד לא היה גיבוי שהצליח.';
     const fail = b.failAt && b.failAt > (b.okAt || 0) ? ` ⚠️ ניסיון אחרון נכשל (${at(b.failAt)}): <span class="en" dir="ltr">${esc(b.err || '')}</span>. ינסה שוב לבד.` : '';
     return ok + fail + (b.pending && !fail ? ' יש שינוי שעוד לא נשלח.' : '');
   }
