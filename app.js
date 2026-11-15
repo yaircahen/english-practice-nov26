@@ -283,17 +283,18 @@
   function packIntroduced(id) { return S.packsIntroduced.some(p => p.id === id); }
   function towerProgress(g) {
     let total = 0, mastered = 0;
-    (g.units || []).forEach(u => packCards(u).forEach(cid => { const st = S.cards[cid]; if (st) { total++; if (st.box >= 4) mastered++; } }));
+    (g.units || []).forEach(u => packCards(u).forEach(cid => { const st = S.cards[cid]; if (st) { total++; if (st.box >= MASTERED_BOX) mastered++; } }));
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0, open: (g.units || []).some(packIntroduced) };
   }
-  // "mastered" is Box 4–5 (PRD §2), as on the map; Box 5 can't be reached in a two-week run
-  const MASTERED_BOX = C.masteredBox || 4;
+  // "mastered" is Box 3–5 (PRD §2), as on the map
+  const MASTERED_BOX = C.masteredBox || 3;
+  const STAR_RECS = new Set(C.words.map(w => cardId(w.id, 'rec')));   // the 50 cards the ⭐ counts
   function isDue(st, n) { if (st.box >= 5) return false; return (n - st.lastSession) >= C.intervals[st.box]; }
   function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.keys(S.cards).filter(known).forEach(cid => c[S.cards[cid].box]++); return c; }   // a skipped card isn't counted either
   // a land's flag is about its three core card types; the tile cards, born later, never take a flag down
   function landProgress(land) {
     let total = 0, mastered = 0;
-    land.words.forEach(wid => cardTypesFor(WORDS[wid]).forEach(type => { const st = S.cards[cardId(wid, type)]; if (st) { total++; if (st.box >= 4) mastered++; } }));
+    land.words.forEach(wid => cardTypesFor(WORDS[wid]).forEach(type => { const st = S.cards[cardId(wid, type)]; if (st) { total++; if (st.box >= MASTERED_BOX) mastered++; } }));
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0 };
   }
   function landIntroduced(id) { return S.landsIntroduced.some(l => l.id === id); }
@@ -451,7 +452,10 @@
     // one promotion per card per day (PRD §6.1): a card already reviewed in today's earlier session waits
     const seenToday = todayNs();
     const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
-    const byRank = (a, b) => (S.cards[b].priority - S.cards[a].priority) || (S.cards[b].box - S.cards[a].box);   // stable: keeps the shuffle inside a box
+    // a word still short of its ⭐ (its Recognition card below the mastered box) is never cut, and plays right after the
+    // priority cards: the time budget ends the review from the back, and the ⭐ must reach 50 by day 11
+    const star = cid => S.cards[cid].box < MASTERED_BOX && STAR_RECS.has(cid);
+    const byRank = (a, b) => (S.cards[b].priority - S.cards[a].priority) || (star(b) - star(a)) || (S.cards[b].box - S.cards[a].box);   // stable: keeps the shuffle inside a box
     const wrap = q => q.map(cid => ({ cid, retry: false, retries: 0 }));
     // the letter-tile cards are the light ones: a few a session, highest box first; the rest stay due.
     // Those few always get their turn (a full stack would otherwise crowd them out every day), and each
@@ -463,25 +467,27 @@
     const due = all.filter(cid => !isTile(cid) && !isCz(cid));
     if (short) {
       // the short review in front of a long sitting, or behind the mid-boss: Box 1 and the highest box due (PRD §7.4)
-      const plain = due.filter(cid => !S.cards[cid].priority);
+      // words short of their ⭐ come first here too
+      const plain = due.filter(cid => !S.cards[cid].priority && !star(cid));
       const top = Math.max(0, ...plain.map(cid => S.cards[cid].box));
       const b1 = shuffle(plain.filter(cid => S.cards[cid].box === 1)), hi = top > 1 ? shuffle(plain.filter(cid => S.cards[cid].box === top)) : [];
-      const q = [...shuffle(due.filter(cid => S.cards[cid].priority > 0)), ...b1.slice(0, Math.max(1, cap - 2)), ...hi].slice(0, cap);
+      const q = [...shuffle(due.filter(cid => S.cards[cid].priority > 0)), ...shuffle(due.filter(cid => !S.cards[cid].priority && star(cid))), ...b1.slice(0, Math.max(1, cap - 2)), ...hi].slice(0, cap);
       return wrap([...q, ...cz, ...tiles].sort(byRank));
     }
     cap = Math.max(8, cap - 2 * tiles.length - cz.length);
     const pri = due.filter(cid => S.cards[cid].priority > 0);
     const rest = due.filter(cid => S.cards[cid].priority === 0);
     const byBox = {}; rest.forEach(cid => { const b = S.cards[cid].box; (byBox[b] = byBox[b] || []).push(cid); });
-    let q = [...shuffle(pri)];
-    for (const b of [4, 3, 2, 1]) if (byBox[b]) q.push(...shuffle(byBox[b]));
+    const starNow = rest.filter(star);
+    let q = [...shuffle(pri), ...shuffle(starNow)];
+    for (const b of [4, 3, 2, 1]) if (byBox[b]) q.push(...shuffle(byBox[b].filter(cid => !star(cid))));
     if (q.length > cap) {
       // what gives way first: recognition-type cards of words already in Box 3 and up (PRD §7.4)
       const easy = cid => !!parseCard(cid).word && S.cards[cid].box >= 3 && !S.cards[cid].priority;
       // then the strongest boxes wait a session; priority cards and Box 1 (reviewed every session, §6.1) always stay
       // a card cut today comes back sooner: each session it waits past due moves it up, so nothing is cut for good
       const over = cid => n - S.cards[cid].lastSession - C.intervals[S.cards[cid].box];
-      const rank = cid => S.cards[cid].priority > 0 ? -1000 : S.cards[cid].box === 1 ? -999 : -3 * over(cid) + (easy(cid) ? 9 : S.cards[cid].box);
+      const rank = cid => S.cards[cid].priority > 0 ? -1000 : star(cid) ? -999 : S.cards[cid].box === 1 ? -998 : -3 * over(cid) + (easy(cid) ? 9 : S.cards[cid].box);
       const kept = new Set([...q].sort((a, b) => rank(a) - rank(b)).slice(0, cap));   // stable: keeps the shuffle inside a box
       q = q.filter(cid => kept.has(cid));                                              // and the play order stays highest box first
     }
@@ -523,16 +529,12 @@
 
   // The mid-boss (PRD §8, day 6): once, with a parent, from the day after the last of the 50 words is in.
   const midBossDue = () => !S.boss.mid && phase2() && packIntroduced('u1') && BANK.length > 0;
-  // A new recording only with a parent, and never two days running: a recording, a day of cards, the next one.
+  // A new recording only with a parent, one a day. (Until 15 Nov there was a day of cards between two
+  // recordings; it went so all three fit before the mock, the run being two days behind the plan.)
   // After the recordings come the unheard dialogues (PRD §6.7), in the order they are listed.
   function listeningForSession(mode) {
     if (mode !== 'parent' || !phase2() || S.listening.runs.some(r => r.date === todayStr())) return null;
-    const next = LISTEN.find(x => !x.fallback && !S.listening.done[x.id]); if (!next) return null;
-    if (next.kind === 'dialogue') return next;               // a short spoken dialogue needs no day of rest before it
-    const last = S.listening.runs.filter(r => !r.fallback).slice(-1)[0];
-    const n = (today().half || {}).n || S.sessionCount + 1;
-    // two sessions can share a day (a solo one, then one with a parent), so the gap is counted in days as well as in sessions
-    return last && (n - last.n < 2 || last.date >= addDays(todayStr(), -1)) ? null : next;
+    return LISTEN.find(x => !x.fallback && !S.listening.done[x.id]) || null;
   }
   const estListening = x => x.min || 4;
   // after a solo session, a parent session the same day is worth it only when it opens something new
@@ -2419,7 +2421,7 @@
         ${againEn ? `<div>חוזרים בפעם הבאה: <span class="en">${againEn}</span></div>` : ''}
         <div class="muted">מסמנים ולא מתקנים באמצע המשפט. הסימונים נשמרים רק כאן; הם לא מזיזים קלפים ולא נראים במשחק.</div>
         <h3>קלפי בנייה מאותיות</h3>
-        <div>${tiles.length} קלפים · ${tiles.filter(cid => S.cards[cid].box >= 4).length} בקופסה 4 ומעלה · עד ${TILE_CAP} במשימה</div>
+        <div>${tiles.length} קלפים · ${tiles.filter(cid => S.cards[cid].box >= MASTERED_BOX).length} בקופסה ${MASTERED_BOX} ומעלה · עד ${TILE_CAP} במשימה</div>
         <div class="muted">קלף כזה נולד כשקלף המשמעות של המילה מגיע לקופסה 3.</div>
         <h3>רצף והקפאות</h3>
         <div>רצף: ${streak()} ימים · ההקפאה החינמית של השבוע: ${freezeLeft() ? 'עוד לא נוצלה' : 'נוצלה'}</div>
@@ -2445,7 +2447,7 @@
         <div class="muted">המספר לפי משקלי המבחן מיועד להורים בלבד. במשחק רואים רק כמה מכות חטף הבוס.</div>
         <h3>בנק מילים וחצאי משפטים</h3>
         ${setRows ? `<table><tr><th>מתי</th><th>סוג</th><th>טעויות בניסיון הראשון</th></tr>${setRows}</table>` : '<div class="muted">מתחילים יום אחרי שכל 50 המילים נפתחו: סט אחד מכל סוג בתוך החזרה.</div>'}
-        <div>קלפי מילה במשפט: ${czs.length} · ${czs.filter(cid => S.cards[cid].box >= 4).length} בקופסה 4 ומעלה · עד ${CZ_CAP} במשימה</div>
+        <div>קלפי מילה במשפט: ${czs.length} · ${czs.filter(cid => S.cards[cid].box >= MASTERED_BOX).length} בקופסה ${MASTERED_BOX} ומעלה · עד ${CZ_CAP} במשימה</div>
         <h3>האזנה</h3>
         ${lRows ? `<table><tr><th>מתי</th><th>מה</th><th>כוכבים</th><th>השמעות</th><th>תשובות שנחשפו</th></tr>${lRows}</table>` : '<div class="muted">עוד לא התחילה. הקלטה ראשונה ביום המיני-בוס, ואחר כך כל משימה שנייה עם הורה.</div>'}
         <div class="muted">ההקלטות מתנגנות מהאתר של ECB וצריכות Wi-Fi. אם הקלטה לא נטענת, באה במקומה שיחה קצרה בקול של המכשיר, וההקלטה מחכה למשימה הבאה עם הורה.</div>`;

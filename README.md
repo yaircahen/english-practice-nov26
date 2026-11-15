@@ -6,7 +6,7 @@ Design: `prd.md`. Static web app, no build step, no backend.
 
 | File | What |
 |---|---|
-| `index.html` | the page shell (now `3.5.1`); bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
+| `index.html` | the page shell (now `3.5.2`); bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
 | `styles.css` | reading-friendly styles |
 | `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
 | `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
@@ -89,7 +89,7 @@ pictures show two figure sizes next to a door.
 - **Mystery box** at the end of every mission, alone or with a parent: one find a day, common, rare
   or golden, for the hero (hat, companion, glow), the map's trail, the confetti, the sound of a right
   answer and the frame of the friend cards. It changes looks and sounds only. A land or tower whose
-  cards are all in Box 4–5 adds a rare find; the 🎁 on the map marks the ones still waiting.
+  cards are all in Box 3–5 adds a rare find; the 🎁 on the map marks the ones still waiting.
 - **Wardrobe**: tap the hero on the map, or the button under "זהו להיום". It opens once the day's
   mission is done, like the training grounds.
 - **Streak freeze**: one missed day a week is frozen by itself (the 🧊 next to the 🔥 shows it is
@@ -132,13 +132,14 @@ session on a day after the last of the 50 words came in.
   the form the sentence needs (`washes`, `months`).
 - **Word-in-a-sentence cards**: each of the 50 words gets one, with its word-bank sentence, once
   its meaning card is in Box 2. At most six a mission (`clozeCap` in `content.js`).
-- **Listening**: a recording on day 6, then on every second parent session: Honey, Robo-Pets,
+- **Listening**: a recording on day 6, then one in each parent session after it (every second
+  one until 15 Nov): Honey, Robo-Pets,
   Splash and Sandy. He hears it once with nothing else on screen, answers, then hears it again
   with the questions in view. Each one adds a pet card. The recordings play from ECB's address
   and need Wi-Fi; nothing of them is in this repo. If one does not load, a short dialogue in the
   device's voice takes its place and the recording waits for the next parent session.
 - **Two sittings**: on a mid-boss day or a recording day, a parent session first asks "cards
-  first, the rest later" or "all in one go". The cards sitting stops at 8 minutes (10 on the
+  first, the rest later" or "all in one go". The cards sitting stops at 10 minutes (12 on the
   mid-boss day) and leaves the quest half done on the map; the second sitting holds the writing,
   the story and the listening, and ends with the box. A session alone on such a day is the cards
   sitting, and ends with the code. A half left open overnight still counts as that day's quest.
