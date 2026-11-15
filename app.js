@@ -286,6 +286,7 @@
   }
   // "mastered" is Box 3–5 (PRD §2), as on the map
   const MASTERED_BOX = C.masteredBox || 3;
+  const STAR_RECS = new Set(C.words.map(w => cardId(w.id, 'rec')));   // the 50 cards the ⭐ counts
   function isDue(st, n) { if (st.box >= 5) return false; return (n - st.lastSession) >= C.intervals[st.box]; }
   function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.keys(S.cards).filter(known).forEach(cid => c[S.cards[cid].box]++); return c; }   // a skipped card isn't counted either
   // a land's flag is about its three core card types; the tile cards, born later, never take a flag down
@@ -447,7 +448,10 @@
     // one promotion per card per day (PRD §6.1): a card already reviewed in today's earlier session waits
     const seenToday = todayNs();
     const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
-    const byRank = (a, b) => (S.cards[b].priority - S.cards[a].priority) || (S.cards[b].box - S.cards[a].box);   // stable: keeps the shuffle inside a box
+    // a word still short of its ⭐ (its Recognition card below the mastered box) is never cut, and plays right after the
+    // priority cards: the time budget ends the review from the back, and the ⭐ must reach 50 by day 11
+    const star = cid => S.cards[cid].box < MASTERED_BOX && STAR_RECS.has(cid);
+    const byRank = (a, b) => (S.cards[b].priority - S.cards[a].priority) || (star(b) - star(a)) || (S.cards[b].box - S.cards[a].box);   // stable: keeps the shuffle inside a box
     const wrap = q => q.map(cid => ({ cid, retry: false, retries: 0 }));
     // the letter-tile cards are the light ones: a few a session, highest box first; the rest stay due.
     // Those few always get their turn (a full stack would otherwise crowd them out every day), and each
@@ -459,25 +463,27 @@
     const due = all.filter(cid => !isTile(cid) && !isCz(cid));
     if (short) {
       // the short review in front of a long sitting, or behind the mid-boss: Box 1 and the highest box due (PRD §7.4)
-      const plain = due.filter(cid => !S.cards[cid].priority);
+      // words short of their ⭐ come first here too
+      const plain = due.filter(cid => !S.cards[cid].priority && !star(cid));
       const top = Math.max(0, ...plain.map(cid => S.cards[cid].box));
       const b1 = shuffle(plain.filter(cid => S.cards[cid].box === 1)), hi = top > 1 ? shuffle(plain.filter(cid => S.cards[cid].box === top)) : [];
-      const q = [...shuffle(due.filter(cid => S.cards[cid].priority > 0)), ...b1.slice(0, Math.max(1, cap - 2)), ...hi].slice(0, cap);
+      const q = [...shuffle(due.filter(cid => S.cards[cid].priority > 0)), ...shuffle(due.filter(cid => !S.cards[cid].priority && star(cid))), ...b1.slice(0, Math.max(1, cap - 2)), ...hi].slice(0, cap);
       return wrap([...q, ...cz, ...tiles].sort(byRank));
     }
     cap = Math.max(8, cap - 2 * tiles.length - cz.length);
     const pri = due.filter(cid => S.cards[cid].priority > 0);
     const rest = due.filter(cid => S.cards[cid].priority === 0);
     const byBox = {}; rest.forEach(cid => { const b = S.cards[cid].box; (byBox[b] = byBox[b] || []).push(cid); });
-    let q = [...shuffle(pri)];
-    for (const b of [4, 3, 2, 1]) if (byBox[b]) q.push(...shuffle(byBox[b]));
+    const starNow = rest.filter(star);
+    let q = [...shuffle(pri), ...shuffle(starNow)];
+    for (const b of [4, 3, 2, 1]) if (byBox[b]) q.push(...shuffle(byBox[b].filter(cid => !star(cid))));
     if (q.length > cap) {
       // what gives way first: recognition-type cards of words already in Box 3 and up (PRD §7.4)
       const easy = cid => !!parseCard(cid).word && S.cards[cid].box >= 3 && !S.cards[cid].priority;
       // then the strongest boxes wait a session; priority cards and Box 1 (reviewed every session, §6.1) always stay
       // a card cut today comes back sooner: each session it waits past due moves it up, so nothing is cut for good
       const over = cid => n - S.cards[cid].lastSession - C.intervals[S.cards[cid].box];
-      const rank = cid => S.cards[cid].priority > 0 ? -1000 : S.cards[cid].box === 1 ? -999 : -3 * over(cid) + (easy(cid) ? 9 : S.cards[cid].box);
+      const rank = cid => S.cards[cid].priority > 0 ? -1000 : star(cid) ? -999 : S.cards[cid].box === 1 ? -998 : -3 * over(cid) + (easy(cid) ? 9 : S.cards[cid].box);
       const kept = new Set([...q].sort((a, b) => rank(a) - rank(b)).slice(0, cap));   // stable: keeps the shuffle inside a box
       q = q.filter(cid => kept.has(cid));                                              // and the play order stays highest box first
     }

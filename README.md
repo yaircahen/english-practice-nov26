@@ -137,7 +137,7 @@ session on a day after the last of the 50 words came in.
   and need Wi-Fi; nothing of them is in this repo. If one does not load, a short dialogue in the
   device's voice takes its place and the recording waits for the next parent session.
 - **Two sittings**: on a mid-boss day or a recording day, a parent session first asks "cards
-  first, the rest later" or "all in one go". The cards sitting stops at 8 minutes (10 on the
+  first, the rest later" or "all in one go". The cards sitting stops at 10 minutes (12 on the
   mid-boss day) and leaves the quest half done on the map; the second sitting holds the writing,
   the story and the listening, and ends with the box. A session alone on such a day is the cards
   sitting, and ends with the code. A half left open overnight still counts as that day's quest.

@@ -92,7 +92,7 @@ is on paper and asks for handwriting.
 | Comprehension check: reads an **unseen** three-paragraph passage (12–15 sentences) at scaffold level 3 and answers 4 of 5 questions in the test's formats, true/false included, with no hints | pass | Day 11 |
 | Scaffold level reached on the story track | level 4 of 5 | Day 11 |
 | Sessions completed | ≥ 12 of 13 | ongoing |
-| Session length (median; both sittings together when the quest is split, §7.4) | 12–16 min; 18–22 on day 6 and days 8–10 | ongoing |
+| Session length (median; both sittings together when the quest is split, §7.4) | 12–18 min; 18–24 on day 6 and days 8–10 (2 min more from 15 Nov) | ongoing |
 | Kid-reported "want to play tomorrow" (thumbs at end of session) | ≥ 70% 👍 | ongoing |
 
 Anti-metrics (things we refuse to optimise): total minutes played, points, number of badges.
@@ -371,7 +371,9 @@ Hard constraints:
   ⭐, the map, the stamp, a land's flag) is now Box 3–5, i.e. two correct recalls after a gap,
   the same as §2's metric. The review stack holds up to 80 cards; the sitting's time budget
   usually holds it to fewer. A card cut from a full stack moves up a place for every session
-  it waits, so none is cut for good.)
+  it waits, so none is cut for good. A word still short of its ⭐ is never cut and plays right
+  after the priority cards, in the short review too, since the time budget ends a review from
+  the back.)
 - **Promotion**: correct → up one box. **Demotion**: wrong → down one box (the gentle variant).
   The classic "back to Box 1" is too punishing for a 10-year-old and over-reviews mature cards;
   the reference's weakness note applies.
@@ -747,7 +749,7 @@ white-hat: visible competence (CD2), choices (CD3), and the parent's attention (
 asks "what do I get" before starting, the reward mix has drifted too extrinsic; cut the mystery box
 to every other day.
 
-### 7.4 Session loop (v4: 16 min at most per sitting)
+### 7.4 Session loop (v4: 16 min at most per sitting; 18 from 15 Nov)
 
 1. **Open** (30 s): map, streak, "today's mission: 18 cards + 1 new land + 1 friend".
 2. **Warm read** (20 s, from day 5): re-read a paragraph from two days ago; personal-best time.
@@ -784,7 +786,9 @@ the days are longer than in v3, and four of them do not fit one sitting.
 | 9 | 5 | 6 ("about me", by hand) | 6.5 | — | 1.5 | **19** |
 | 11–12 | test mode and the mock have their own length (about 25 and 40) | | | | | |
 
-**The hard stop stays at 16 minutes per sitting**: the app ends the sitting gracefully even if
+**The hard stop is 18 minutes per sitting** (16 until 15 Nov; the two extra minutes go to the
+review, and the cards sitting below moved from 8 to 10 the same day, so the words still short of
+their ⭐ reach the review in time; §6.1): the app ends the sitting gracefully even if
 cards remain ("the rest wait for tomorrow"), to protect the appointment dynamic and the kid's
 tolerance. On day 6 and days 8–10 **the quest can be played in two sittings**:
 
@@ -792,7 +796,7 @@ tolerance. On day 6 and days 8–10 **the quest can be played in two sittings**:
 |---|---|---|
 | Holds | review stack, new land | writing, story, listening, close |
 | With | alone or with a parent (alone: no new land, as before) | a parent |
-| Length | 5–8 min, stop at 8 | 11–16 min, stop at 16 |
+| Length | 5–10 min, stop at 10 (12 on the mid-boss day) | 11–18 min, stop at 18 |
 | Ends with | the completion code; the map shows the quest half done | map update, loot, brag card |
 
 It is still one quest: one streak day, one mystery box, one promotion per card. If only one

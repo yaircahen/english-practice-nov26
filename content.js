@@ -1171,8 +1171,8 @@ window.CONTENT = {
   // The Sentence-cloze cards (one of the 50 words in its word-bank sentence) are born late and all at once:
   // at most this many in a session.
   clozeCap: 6,
-  sessionHardStopMin: 16,
-  cardsStopMin: 8,                // the cards sitting of a quest played in two sittings (PRD §7.4)
+  sessionHardStopMin: 18,          // 16 until 15 Nov: two more minutes a sitting for the review (PRD §7.4)
+  cardsStopMin: 10,               // was 8 until 15 Nov; the cards sitting of a quest played in two sittings (PRD §7.4)
   freePlayCapMinDefault: 15,
   reviewStackCap: 80,      // about 7–8 minutes at his pace; the sitting's time budget and hard stop still bound it
   masteredBox: 3,          // "mastered" = Box 3–5 (PRD §2), i.e. two correct recalls after a gap: the ⭐, the map, the stamp
