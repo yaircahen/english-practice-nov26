@@ -1165,14 +1165,15 @@ window.CONTENT = {
   // Letter-tile cards (one word, Hebrew → English) are the light ones: at most this many in a session.
   tileCap: 3,
 
-  // Leitner: sessions between reviews, by box. Box 5 is "mastered": only spot-checked (M3).
-  intervals: { 1: 1, 2: 2, 3: 4, 4: 7, 5: Infinity },
+  // Leitner: sessions between reviews, by box. Box 5 is done: it leaves the daily review.
+  // Short gaps (1/1/2/3, not 1/2/4/7): the run is two weeks, and every word must reach the ⭐ by day 11.
+  intervals: { 1: 1, 2: 1, 3: 2, 4: 3, 5: Infinity },
   // The Sentence-cloze cards (one of the 50 words in its word-bank sentence) are born late and all at once:
   // at most this many in a session.
   clozeCap: 6,
   sessionHardStopMin: 16,
   cardsStopMin: 8,                // the cards sitting of a quest played in two sittings (PRD §7.4)
   freePlayCapMinDefault: 15,
-  reviewStackCap: 40,      // about 4 minutes at his pace; the 16-minute hard stop still ends the sitting
-  masteredBox: 4,          // "mastered" = Box 4–5 (PRD §2): the ⭐, the map, the stamp
+  reviewStackCap: 80,      // about 7–8 minutes at his pace; the sitting's time budget and hard stop still bound it
+  masteredBox: 3,          // "mastered" = Box 3–5 (PRD §2), i.e. two correct recalls after a gap: the ⭐, the map, the stamp
 };

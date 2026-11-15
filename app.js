@@ -281,17 +281,17 @@
   function packIntroduced(id) { return S.packsIntroduced.some(p => p.id === id); }
   function towerProgress(g) {
     let total = 0, mastered = 0;
-    (g.units || []).forEach(u => packCards(u).forEach(cid => { const st = S.cards[cid]; if (st) { total++; if (st.box >= 4) mastered++; } }));
+    (g.units || []).forEach(u => packCards(u).forEach(cid => { const st = S.cards[cid]; if (st) { total++; if (st.box >= MASTERED_BOX) mastered++; } }));
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0, open: (g.units || []).some(packIntroduced) };
   }
-  // "mastered" is Box 4–5 (PRD §2), as on the map; Box 5 can't be reached in a two-week run
-  const MASTERED_BOX = C.masteredBox || 4;
+  // "mastered" is Box 3–5 (PRD §2), as on the map
+  const MASTERED_BOX = C.masteredBox || 3;
   function isDue(st, n) { if (st.box >= 5) return false; return (n - st.lastSession) >= C.intervals[st.box]; }
   function boxCounts() { const c = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.keys(S.cards).filter(known).forEach(cid => c[S.cards[cid].box]++); return c; }   // a skipped card isn't counted either
   // a land's flag is about its three core card types; the tile cards, born later, never take a flag down
   function landProgress(land) {
     let total = 0, mastered = 0;
-    land.words.forEach(wid => cardTypesFor(WORDS[wid]).forEach(type => { const st = S.cards[cardId(wid, type)]; if (st) { total++; if (st.box >= 4) mastered++; } }));
+    land.words.forEach(wid => cardTypesFor(WORDS[wid]).forEach(type => { const st = S.cards[cardId(wid, type)]; if (st) { total++; if (st.box >= MASTERED_BOX) mastered++; } }));
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0 };
   }
   function landIntroduced(id) { return S.landsIntroduced.some(l => l.id === id); }
@@ -2402,7 +2402,7 @@
         ${againEn ? `<div>חוזרים בפעם הבאה: <span class="en">${againEn}</span></div>` : ''}
         <div class="muted">מסמנים ולא מתקנים באמצע המשפט. הסימונים נשמרים רק כאן; הם לא מזיזים קלפים ולא נראים במשחק.</div>
         <h3>קלפי בנייה מאותיות</h3>
-        <div>${tiles.length} קלפים · ${tiles.filter(cid => S.cards[cid].box >= 4).length} בקופסה 4 ומעלה · עד ${TILE_CAP} במשימה</div>
+        <div>${tiles.length} קלפים · ${tiles.filter(cid => S.cards[cid].box >= MASTERED_BOX).length} בקופסה ${MASTERED_BOX} ומעלה · עד ${TILE_CAP} במשימה</div>
         <div class="muted">קלף כזה נולד כשקלף המשמעות של המילה מגיע לקופסה 3.</div>
         <h3>רצף והקפאות</h3>
         <div>רצף: ${streak()} ימים · ההקפאה החינמית של השבוע: ${freezeLeft() ? 'עוד לא נוצלה' : 'נוצלה'}</div>
@@ -2428,7 +2428,7 @@
         <div class="muted">המספר לפי משקלי המבחן מיועד להורים בלבד. במשחק רואים רק כמה מכות חטף הבוס.</div>
         <h3>בנק מילים וחצאי משפטים</h3>
         ${setRows ? `<table><tr><th>מתי</th><th>סוג</th><th>טעויות בניסיון הראשון</th></tr>${setRows}</table>` : '<div class="muted">מתחילים יום אחרי שכל 50 המילים נפתחו: סט אחד מכל סוג בתוך החזרה.</div>'}
-        <div>קלפי מילה במשפט: ${czs.length} · ${czs.filter(cid => S.cards[cid].box >= 4).length} בקופסה 4 ומעלה · עד ${CZ_CAP} במשימה</div>
+        <div>קלפי מילה במשפט: ${czs.length} · ${czs.filter(cid => S.cards[cid].box >= MASTERED_BOX).length} בקופסה ${MASTERED_BOX} ומעלה · עד ${CZ_CAP} במשימה</div>
         <h3>האזנה</h3>
         ${lRows ? `<table><tr><th>מתי</th><th>מה</th><th>כוכבים</th><th>השמעות</th><th>תשובות שנחשפו</th></tr>${lRows}</table>` : '<div class="muted">עוד לא התחילה. הקלטה ראשונה ביום המיני-בוס, ואחר כך כל משימה שנייה עם הורה.</div>'}
         <div class="muted">ההקלטות מתנגנות מהאתר של ECB וצריכות Wi-Fi. אם הקלטה לא נטענת, באה במקומה שיחה קצרה בקול של המכשיר, וההקלטה מחכה למשימה הבאה עם הורה.</div>`;

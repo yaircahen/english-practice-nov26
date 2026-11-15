@@ -85,9 +85,9 @@ is on paper and asks for handwriting.
 | Final mock test (paper, the practice copy's five sections and point weights, §4.4) | ≥ 90% | Day 12 (Fri 20 Nov) |
 | Writing (v4): five sentences about a labelled picture with a word bank, on paper, unaided | ≥ 4 of 5 fully correct | Day 11 (test mode), again in the mock |
 | Listening (v4): an unheard short dialogue, played twice, questions in the test's formats | ≥ 4 of 5 | Day 11 |
-| Vocabulary cards in Box 4–5 ("mastered") | ≥ 90% of 50 words on Recognition, Sound-lineup and Word↔Image; ≥ 70% on tile Production | Day 11 |
+| Vocabulary cards in Box 3–5 ("mastered"; was Box 4–5 until 15 Nov, §6.1) | 50 of 50 words on Recognition (the ⭐); ≥ 90% on Sound-lineup and Word↔Image; tile Production in Box 2 or higher | Day 11 |
 | Bonus-land cards (v4: numbers, months, picture adjectives, §4.1c) in Box 3 or higher | ≥ 85% | Day 11 |
-| Grammar cards in Box 4–5 | ≥ 85% | Day 11 |
+| Grammar cards in Box 3–5 | ≥ 85% | Day 11 |
 | (Secondary) Reading check: reads all 50 words aloud correctly, ≤ 2 s each | 45/50 | Day 11 |
 | Comprehension check: reads an **unseen** three-paragraph passage (12–15 sentences) at scaffold level 3 and answers 4 of 5 questions in the test's formats, true/false included, with no hints | pass | Day 11 |
 | Scaffold level reached on the story track | level 4 of 5 | Day 11 |
@@ -363,12 +363,15 @@ Hard constraints:
 ### 6.1 Leitner engine
 
 - **5 boxes, session-based** (not calendar-based), so a skipped day doesn't break the schedule.
-  Box 1 is reviewed every session, Box 2 every 2nd session, Box 3 every 4th, Box 4 every 7th,
-  Box 5 = "mastered": only spot-checked inside boss fights and on the final two days.
-  (Corrected 13 Nov: at these intervals Box 1 → Box 5 takes 13 sessions, so no card reaches
-  Box 5 before the test. "Mastered" in the app (the ⭐, the map, the stamp) is therefore Box 4–5,
-  the same as §2's metric. The review stack holds up to 40 cards, and a card cut from a full
-  stack moves up a place for every session it waits, so none is cut for good.)
+  Box 1 and Box 2 are reviewed every session, Box 3 every 2nd session, Box 4 every 3rd;
+  Box 5 leaves the daily review.
+  (Changed 15 Nov, from 1/2/4/7 sessions, "mastered" at Box 4 and a 40-card stack: a model of
+  days 1–13 showed that even with every answer right, the last land's words reached Box 4 on
+  day 11 at the earliest, so the ⭐ could not reach 50 by the target. "Mastered" in the app (the
+  ⭐, the map, the stamp, a land's flag) is now Box 3–5, i.e. two correct recalls after a gap,
+  the same as §2's metric. The review stack holds up to 80 cards; the sitting's time budget
+  usually holds it to fewer. A card cut from a full stack moves up a place for every session
+  it waits, so none is cut for good.)
 - **Promotion**: correct → up one box. **Demotion**: wrong → down one box (the gentle variant).
   The classic "back to Box 1" is too punishing for a 10-year-old and over-reviews mature cards;
   the reference's weakness note applies.
@@ -460,7 +463,7 @@ counter-measures.
    (The book is not at home, so the book-text MP3s are not used. The three listening recordings
    of §6.7 are a separate track.)
 7. **No timers on reading**. The only timed mode is the optional "speed round" on Recognition
-   cards of Box 4–5 words, which he chooses to enter (CD3, not CD8).
+   cards of Box 3–5 words, which he chooses to enter (CD3, not CD8).
 
 ### 6.4 Paper mode (days 11–13): decided, option B + one printed mock
 
@@ -914,7 +917,7 @@ schedule.
 | Box promotions / demotions | yes | **neither**: cards never move from free play |
 | Story level-ups | yes | no (any unlocked story can be re-read; re-reads feed the coach log) |
 | Loot, streak, map | yes | no (a free-play "training" tally is shown, nothing more) |
-| What's there | the due stack, today's land, today's story | Box 1–2 cards as drills, sound-lineup sets by look-alike group, word↔image memory game, re-read any friend, replay any recording he has met, build sentences from a picture (writing rungs 1–2), speed round on Box 4–5 words, test-mode practice in week 2, the wardrobe and trophy shelf |
+| What's there | the due stack, today's land, today's story | Box 1–2 cards as drills, sound-lineup sets by look-alike group, word↔image memory game, re-read any friend, replay any recording he has met, build sentences from a picture (writing rungs 1–2), speed round on Box 3–5 words, test-mode practice in week 2, the wardrobe and trophy shelf |
 | Feeds the engine? | fully | lightly: a card missed 3+ times in free play is placed first in tomorrow's stack; a card nailed in free play does not skip ahead |
 
 **Why the cap.**
@@ -1051,7 +1054,7 @@ deliberately unseen and unheard: those are the comprehension and listening metri
    card collection (10 friends, 3 pets and his own), gilded ones first.
    *Built 13 Nov (v3.2.0), widened at the owner's request:* every unlocked word, not only the
    mastered ones, land by land (the bonus land as one section), each at its rank (the skin's box
-   name and a small ladder, from the word's first card type, as the ⭐ counts it); Box 4–5 gilded
+   name and a small ladder, from the word's first card type, as the ⭐ counts it); Box 4–5 gilded (Box 3–5 from 15 Nov)
    and first; a tap flips to the Hebrew and says the word; 🔥 for a word with a card missed 3+
    times; closed lands show how many words are still hiding. Opens from the map after the quest,
    like the wardrobe; looking never moves a card. Named per skin: מסדר המילים / לוח הצוות /

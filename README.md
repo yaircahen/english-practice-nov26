@@ -88,7 +88,7 @@ pictures show two figure sizes next to a door.
 - **Mystery box** at the end of every mission, alone or with a parent: one find a day, common, rare
   or golden, for the hero (hat, companion, glow), the map's trail, the confetti, the sound of a right
   answer and the frame of the friend cards. It changes looks and sounds only. A land or tower whose
-  cards are all in Box 4–5 adds a rare find; the 🎁 on the map marks the ones still waiting.
+  cards are all in Box 3–5 adds a rare find; the 🎁 on the map marks the ones still waiting.
 - **Wardrobe**: tap the hero on the map, or the button under "זהו להיום". It opens once the day's
   mission is done, like the training grounds.
 - **Streak freeze**: one missed day a week is frozen by itself (the 🧊 next to the 🔥 shows it is
