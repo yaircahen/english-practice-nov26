@@ -241,6 +241,28 @@ insurance and reading practice, not a rescue.
 - The list is inferred from one practice copy. Check it against the book's Unit 1 pages or
   with the teacher (§11).
 
+### 4.1d The everyday words (15 Nov, v3.5.0)
+
+The scan of the practice copy (§4.4) shows ordinary words from earlier years in every section,
+and half of its ten matching words were outside the 50. Twelve of them are land 8, a third stop
+on the bonus land's side path: `flower, now, today, night, week, kids, sister, grandmother,
+money, small, want, buy`. `flower` and `now` are the two matching words that nothing in the
+game covered.
+
+- **One card a word**: Recognition (English → Hebrew), set against the other eleven. No
+  Sound-lineup, no picture card, no tile. The first round is a placement round, as in the bonus
+  land: a word he reads goes to Box 2.
+- **It opens like any land**, the day after land 7, and is not counted in the 50.
+- **It has a last day, 18 Nov.** A land that has not opened by then stays shut, and the map is
+  drawn without it. New cards stop four days before the test (reference §7); this is the one
+  place the game looks at the calendar.
+- **The cost.** A new-land round of about three minutes on one day, and up to twelve more cards
+  in Box 1 for the sessions after it. Box 1 always keeps its place in the review stack (§7.4),
+  so on those days up to twelve cards of the 50 that sit in Box 3 and up wait a session. That
+  is the price of a land this late, and the reason it is twelve words and not more.
+- Eight sentences with these words joined the reading minute, and are read first once the
+  land is open.
+
 ### 4.2 Grammar, decomposed into card-sized facts
 
 | Topic | Facts to drill | Example card prompts |
@@ -325,7 +347,7 @@ instructions in English with Hebrew and Arabic beside them:
 | Writing | 5 × 2 | The word bank is **above** the picture: 14 words, adjectives and **bare nouns** (`ball`, not `a ball`; also a plural and uncountables). Eight labelled people. Five plain lines. The rule of two *is/are* and three *have/has* is given only in Hebrew and Arabic, with "correct grammar, spelling and punctuation" |
 
 The mock (`mock.html`) follows this shape. **Gaps between the scan and what the game trains.**
-The first two were closed on 15 Nov (v3.4.0); the other three are open:
+All five were closed on 15 Nov: the first two in v3.4.0, the other three in v3.5.0.
 
 1. *Writing (closed).* The game's bank at rung 4 handed him `a dog`. The test hands him `dog`,
    and `flowers` and `money` beside it, so the article is his to add or leave out. From 3.4.0 the
@@ -335,12 +357,19 @@ The first two were closed on 15 Nov (v3.4.0); the other three are open:
    have only. The test's passage is half as long again, in the first person, with everyday
    verbs. From 3.4.0, C3 and C4 are told that way (§6.5). C1 and C2 are unchanged: they are the
    step up to the long story.
-3. *Sentence halves.* The game's families are cut so that agreement decides. The test's are
-   decided by meaning.
-4. *Choices.* The game's questions offer three. The test's offer four, and in the listening they
-   are phrases he has to read while he listens.
-5. *The words around the unit.* The test assumes ordinary earlier-years vocabulary (family,
-   school, colours, common verbs) in every section.
+3. *Sentence halves (closed).* The game's families are cut so that agreement decides. The
+   test's are decided by meaning. From 3.5.0 two halves sets of every three are fixed sets
+   joined by meaning (§6.2); the third is still drawn from the families.
+4. *Choices (closed).* The game's questions offered three. The test's offer four, and in the
+   listening they are phrases he has to read while he listens. From 3.5.0 every listening
+   question to complete has four endings in words, with no picture beside them, the Yes / No
+   lines are statements, and the stories' Wh-questions offer four choices. A new unheard
+   dialogue in the practice copy's exact shape follows the recordings (§6.7).
+5. *The words around the unit (closed as far as a week allows).* The test assumes ordinary
+   earlier-years vocabulary (family, school, colours, common verbs) in every section. From
+   3.5.0 twelve of those words are a small land of meaning cards (§4.1d), and the new halves,
+   the new dialogue and C3 and C4 are written with such words. Vocabulary of this kind is years
+   of reading, and twelve cards do not replace it.
 
 Not on the practice copy: word-to-image matching, a/an/some, Wh-questions, short answers,
 pronoun substitution. They stay in the game, because the teacher's sheet lists the grammar
@@ -449,6 +478,16 @@ derived, not hand-written.
 Word bank and Sentence halves are sets of five, generated fresh from the sentence pool each
 time, so a set has no box of its own. It enters the review stack as one item, and a miss inside
 it demotes that word's Sentence-cloze card.
+
+**Halves joined by meaning (15 Nov, v3.5.0).** On the practice copy nothing in the grammar gives
+an ending away: two beginnings end in `is`, two need a thing or a person after them, one ends
+in `because`, and only the sense tells which ending goes where (§4.4). The families above are
+cut so that am / is / are decides. So six fixed sets of five were added, each checked by hand,
+pair by pair: taken as a set every beginning has one ending, and every other pairing is not a
+sentence or makes no sense. The ending after `because` starts with a pronoun, because one that
+starts with a name would also read on from `waits for` or `has`. Two halves sets of every three
+in the review come from these six; the third is still drawn from the families. They are
+written with the everyday words of §4.1d.
 
 Derived counts: 50 words × 3 core types + ~30 Word↔Image + 50 light Production ≈ 230 vocab
 cards, plus ~60 grammar cards. Not all exist on day 1: Production and Cloze cards are born from
@@ -731,6 +770,20 @@ emoji, and three key words with Hebrew, because the recordings use a few words o
 Questions are in the test's formats (multiple choice, tick two pictures, yes/no), with the same
 hint ladder as the stories, where the first hint is "listen again". Each recording finished
 adds a **pet card** (Honey, the Robo-Dog, Splash and Sandy) to the friend collection.
+
+**The questions are the test's (15 Nov, v3.5.0).** On the practice copy the listening asks for
+three sentences to be completed, each with four endings a few words long and no picture; two
+pictures to be ticked out of five; and two statements to be marked Yes or No (§4.4). The
+recordings' questions were three short choices with a picture beside each, and their Yes / No
+lines were questions. They now have the test's form: a sentence to complete with four endings
+in words, and statements. The fourth ending of each was written without the transcript at hand
+and chosen to be impossible beside the right answer; **check them against the transcripts**.
+
+**The first unheard dialogue is built** ("Maya and Dan", 12 lines, two device voices): six
+questions in the practice copy's exact order, three to complete, two pictures, two statements.
+It is the next listening item after the three recordings, and unlike a recording it needs no
+day of rest before it, so it falls on the day after the last recording (day 11 if he is on
+plan).
 
 **Unheard material.** Three recordings cannot test listening honestly, because he will know
 them by the third play. Days 11–12 use app-written dialogues of 6–8 lines on the unit's theme,
@@ -1217,7 +1270,7 @@ Still open, none blocking the build:
 | PRD v4 | Tue 10 Nov | This revision, after the practice copy. `archive/prd-v3.md` keeps the old plan. |
 | M2 | Wed 11 Nov (was Tue 10) | **Status, 10 Nov: both lists are built.** *Test-facing list (v2.0.0):* played through six simulated days in the Mac browser at iPad size, starting from an M1 save; Yair then tried it on the iPad, and what came up there (the tall/short picture among it) was fixed before the "then" list was started, per the ordering rule below. *"Then" list (v2.1.0):* played in the Mac browser at iPad size (820×1180) from an M1-shaped save and from M2 saves, in all three skins, with no console errors. **v2.1.0 is not yet tried on the real iPad, and not pushed.** Moved to M3 while building: the level-3 "find it" step, re-asking a question after hint 3 and its coach flag, the one-line comprehension tips, and showing personal-best read times. **Test-facing first:** grammar cards for all four towers in the v4 order (to be; have/has; negatives, questions, short answers; Wh-questions and a/an/some), with names as subjects. Noun→pronoun card. Same-or-different cards. Sentence builder on the four writing frames (rungs 1–2). Writing minute on paper (rungs 3–4: "pen down", key, three checks). Story track v1: tier A and B passages, scaffold levels 1–3, hint ladder, true/false and tick-two questions, friend cards. Coach log. **Then:** copy pass (all strings in one table, new voice), tile production, reading minute, mystery box with loot tiers and a cosmetics wardrobe, streak + freeze, brag card. **The "then" list as built:** *Mystery box* after every finished quest, solo and hard-stopped ones included, one a day. 33 items per skin (17 common, 9 rare, 7 golden) in seven slots: hat, companion, aura, trail, confetti, the correct-answer sound, friend-card frame; hats and companions belong to the skin. The first box is never common and holds something to wear; never three common ones in a row; a golden one at least every sixth box; no duplicates. A territory with all its cards in Box 4–5 gives one guaranteed rare, and an open territory shows a 🎁 until then. The coach can thin the box to every second quest (§7.3's guard). *Wardrobe:* opens from the hero or from the map once the day's quest is done (§7.7); what is still in a closed box stays a "?". *Streak freeze:* each week (Sunday to Saturday) has one free freeze, spent by itself on a single missed day that follows a played one; two missed days in a row end the streak unless the coach freezes them from the coach screen. *Brag card:* a 1080×1350 picture in the skin's colours (the hero as worn, the day number, up to four of the day's numbers); one tap opens the share sheet where the browser can share a file, and the picture stays on screen to save where it cannot. *Reading minute:* after the story, in parent sessions, only with 1.5 minutes or more left; three sentences from a pool of 50, tagged by land and grammar unit; ✓ or 🔁 per sentence (🔁 stands in for ✗, by §7.6's no-red-X rule), the 🔁 ones return first next time; coach log only. *Tile production:* a word's card is born when its Recognition card reaches Box 3 (the 50 words, not the starter kit); at most three a session (`tileCap` in the content file), no same-session retry, and not counted in a land's flag. At that weight §2's target of 70% in Box 4–5 by day 11 will not be reached. *Copy pass:* every line the kid reads is in `copy` in `content.js`, with the voice rules written above it; the coach screen's lines stay in `app.js`. **Not built:** the 👍/👎 at the close and the golden card (§7.4 step 9, §7.6; neither is on a milestone's list yet), map decorations and trophy-shelf stickers as loot (the shelf is M3), the parent-authored real-world pool (§7.5, optional), tile cards in the training grounds (M3's drills) |
 | M3 | Fri 13 Nov (was Thu 12) | **Status, 12 Nov: the test-facing list is built (v3.0.1).** Played in the browser at iPad size (820×1180) from the day-6 and day-8 sample saves and from M1 and M2 saves, in all three skins, six simulated days in a row, with no console errors. **Not yet tried on the real iPad. The recordings could not be played where it was built** (ECB's address was not reachable there), so the player was tested against a stand-in file and against a failed load; the three addresses of §4.3 still need a check on the iPad. *As built:* the mid-boss is 20 answers (4 listen-and-pick, a word-bank set, 4 grammar cloze with has/have twice, a sentence-halves set, 2 tile-built sentences); the kid sees hits on a boss, and the section tally with a number by the test's weights is on the coach screen only (§9.2's "you'd have scored 86" would break §7.1's rule). The word bank is ten fixed sets, each of the 50 words once, each set checked by hand so that a word fits one sentence only; the halves are drawn fresh from six sentence families that cannot be cross-matched. The Sentence-cloze cards of §6.2 were on no milestone's list and are built here, from the word-bank sentences, six a session at most. Bonus land: twelve numbers (Sound-lineup only for the three look-alike pairs), six months, six adjectives (`fat` and `nice` as meaning cards). Listening: the first pass gives no verdict on a miss, the question stays open for the second hearing; there is no sentence to highlight, so the hint ladder is the second hearing, then one more try, then the answer. One spoken dialogue is built already, as the stand-in for a recording that does not load. Two sittings: the cards sitting stops at 8 minutes, at 10 on the mid-boss day (the boss alone is about 5). Story track v2: C1–C4 (C5 belongs to the mock, M4); one paragraph a screen up to level 3, each with its own questions; complete-the-sentence and write-two questions (write-two is tapped up to level 3, on paper from level 4); levels 4 and 5; the second visit two sessions later, one level higher (a long story: one paragraph, his pick); the warm read; reading times kept per paragraph. Also built from what M2 handed on: the level-3 "find it" step, re-asking a question after hint 3 with its coach flag, the five one-line tips. *Differs from §6.5:* a best reading time is announced as the paragraph's own record, with no earlier time beside it (§7.1 rules out a before/after frame; the times are on the coach screen); at level 4 the questions still come one at a time, not all on one page; the level-4 "hear the paragraph" button and the read-along days (§6.3 item 6) are not built. A day with a new long story counts as a long day and offers two sittings. **Then-list: not started.** **Test-facing first:** listening track (Listen-and-pick cards, the three recordings with questions, pet cards; streaming and two voices checked on the iPad). Bonus land. Word-bank and Sentence-halves cards. Story track v2: tier C with one paragraph per screen, complete-the-sentence and write-two questions, levels 4–5, repeated-reading scheduler, warm read, timing. Two-sitting quest. Mid-boss in the test's five sections. **Then:** trophy shelf, tricky-word flow, own-sentence cards, export/import. Training grounds: drills, re-reads, recording replays, sentence building, memory game, parent cap (a minimal "replay Box 1" version ships in M1 so the cap exists from day 1) |
-| M4 | Mon 16 Nov | **Status, 15 Nov: the printable mock and its key are built (v3.3.0), ahead of the rest of the list**, because it is the one piece that works on paper if the screens slip. `mock.html` prints the test (9 pages), the answer key and two pages for the coach, from `mock` in `content.js`. It was first laid out from §4.4 and then rebuilt against the scan of the practice copy, task by task (§4.4, "Checked against the scan"): the same tasks, items, choices, points and sheets, with all content new: ten names neither the practice copy nor the stories use, C5 ("Ella and Yoni", first person, 21 sentences, 136 words), an unheard dialogue (Yael and Noam, 12 lines) spoken twice from the page in two device voices, and a picture of six labelled people with a bank of bare nouns. Checked in the browser as A4 PDFs only: not yet on the iPad, on a printer, or with the real voices. Of the five gaps the scan shows between the test and the game (§4.4), the first two were closed the same day (v3.4.0): the writing bank on paper is bare, with two nouns that take no article, and C3 and C4 are retold in the test's first-person style. Played in the browser from the day-8 sample save at levels 1, 3 and 4; not on the iPad. **Not built yet:** writing rung 5 in the quest, unheard dialogues in the quest, the test-mode screen, the final boss, and the "then" list. **Test-facing first:** writing rung 5 (the full five-sentence task). App-written dialogues for unheard listening. Test-mode screen (worksheet look, self-marking against the key). One printable full mock + answer key, cloned from the practice copy's five sections with all content new. Final boss with unseen passage and unheard dialogue. **Then:** "about me" template, speed round |
+| M4 | Mon 16 Nov | **Status, 15 Nov: the printable mock and its key are built (v3.3.0), ahead of the rest of the list**, because it is the one piece that works on paper if the screens slip. `mock.html` prints the test (9 pages), the answer key and two pages for the coach, from `mock` in `content.js`. It was first laid out from §4.4 and then rebuilt against the scan of the practice copy, task by task (§4.4, "Checked against the scan"): the same tasks, items, choices, points and sheets, with all content new: ten names neither the practice copy nor the stories use, C5 ("Ella and Yoni", first person, 21 sentences, 136 words), an unheard dialogue (Yael and Noam, 12 lines) spoken twice from the page in two device voices, and a picture of six labelled people with a bank of bare nouns. Checked in the browser as A4 PDFs only: not yet on the iPad, on a printer, or with the real voices. All five gaps the scan shows between the test and the game (§4.4) were closed the same day. v3.4.0: the writing bank on paper is bare, with two nouns that take no article, and C3 and C4 are retold in the test's first-person style. v3.5.0: two halves sets of every three are joined by meaning (six fixed sets); every listening question to complete has four endings in words and the stories' Wh-questions four choices; one unheard dialogue in the practice copy's shape follows the recordings; and twelve everyday words are a small land that may open until 18 Nov (§4.1d). Played in the browser from the day-8 sample save; not on the iPad. The fourth endings of the recording questions were written without the transcripts and need a look. **Not built yet:** writing rung 5 in the quest, a second unheard dialogue (the first is in), the test-mode screen, the final boss, and the "then" list. **Test-facing first:** writing rung 5 (the full five-sentence task). App-written dialogues for unheard listening. Test-mode screen (worksheet look, self-marking against the key). One printable full mock + answer key, cloned from the practice copy's five sections with all content new. Final boss with unseen passage and unheard dialogue. **Then:** "about me" template, speed round |
 | M5 | Thu 19 Nov | Tuning from 10 days of session logs; nothing new |
 
 **Ordering rule (v4).** Nothing was cut, and there are fewer build days than v3 assumed. Inside

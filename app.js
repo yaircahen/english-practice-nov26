@@ -26,6 +26,7 @@
   const CZ = {};
   BANK.forEach(set => set.items.forEach(it => { CZ[it.w] = Object.assign({ mates: set.items.filter(x => x !== it).map(x => x.a) }, it); }));
   const HALVES = C.halves || {};
+  const HALVES_M = C.halvesMeaning || [];                    // fixed sets whose halves are joined by meaning (prd.md §4.4)
   const LISTEN = (C.listening && C.listening.items) || [];
   const LITEM = Object.fromEntries(LISTEN.map(x => [x.id, x]));
   const CZ_CAP = C.clozeCap == null ? 6 : C.clozeCap;
@@ -70,7 +71,7 @@
       streak: { frozen: {}, told: '' },                      // frozen[date] = 'auto' (the week's free one) | 'coach'
       reading: { again: [], seen: {}, history: [] },         // reading minute: ids marked "again" · seen[id] = session · history: [{ date, n, items }]
       // M3. Absent from an older save; same rule.
-      sets: { bankSeq: 0, history: [] },                     // word-bank and sentence-halves sets: history: [{ date, n, kind, sid, misses }]
+      sets: { bankSeq: 0, hvSeq: 0, history: [] },           // word-bank and sentence-halves sets: history: [{ date, n, kind, sid, misses }]
       listening: { done: {}, runs: [] },                     // done[id] = { stars, total, date } · runs: [{ id, date, n, plays, stars, total, hints, fallback, for }]
       boss: { mid: null },                                   // mid = { date, n, hits, total, sec, misses }
     };
@@ -221,6 +222,7 @@
     if (w.kind === 'num') return w.twin ? ['num', 'lineup'] : ['num'];
     if (w.kind === 'month') return ['lineup'];
     if (w.kind === 'adj') return [hasPic(w) ? 'img' : 'rec'];
+    if (w.kind === 'near') return ['rec'];                    // an everyday word (land 8): its meaning, and no more
     const types = ['rec', 'lineup']; if (w.emoji) types.push('img'); return types;
   }
   // what a new land's first round asks: the placement round (a number pair's Sound-lineup waits for the next review)
@@ -295,9 +297,11 @@
     return { total, mastered, pct: total ? Math.round(100 * mastered / total) : 0 };
   }
   function landIntroduced(id) { return S.landsIntroduced.some(l => l.id === id); }
+  // a land with a last day (`until`) that has passed unopened stays shut: no new cards in the last days before the test
+  const landShut = l => !!l.until && todayStr() > l.until && !landIntroduced(l.id);
   function nextLandForToday() {
     if (S.landsIntroduced.some(l => l.date === todayStr())) return null;
-    return C.lands.find(l => !landIntroduced(l.id)) || null;
+    return C.lands.find(l => !landIntroduced(l.id) && !landShut(l)) || null;
   }
   function masteredWordCount() {
     return C.words.filter(w => { const st = S.cards[cardId(w.id, 'rec')]; return st && st.box >= MASTERED_BOX; }).length;
@@ -520,9 +524,11 @@
   // The mid-boss (PRD §8, day 6): once, with a parent, from the day after the last of the 50 words is in.
   const midBossDue = () => !S.boss.mid && phase2() && packIntroduced('u1') && BANK.length > 0;
   // A new recording only with a parent, and never two days running: a recording, a day of cards, the next one.
+  // After the recordings come the unheard dialogues (PRD §6.7), in the order they are listed.
   function listeningForSession(mode) {
     if (mode !== 'parent' || !phase2() || S.listening.runs.some(r => r.date === todayStr())) return null;
     const next = LISTEN.find(x => !x.fallback && !S.listening.done[x.id]); if (!next) return null;
+    if (next.kind === 'dialogue') return next;               // a short spoken dialogue needs no day of rest before it
     const last = S.listening.runs.filter(r => !r.fallback).slice(-1)[0];
     const n = (today().half || {}).n || S.sessionCount + 1;
     // two sessions can share a day (a solo one, then one with a parent), so the gap is counted in days as well as in sessions
@@ -823,6 +829,14 @@
       const rows = shuffle(set.items).map(it => ({ w: it.w, t: it.t, a: it.a, he: it.he, tries: 0, done: false }));
       return { kind: 'bank', sid: set.id, rows, tiles: shuffle(rows.map((r, i) => ({ id: i, text: r.a, used: false }))), cur: 0, bad: -1, solved: false, misses: [] };
     }
+    // two halves sets of every three are joined by meaning, as the test's are; the third is drawn from the families,
+    // where agreement decides
+    const k = S.sets.hvSeq || 0;
+    if (HALVES_M.length && k % 3 !== 2) {
+      const set = HALVES_M[(k - Math.floor(k / 3)) % HALVES_M.length];
+      const rows = shuffle(set.items).map(it => Object.assign({ tries: 0, done: false }, it));
+      return { kind: 'halves', sid: set.id, rows, tiles: shuffle(rows.map((r, i) => ({ id: i, text: r.b, used: false }))), cur: 0, bad: -1, solved: false, misses: [] };
+    }
     const rows = shuffle(sample(Object.keys(HALVES), 5).map(f => Object.assign({ fam: f, tries: 0, done: false }, sample(HALVES[f], 1)[0])));
     return { kind: 'halves', sid: rows.map(r => r.fam).sort().join('+'), rows, tiles: shuffle(rows.map((r, i) => ({ id: i, text: r.b, used: false }))), cur: 0, bad: -1, solved: false, misses: [] };
   }
@@ -847,7 +861,7 @@
     const order = v.rows.map((_, i) => i); const next = [...order.slice(v.cur + 1), ...order.slice(0, v.cur)].find(i => !v.rows[i].done);
     if (next == null) {
       v.solved = true; item.answered = true; R.done++;
-      if (v.kind === 'bank') S.sets.bankSeq++;
+      if (v.kind === 'bank') S.sets.bankSeq++; else S.sets.hvSeq = (S.sets.hvSeq || 0) + 1;
       S.sets.history.push({ date: todayStr(), n: R.n, kind: v.kind, sid: v.sid, misses: v.misses }); if (S.sets.history.length > 60) S.sets.history.shift();
       logEvent('set', { kind: v.kind, sid: v.sid, misses: v.misses.length });
     } else v.cur = next;
@@ -2007,7 +2021,7 @@
       };
       const road = smoothPath(stops.map(s => [s.x, s.y]));
       // the bonus land (PRD §4.1c) is a side path off the trail, from the last word land
-      const bonusLands = C.lands.filter(l => l.bonus);
+      const bonusLands = C.lands.filter(l => l.bonus && !landShut(l));
       const bonusNode = () => {
         if (!bonusLands.length) return '';
         const open = bonusLands.filter(l => landIntroduced(l.id)); const nb = nextLandForToday();
@@ -2736,5 +2750,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard };
 })();

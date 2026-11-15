@@ -6,7 +6,7 @@ Design: `prd.md`. Static web app, no build step, no backend.
 
 | File | What |
 |---|---|
-| `index.html` | the page shell (now `3.4.0`); bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
+| `index.html` | the page shell (now `3.5.0`); bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
 | `styles.css` | reading-friendly styles |
 | `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
 | `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
@@ -232,6 +232,38 @@ Two of the five gaps that prd.md §4.4 lists between the test and what the game 
 Played in the browser from the day-8 sample save: the writing minute at rungs 2 and 4, and each of
 the two stories at support levels 1, 3 and 4, every question answered as marked with no hint.
 **Not tried on the iPad.**
+
+## What 3.5.0 changed in the game (15 Nov, the other three gaps)
+
+The three gaps of prd.md §4.4 that 3.4.0 left open. Main (3.3.1: the automatic backup, the coach
+screen fix) was merged in first.
+
+- **Sentence halves joined by meaning.** Six fixed sets of five (`halvesMeaning` in
+  `content.js`), in which the grammar does not give the ending away, as on the practice copy.
+  Two halves sets of every three in the review come from them; the third is drawn from the old
+  families. Each set was checked by hand, pair by pair; the rule for writing one is in the
+  comment above them.
+- **Listening in the test's form.** Every question to complete has four endings in words, with
+  no picture beside them, and the Yes / No lines are statements. **The fourth ending of each
+  recording question was written without the transcript**: each was chosen to be impossible
+  beside the right answer, but please check them against the transcripts (`rec1`: a duck, at
+  school, a hat · `rec2`: a new phone, green, the Robo-Cat · `rec3`: a cat, in a big pool, at
+  school).
+- **One unheard dialogue** ("Maya and Dan", `dlg1`): 12 lines in two device voices, and six
+  questions in the practice copy's order. It is the listening item after the three recordings,
+  and it needs no day of rest before it.
+- **Four choices** on the stories' Wh-questions (nine questions, A1 to C2).
+- **Land 8: twelve everyday words** (`flower, now, today, night, week, kids, sister,
+  grandmother, money, small, want, buy`) on the bonus land's side path. One meaning card a word,
+  with a placement round. It opens the day after land 7 and **only until 18 Nov**; after that it
+  stays shut. It costs a round of about three minutes on one day and up to twelve more cards in
+  Box 1 for a few sessions, during which some stronger cards of the 50 wait a session
+  (prd.md §4.1d). Eight sentences with these words joined the reading minute.
+
+Played in the browser from the day-8 sample save: nine halves sets in a row, each solved by its
+own pairs; the dialogue and the three recordings' questions (the recordings against a stand-in
+file, and the fallback dialogue against a failed load); C1, C2 and A1; land 8 opened, introduced
+and played, and shut on 19 Nov. **Not tried on the iPad.**
 
 ## Coach screen (hidden)
 
