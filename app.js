@@ -525,14 +525,11 @@
 
   // The mid-boss (PRD §8, day 6): once, with a parent, from the day after the last of the 50 words is in.
   const midBossDue = () => !S.boss.mid && phase2() && packIntroduced('u1') && BANK.length > 0;
-  // A new recording only with a parent, and never two days running: a recording, a day of cards, the next one.
+  // A new recording only with a parent, one a day. (Until 15 Nov there was a day of cards between two
+  // recordings; it went so all three fit before the mock, the run being two days behind the plan.)
   function listeningForSession(mode) {
     if (mode !== 'parent' || !phase2() || S.listening.runs.some(r => r.date === todayStr())) return null;
-    const next = LISTEN.find(x => !x.fallback && !S.listening.done[x.id]); if (!next) return null;
-    const last = S.listening.runs.filter(r => !r.fallback).slice(-1)[0];
-    const n = (today().half || {}).n || S.sessionCount + 1;
-    // two sessions can share a day (a solo one, then one with a parent), so the gap is counted in days as well as in sessions
-    return last && (n - last.n < 2 || last.date >= addDays(todayStr(), -1)) ? null : next;
+    return LISTEN.find(x => !x.fallback && !S.listening.done[x.id]) || null;
   }
   const estListening = x => x.min || 4;
   // after a solo session, a parent session the same day is worth it only when it opens something new

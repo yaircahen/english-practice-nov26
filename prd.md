@@ -989,6 +989,11 @@ What moved in v4:
 - **The pen comes out on day 4**, listening starts on day 6, and the bonus land fills days 6–7.
 - **Day 6 and days 8–10 are the long days** (§7.4).
 
+What moved on 15 Nov: the run was two days behind this table (land 5 opened on day 7, not
+day 5), and the game opens one land, one grammar unit and one new story a day. To fit the three
+recordings before the mock, a recording now comes in every parent session once they start
+(day 8, 9 and 10 of the real run, Mon–Wed 16–18 Nov) instead of every second one.
+
 Grammar is interleaved from day 3, not left for week 2, so grammar cards get their full Leitner
 run. New words from the 50 end on day 5 and the bonus land on day 7; the last 6 days are
 retrieval only, which is where the score comes from. Stories start at scaffold level 1 and are

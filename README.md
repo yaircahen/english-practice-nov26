@@ -131,7 +131,8 @@ session on a day after the last of the 50 words came in.
   the form the sentence needs (`washes`, `months`).
 - **Word-in-a-sentence cards**: each of the 50 words gets one, with its word-bank sentence, once
   its meaning card is in Box 2. At most six a mission (`clozeCap` in `content.js`).
-- **Listening**: a recording on day 6, then on every second parent session: Honey, Robo-Pets,
+- **Listening**: a recording on day 6, then one in each parent session after it (every second
+  one until 15 Nov): Honey, Robo-Pets,
   Splash and Sandy. He hears it once with nothing else on screen, answers, then hears it again
   with the questions in view. Each one adds a pet card. The recordings play from ECB's address
   and need Wi-Fi; nothing of them is in this repo. If one does not load, a short dialogue in the
