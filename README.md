@@ -6,10 +6,11 @@ Design: `prd.md`. Static web app, no build step, no backend.
 
 | File | What |
 |---|---|
-| `index.html` | the page shell; bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
+| `index.html` | the page shell (now `3.5.1`); bumps `?v=` on every milestone so iPad caches refresh (M2 = `2.1.0`, M3's test-facing half = `3.0.1`, joined with the same-day parent session and the reachable ⭐ of `2.3.0` = `3.1.0`) |
 | `styles.css` | reading-friendly styles |
 | `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
 | `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
+| `mock.html` | the printable mock (M4): the test, the answer key and a page for the coach. It reads `mock` in `content.js` and nothing else |
 | `prd.md` | the design (v4): the one to build from |
 | `archive/prd-v3.md` | the previous version of the design, kept as written for the record |
 | `.claude/launch.json` | local dev server definition (uses the venv) |
@@ -171,11 +172,105 @@ dialogue's two voices can be told apart; that the door-and-figure pictures for `
 show; that the word-bank and halves sets are comfortable to tap; that in a long story the
 sentences are easy to tap for "write two things".
 
+## What M4 added so far (15 Nov, the mock, v3.3.0)
+
+Built first of M4's test-facing list, because it is the one piece that works on paper even if every
+screen after it slips. The rest of the list (the five-sentence writing task, unheard dialogues in
+the quest, the test-mode screen, the final boss) is not built yet.
+
+- **`mock.html`** is the day-12 mock (prd.md §6.4). It follows the scan of the practice copy task
+  by task: the same sections, the same tasks in the same order, the same number of items and
+  choices, the same points, and the same nine sheets. The content is all new: ten names the
+  practice copy and the game's stories do not use, new pictures, an unseen passage (C5, "Ella and
+  Yoni": first person, three paragraphs, 21 sentences, 136 words) and an unheard dialogue (Yael and
+  Noam, 12 lines).
+- **Three views**, each printed on its own with the "הדפסה" button, on A4:
+  `mock.html` is the test (9 pages), `mock.html?view=key` the answer key (1 page),
+  `mock.html?view=coach` the pages for the coach (how to run it and the listening text; the
+  points). The coach screen links to all three.
+- **Listening**: "האזנה 1" and "האזנה 2" in the bar speak each part twice in the device's voices,
+  the dialogue in two voices as in the game. If the voices are not clear, the text to read aloud
+  is on the coach's page.
+- **No printer**: the test view on the iPad and answers on plain paper; copy the passage (page 7)
+  out by hand, as §6.4 says.
+- **The content** is `mock` in `content.js`, kept apart from `stories` and `listening` so that the
+  game never shows the passage or plays the dialogue before the mock. The final boss will read the
+  same data.
+
+How it was made, and what to look at before he sits it:
+
+- The first version was laid out from prd.md §4.4 alone. It was then rebuilt against the scan of
+  the practice copy (the scan itself is publisher material and stays out of the repo). What the
+  scan changed is listed in prd.md §4.4, with the gaps it shows between the test and what the game
+  trains.
+- The Hebrew and Arabic instruction lines are modelled on the practice copy's. The Arabic was not
+  read by an Arabic speaker.
+- The people in the writing picture are line drawings and print the same anywhere. The dog, cat,
+  ball, book, flowers and the listening pictures are emoji: they come out in the printing device's
+  own style, and on a black-and-white printer in grey. The practice copy's pictures are drawn
+  scenes; these are simpler.
+- Checked in the browser only: the three views as A4 PDFs (9, 1 and 2 pages), no sheet running
+  over, the shape of every task against the practice copy's, the player's order and its stop
+  button against a stand-in voice, the fit on an upright iPad, the game still starting from the
+  day-8 sample save. **Not tried on the iPad or on a real printer; the real device voices were not
+  heard.**
+
+## What 3.4.0 changed in the game (15 Nov, after the scan of the practice copy)
+
+Two of the five gaps that prd.md §4.4 lists between the test and what the game trains:
+
+- **The writing bank is bare.** On paper (rung 4) the bank shows `dog`, not `a dog`, as the
+  practice copy's bank does. Two nouns were added that are written without `a`: `flowers` and
+  `money` ("Omer has flowers."). They come up on every rung, tiles included. The third check on
+  the "בודקים יחד" screen now says "`a` לפני `dog`" or "בלי `a` לפני `flowers`".
+- **C3 and C4 are retold in the test's style.** One of the two friends speaks in the first
+  person: three paragraphs, 20 sentences, 147 and 137 words, with `like to`, `want`, `can` and
+  `don't`. The friends, their cards and the order of the stories are the same. The questions are
+  the test's kinds, with `same` or `different` in every true-or-false. C1 and C2 are unchanged.
+  A save in which C3 or C4 was already read keeps its stars and card; a re-read shows the new text.
+
+Played in the browser from the day-8 sample save: the writing minute at rungs 2 and 4, and each of
+the two stories at support levels 1, 3 and 4, every question answered as marked with no hint.
+**Not tried on the iPad.**
+
+## What 3.5.0 changed in the game (15 Nov, the other three gaps)
+
+The three gaps of prd.md §4.4 that 3.4.0 left open. Main (3.3.1: the automatic backup, the coach
+screen fix) was merged in first.
+
+- **Sentence halves joined by meaning.** Six fixed sets of five (`halvesMeaning` in
+  `content.js`), in which the grammar does not give the ending away, as on the practice copy.
+  Two halves sets of every three in the review come from them; the third is drawn from the old
+  families. Each set was checked by hand, pair by pair; the rule for writing one is in the
+  comment above them.
+- **Listening in the test's form.** Every question to complete has four endings in words, with
+  no picture beside them, and the Yes / No lines are statements. Every question, right answer
+  and wrong ending of the three recordings was checked against the owner's transcripts (15 Nov,
+  v3.5.1). The last question of the third recording now asks for a reason, as the practice
+  copy's listening does.
+- **One unheard dialogue** ("Maya and Dan", `dlg1`): 12 lines in two device voices, and six
+  questions in the practice copy's order. It is the listening item after the three recordings,
+  and it needs no day of rest before it.
+- **Four choices** on the stories' Wh-questions (nine questions, A1 to C2).
+- **Land 8: twelve everyday words** (`flower, now, today, night, week, kids, sister,
+  grandmother, money, small, want, buy`) on the bonus land's side path. One meaning card a word,
+  with a placement round. It opens the day after land 7 and **only until 18 Nov**; after that it
+  stays shut. It costs a round of about three minutes on one day and up to twelve more cards in
+  Box 1 for a few sessions, during which some stronger cards of the 50 wait a session
+  (prd.md §4.1d). Eight sentences with these words joined the reading minute.
+
+Played in the browser from the day-8 sample save: nine halves sets in a row, each solved by its
+own pairs; the dialogue and the three recordings' questions (the recordings against a stand-in
+file, and the fallback dialogue against a failed load); C1, C2 and A1; land 8 opened, introduced
+and played, and shut on 19 Nov. **Not tried on the iPad.**
+
 ## Coach screen (hidden)
 
 On the map, press and hold the small ⭐ counter (top left) for 2 seconds. The first time, you
 set a 4-digit parent PIN; after that it asks for it. Nothing on screen hints at this. Export the
 save from there once a week. The PIN can be changed from the coach screen; a full reset clears it.
+
+Added in 3.3.0: "המבחן לדוגמה", three links to the mock: the test, the key and the coach's page.
 
 Added in 3.0.0: the mid-boss by the test's five sections, the misses inside the word-bank and
 halves sets, the listening log, and on a day played in two sittings the first sitting's code.
