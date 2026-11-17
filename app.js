@@ -73,7 +73,7 @@
       streak: { frozen: {}, told: '' },                      // frozen[date] = 'auto' (the week's free one) | 'coach'
       reading: { again: [], seen: {}, history: [] },         // reading minute: ids marked "again" · seen[id] = session · history: [{ date, n, items }]
       // M3. Absent from an older save; same rule.
-      sets: { bankSeq: 0, hvSeq: 0, history: [] },           // word-bank and sentence-halves sets: history: [{ date, n, kind, sid, misses }]
+      sets: { bankSeq: 0, hvSeq: 0, history: [], again: [] },  // word-bank and sentence-halves sets: history: [{ date, n, kind, sid, misses }] · again: halves sets with a miss, played once more: [{ sid, rows, rep }]
       listening: { done: {}, runs: [] },                     // done[id] = { stars, total, date } · runs: [{ id, date, n, plays, stars, total, hints, fallback, for }]
       boss: { mid: null, final: null, ready: null },         // mid, final = { date, n, hits, total, sec, misses } · ready = the date a parent signed the badge
       // M4. Absent from an older save; same rule.
@@ -613,14 +613,14 @@
     // the cards sitting stops at 8 minutes; the one that holds the mid-boss gets two more, or the new land never fits behind it
     const stopMin = sitting === 'cards' ? C.cardsStopMin + (boss ? 2 : 0) : C.sessionHardStopMin;
     // word bank and sentence halves: one set of each in the review; on the mid-boss day they are inside the boss
-    const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? [S.sets.history.length % 2 ? 'halves' : 'bank'] : ['bank', 'halves']);
+    const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? ['halves'] : ['bank', 'halves']);
     // the review stack is what gives way to everything else in the sitting
     const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + sets.length + (warm ? 0.5 : 0) + 1;
     const short = boss || sitting === 'single';
     const cap = short ? 6 : clamp(Math.floor((stopMin - other) * CARDS_PER_MIN), 8, C.reviewStackCap);
     const queue = cards ? buildReviewQueue(n, cap, short) : [];
     // the word-bank set opens the review; the halves set comes a few cards in
-    sets.forEach((k, i) => queue.splice(Math.min(queue.length, i * 6), 0, { set: k, sec: k === 'bank' ? 'V' : 'R', retry: false, retries: 0 }));
+    sets.reverse().forEach((k, i) => queue.splice(Math.min(queue.length, i * 6), 0, { set: k, sec: k === 'bank' ? 'V' : 'R', retry: false, retries: 0 }));
     // a cards sitting with no cards in it is no sitting: with a parent the rest is played now, alone it is an ordinary solo session
     if (sitting === 'cards' && !queue.length && !boss && !newLand && !unit && !sd) return startSession(mode, parent ? 'single' : 'full');
     if (!queue.length && !boss && !newLand && !unit && !sd && !writing && !story && !listening && !reread) {
@@ -847,6 +847,13 @@
     }
     // two halves sets of every three are joined by meaning, as the test's are; the third is drawn from the families,
     // where agreement decides
+    // a halves set with a miss comes back whole, once more, before the rotation moves on
+    if (!S.sets.again) S.sets.again = [];
+    const back = S.sets.again.shift();
+    if (back) {
+      const rows = shuffle(back.rows).map(r => Object.assign({}, r, { tries: 0, done: false }));
+      return { kind: 'halves', sid: back.sid, again: back.rep || 1, rows, tiles: shuffle(rows.map((r, i) => ({ id: i, text: r.b, used: false }))), cur: 0, bad: -1, solved: false, misses: [] };
+    }
     const k = S.sets.hvSeq || 0;
     if (HALVES_M.length && k % 3 !== 2) {
       const set = HALVES_M[(k - Math.floor(k / 3)) % HALVES_M.length];
@@ -855,6 +862,12 @@
     }
     const rows = shuffle(sample(Object.keys(HALVES), 5).map(f => Object.assign({ fam: f, tries: 0, done: false }, sample(HALVES[f], 1)[0])));
     return { kind: 'halves', sid: rows.map(r => r.fam).sort().join('+'), rows, tiles: shuffle(rows.map((r, i) => ({ id: i, text: r.b, used: false }))), cur: 0, bad: -1, solved: false, misses: [] };
+  }
+  // a halves set with a miss is played once more, then twice at most; the rows are kept as they were drawn
+  function halvesAgain(sid, rows, rep) {
+    if (!S.sets.again) S.sets.again = [];
+    if (S.sets.again.some(x => x.sid === sid)) return;
+    S.sets.again.push({ sid, rep: rep + 1, rows: rows.map(r => ({ a: r.a, b: r.b, he: r.he, fam: r.fam })) });
   }
   const setFull = (v, r) => v.kind === 'bank' ? r.t.replace('___', r.a) : `${r.a} ${r.b}`;
   // one answer inside a set or a mid-boss item: it counts in the session's numbers, and in the boss's when he is there
@@ -877,7 +890,8 @@
     const order = v.rows.map((_, i) => i); const next = [...order.slice(v.cur + 1), ...order.slice(0, v.cur)].find(i => !v.rows[i].done);
     if (next == null) {
       v.solved = true; item.answered = true; R.done++;
-      if (v.kind === 'bank') S.sets.bankSeq++; else S.sets.hvSeq = (S.sets.hvSeq || 0) + 1;
+      if (v.kind === 'bank') S.sets.bankSeq++; else if (!v.again) S.sets.hvSeq = (S.sets.hvSeq || 0) + 1;
+      if (v.kind === 'halves' && v.misses.length && (v.again || 0) < 2) halvesAgain(v.sid, v.rows, v.again || 0);
       S.sets.history.push({ date: todayStr(), n: R.n, kind: v.kind, sid: v.sid, misses: v.misses }); if (S.sets.history.length > 60) S.sets.history.shift();
       logEvent('set', { kind: v.kind, sid: v.sid, misses: v.misses.length });
     } else v.cur = next;
@@ -1452,6 +1466,7 @@
     const misses = sh.items.filter((_, i) => !oks[i]).map(it => it.label);
     if (!sh.mock && (sh.kind === 'bank' || sh.kind === 'halves')) {
       if (sh.kind === 'bank') S.sets.bankSeq++; else { const k = S.sets.hvSeq || 0; S.sets.hvSeq = k + (k % 3 === 2 ? 2 : 1); }
+      if (sh.kind === 'halves' && misses.length && sh.rows) halvesAgain(sh.sid, sh.rows, 0);
       S.sets.history.push({ date: todayStr(), n: R.n, kind: sh.kind, sid: sh.sid, misses, paper: true }); if (S.sets.history.length > 60) S.sets.history.shift();
     }
     if (!sh.mock && sh.kind === 'dialogue') {
