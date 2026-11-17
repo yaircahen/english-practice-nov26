@@ -1521,6 +1521,58 @@ window.CONTENT = {
     lsEndPlain: 'האזנה הושלמה',
     lsFail: 'ההקלטה לא נטענת כרגע. במקומה: שיחת טלפון קצרה.',
     lsNone: 'ההקלטה לא נטענת כרגע. היא תחכה לפעם הבאה.',
+    lsReadyTitle: '🎧 לפני ההקלטה',
+    lsReady1: 'יושבים ליד השולחן',
+    lsReady2: 'עיפרון ודף מוכנים, לרשום מה ששומעים',
+    lsReady3: 'אמא או אבא לידך',
+    lsReadyBtn: 'אני מוכן ✋',
+    lsSure: 'בטוח?',
+    lsSureSub: 'בלחיצה הבאה: 3, 2, 1, וההקלטה מתחילה.',
+    lsSureGo: 'כן, להתחיל! 🎧',
+    lsSureBack: 'רגע, עוד לא',
+    lsCountSub: 'ההקלטה כבר רועדת.',
+    lsReplayTitle: '🎧 שוב, על פי בקשה',
+    lsReplayLater: 'ההקלטות נפתחות אחרי המשימה של היום 🎧',
+    goldBanner: '✨ קלף זהב ✨',
+    goldRight: 'זהב! 🏆',
+    mapTreasure: '💫 משהו מסתתר היום במגרש האימונים',
+    surpriseTitle: '💫 מצאת את המטמון של היום!',
+    surpriseJokeTitle: '✨ קלף זהב',
+    surpriseWardrobe: 'זה כבר מחכה ב{wardrobe}.',
+    surpriseGo: 'ממשיכים ←',
+    surpriseJokes: [
+      'המילה <span class="en">because</span> ניסתה להתחבא מאחורי <span class="en">but</span>. זה לא עבד.',
+      'המילה <span class="en">always</span> אמרה שהיא תמיד מנצחת. היא כבר לא אומרת את זה.',
+      'שמועה: <span class="en">thirteen</span> ו-<span class="en">thirty</span> החליפו בגדים כדי שלא יזהו אותן. זיהו.',
+      'המילה <span class="en">important</span> ביקשה שיתייחסו אליה ברצינות. התייחסו. היא מצטערת.',
+      'המילה <span class="en">birthday</span> קיוותה שיפספסו אותה. היא לא קיבלה מתנה.',
+      'ה-<span class="en">who</span>, ה-<span class="en">what</span> וה-<span class="en">where</span> עשו ישיבת חירום. נושא הישיבה: אתה.',
+      'המילה <span class="en">together</span> הלכה להתחבא, ביחד עם כל החברים שלה. נמצאו כולם.',
+      'המילה <span class="en">information</span> שומרת עליך תיק. הוא מתעבה.',
+      'שמועה: <span class="en">has</span> ו-<span class="en">have</span> הפסיקו לדבר אחת עם השנייה. כל אחת טוענת שהיא הנכונה.',
+      'המילה <span class="en">fast</span> ניסתה לברוח. היא לא מספיק <span class="en">fast</span>.',
+    ],
+    streakInfo: '🔥 {n} ימים ברצף.',
+    streakNext: 'ב-{n} מחכה שלל נדיר.',
+    streakMark: '🎉 {n} ימים ברצף! המילים התחילו לספור גם הן.',
+    streakLines: [
+      'עוד יום. המילים כבר מתחילות להתלחש.',
+      'האש לא כבתה. המילים ביקשו לפתוח חלון.',
+      'עוד יום על הלוח. מישהו במילון מתחיל להזיע.',
+      'הרצף ממשיך. המילים העבירו ישיבה לחדר אחר.',
+      'עוד גפרור במדורה. המילים מתרחקות ממנה.',
+    ],
+    surpriseComboTitle: '⚡ x{n} ברצף! המילים השאירו משהו מאחור',
+    boxCombo: '{n} נכונות ברצף. המילים ברחו והשאירו את זה.',
+    comboLines: [
+      'המילים מחפשות מסתור.',
+      'במילון הכריזו על כוננות.',
+      'אף מילה לא מרימה את הראש.',
+      'המילים ביקשו הפסקה. לא אושר.',
+      'השמועה במילון: אין דרך לעצור את זה.',
+    ],
+    boxStreak: '{n} ימים ברצף. זה מגיע לך.',
+    lsReplayNone: 'ההקלטה לא נטענת כרגע. נסה אחר כך.',
 
     // reading aloud
     rdTitle: '🗣️ קוראים בקול',
@@ -1594,6 +1646,13 @@ window.CONTENT = {
 
   // Letter-tile cards (one word, Hebrew → English) are the light ones: at most this many in a session.
   tileCap: 3,
+
+  // Serendipity (owner, 17 Nov). Cosmetic and celebratory only: nothing here moves a card or a box.
+  // goldQuest / goldPractice: the chance a dealt card is a golden one, in the quest's review and in the
+  // training grounds. treasureMin..Max: the day's hidden find in the training grounds waits behind this
+  // many right answers there (drawn once a day). comboFind: right answers in a row, in the quest or the
+  // training grounds, for the day's combo find (once a day); every tenth in a row is a party with a line.
+  surprise: { goldQuest: 0.04, goldPractice: 0.12, treasureMin: 4, treasureMax: 11, comboFind: 15 },
 
   // Leitner: sessions between reviews, by box. Box 5 is done: it leaves the daily review.
   // Short gaps (1/1/2/3, not 1/2/4/7): the run is two weeks, and every word must reach the ⭐ by day 11.

@@ -666,3 +666,34 @@ button.fchip { font: inherit; cursor: pointer; }
 /* speed round */
 .spprog { height: 18px; }
 .spprog > div { transition: width .1s linear; }
+
+/* listening: the ready list and the 3-2-1 (owner, 17 Nov) */
+.lsready { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 22px; width: 100%; }
+.lsready li { display: flex; gap: 14px; align-items: center; padding: 12px 16px; border-radius: 14px; background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.lsready li span { font-size: 30px; }
+.lscountdown { padding: 40px 16px; }
+.cdnum { font-size: 160px; line-height: 1; font-weight: 800; color: var(--accent-deep); animation: cdpop .9s ease-out both; }
+@keyframes cdpop { 0% { transform: scale(2.2); opacity: 0; } 30% { transform: scale(1); opacity: 1; } 100% { transform: scale(.85); opacity: .7; } }
+.fchip.pet { cursor: pointer; font-family: inherit; }
+.fchip .replay { font-size: 14px; opacity: .75; }
+
+/* serendipity: golden cards, the day's treasure, the streak (owner, 17 Nov) */
+.goldbanner { margin-top: 12px; text-align: center; font-size: 22px; font-weight: 800; color: var(--gold); letter-spacing: 1px; animation: lspulse 1.4s ease-in-out infinite; }
+.card.question.gold { border: 3px solid var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 30%, transparent), 0 0 34px 6px color-mix(in srgb, var(--gold) 45%, transparent); }
+.feedback.goldfb { border-right-color: var(--gold); }
+.goldword { font-size: 28px; font-weight: 800; color: var(--gold); animation: lootpop .5s ease-out both; }
+.treasurehint { margin-top: 6px; font-weight: 700; color: var(--accent-deep); animation: lspulse 2.2s ease-in-out infinite; }
+.lootcard.surprise .big { font-size: 24px; line-height: 1.5; }
+.streakcard { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.streakcard .flames { font-size: 34px; letter-spacing: -4px; animation: flicker 1.6s ease-in-out infinite; }
+.streakcard .snum { font-size: 64px; font-weight: 800; line-height: 1; color: var(--accent-deep); animation: lootpop .6s ease-out both; }
+.streakcard .slabel { color: var(--ink-muted); }
+.streakcard .sline { margin-top: 8px; font-size: 20px; }
+.streakcard.hot .flames { font-size: 42px; }
+.streakcard.blaze .flames { font-size: 50px; }
+.streakcard.mark { border: 3px solid var(--gold); }
+.streakpill.hot { box-shadow: 0 0 12px 2px rgba(255, 140, 40, .55); }
+.streakpill.blaze { box-shadow: 0 0 18px 4px rgba(255, 90, 30, .7); animation: flicker 1.8s ease-in-out infinite; }
+@keyframes flicker { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.06); filter: brightness(1.18); } }
+@media (prefers-reduced-motion: reduce) { .goldbanner, .treasurehint, .streakcard .flames, .streakpill.blaze, .cdnum { animation: none; } }
+.comboline { font-size: 20px; font-weight: 700; color: var(--accent-deep); animation: lootpop .5s ease-out both; }
