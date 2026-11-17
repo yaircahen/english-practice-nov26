@@ -838,6 +838,44 @@ window.CONTENT = {
         { para: 2, type: 'write2', en: 'What do the friends give on the birthdays? Write two things.', he: 'מה החברות נותנות בימי ההולדת? כתוב שני דברים.', ev: [16, 17], model: ['Tali gives Dana a special toy.', 'Dana gives Tali a new book.'] },
         { para: 2, type: 'complete', en: 'Next year Dana and Tali want', he: 'בשנה הבאה דנה וטלי רוצות', ev: [18], choices: [{ en: 'a big birthday party.', he: 'מסיבת יום הולדת גדולה.', ok: true }, { en: 'a new team.', he: 'קבוצה חדשה.' }, { en: 'a special toy.', he: 'צעצוע מיוחד.' }, { en: 'a chess book.', he: 'ספר שחמט.' }] },
       ] },
+    // C6: the Robo-Pets story. Our own text (it does not retell ECB's recording, rec2); same shape as C3 and C4.
+    // It comes last, so it opens after C4. Move it up the array to open it sooner.
+    { id: 'C6', tier: 'C', title: 'Tom and the Robo-Pets', emoji: '🤖', gist: 'תום ודנה בחנות חיות, ושלושה רובוטים מיוחדים שמחכים להם.',
+      keys: ['robot', 'shop', 'buy'],
+      friend: { name: 'Tom & Dana', emoji: '🤖', facts: ['11 · 10', '🐶 Robo-Dog', '🕊️ Robo-Bird'] },
+      paras: [[0, 1, 2, 3, 4, 5], [6, 7, 8, 9, 10, 11, 12], [13, 14, 15, 16, 17, 18, 19]],
+      sentences: [
+        { en: 'Hello! My name is Tom.', he: 'שלום! קוראים לי תום.' },
+        { en: "I'm eleven years old.", he: 'אני בן אחת עשרה.' },
+        { en: 'I like to play chess and swim.', he: 'אני אוהב לשחק שחמט ולשחות.' },
+        { en: "I don't have a pet, but I want a pet.", he: 'אין לי חיית מחמד, אבל אני רוצה חיית מחמד.' },
+        { en: 'Today my friend Dana and I are at a pet shop.', he: 'היום החברה שלי דנה ואני בחנות חיות.' },
+        { en: 'It is a special shop: it has Robo-Pets!', he: 'זאת חנות מיוחדת: יש בה חיות רובוט!' },
+        { en: 'A Robo-Pet is a pet robot.', he: 'Robo-Pet הוא רובוט חיית מחמד.' },
+        { en: 'The Robo-Dog is small, and it is black and white.', he: 'ה-Robo-Dog קטן, והוא שחור ולבן.' },
+        { en: "It can walk and jump, but it can't swim.", he: 'הוא יודע ללכת ולקפוץ, אבל הוא לא יודע לשחות.' },
+        { en: 'The Robo-Bird is green.', he: 'ה-Robo-Bird ירוק.' },
+        { en: 'It can fly and it can talk.', he: 'הוא יודע לעוף והוא יודע לדבר.' },
+        { en: 'Dana likes the Robo-Bird because it is very fast.', he: 'דנה אוהבת את ה-Robo-Bird כי הוא מהיר מאוד.' },
+        { en: 'She wants to buy it.', he: 'היא רוצה לקנות אותו.' },
+        { en: 'What do I want?', he: 'מה אני רוצה?' },
+        { en: 'I want the Robo-Dog, because it can jump.', he: 'אני רוצה את ה-Robo-Dog, כי הוא יודע לקפוץ.' },
+        { en: 'I have some money, but it is not a lot.', he: 'יש לי קצת כסף, אבל זה לא הרבה.' },
+        { en: 'Dana has some money, too.', he: 'גם לדנה יש קצת כסף.' },
+        { en: 'The shop is open every day, so we can come back.', he: 'החנות פתוחה כל יום, אז אפשר לחזור.' },
+        { en: 'Perhaps we can buy two Robo-Pets next week!', he: 'אולי נוכל לקנות שני Robo-Pets בשבוע הבא!' },
+        { en: 'Then we can be together with our pets every day.', he: 'אז נוכל להיות ביחד עם החיות שלנו כל יום.' },
+      ],
+      questions: [
+        { para: 0, type: 'tf', en: 'Tom has a pet.', he: 'לתום יש חיית מחמד.', ev: [3], ok: false },
+        { para: 0, type: 'tick2', en: 'Tick the TWO things Tom likes to do.', he: 'סמן את שני הדברים שתום אוהב לעשות.', ev: [2],
+          choices: [{ en: 'play chess', he: 'לשחק שחמט', ok: true }, { en: 'draw', he: 'לצייר' }, { en: 'swim', he: 'לשחות', ok: true }, { en: 'dance', he: 'לרקוד' }, { en: 'read books', he: 'לקרוא ספרים' }] },
+        { para: 1, type: 'tf', en: 'The Robo-Dog can swim.', he: 'ה-Robo-Dog יודע לשחות.', ev: [8], ok: false },
+        { para: 1, type: 'complete', en: 'The Robo-Bird', he: 'ה-Robo-Bird', ev: [9, 10], choices: [{ en: 'is green and can talk.', he: 'ירוק ויודע לדבר.', ok: true }, { en: 'is black and white.', he: 'שחור ולבן.' }, { en: 'is small and can jump.', he: 'קטן ויודע לקפוץ.' }, { en: 'is old and can swim.', he: 'זקן ויודע לשחות.' }] },
+        { para: 1, type: 'fact', en: 'Why does Dana like the Robo-Bird?', he: 'למה דנה אוהבת את ה-Robo-Bird?', ev: [11], choices: [{ en: 'It is very fast.', he: 'הוא מהיר מאוד.', ok: true }, { en: 'It is small.', he: 'הוא קטן.' }, { en: 'It is black and white.', he: 'הוא שחור ולבן.' }, { en: 'It can swim.', he: 'הוא יודע לשחות.' }] },
+        { para: 2, type: 'write2', en: 'What can Tom and Dana do next week? Write two things.', he: 'מה תום ודנה יכולים לעשות בשבוע הבא? כתוב שני דברים.', ev: [17, 18], model: ['They can come back to the shop.', 'They can buy two Robo-Pets.'] },
+        { para: 2, type: 'complete', en: 'Tom wants the Robo-Dog because', he: 'תום רוצה את ה-Robo-Dog כי', ev: [14], choices: [{ en: 'it can jump.', he: 'הוא יודע לקפוץ.', ok: true }, { en: 'it can fly.', he: 'הוא יודע לעוף.' }, { en: 'it is green.', he: 'הוא ירוק.' }, { en: 'it is old.', he: 'הוא זקן.' }] },
+      ] },
   ],
 
   // The five reading moves (PRD §6.5), one line each. One is shown before a new story until all five have been.
@@ -869,6 +907,11 @@ window.CONTENT = {
     books: 'ספרים', dance: 'לרקוד', kids: 'ילדים', times: 'פעמים', week: 'שבוע', four: 'ארבע', there: 'there are = יש',
     want: 'לרצות', "don't": 'לא (do not)', perhaps: 'אולי', can: 'יכול / יכולה', be: 'להיות', go: 'ללכת', me: 'אותי / לי',
     our: 'שלנו', party: 'מסיבה', games: 'משחקים', gives: 'נותן / נותנת', learns: 'לומד / לומדת',
+    // C6, the Robo-Pets story
+    shop: 'חנות', robot: 'רובוט', robopets: 'חיות רובוט', robopet: 'חיית רובוט', robodog: 'כלב רובוט', robobird: 'ציפור רובוט',
+    pets: 'חיות מחמד', black: 'שחור', white: 'לבן', green: 'ירוק', walk: 'ללכת', jump: 'לקפוץ', fly: 'לעוף', talk: 'לדבר',
+    "can't": 'לא יכול (can not)', wants: 'רוצה', do: 'עושה / (מילת שאלה)', too: 'גם', open: 'פתוח', come: 'לבוא', back: 'חזרה',
+    money: 'כסף', today: 'היום', next: 'הבא', buy: 'לקנות',
   },
 
   // The mock (PRD §6.4): a clone of the practice copy, task by task, with all content new.
