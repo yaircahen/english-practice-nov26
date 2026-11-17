@@ -38,6 +38,7 @@
     <button data-preset="day7"><b>יום 7</b><span>שאלות Wh, כתיבה על דף מתמונה ובנק מילים, סיפור בשתי פסקאות ברמת תמיכה 2</span></button>
     <button data-preset="day6"><b>יום 6</b><span>מיני-בוס בחמשת חלקי המבחן, האי של המספרים, ההקלטה הראשונה. יום ארוך: אפשר לחלק לשניים</span></button>
     <button data-preset="day8"><b>יום 8</b><span>אחרי המיני-בוס: בנק מילים וחצאי משפטים בתוך החזרה, קלפי האזנה לתמונה, ההקלטה השנייה, והסיפור הארוך הראשון (רמת התמיכה משתנה ממסך המאמן, 1 עד 5)</span></button>
+    <button data-preset="day11"><b>יום 11</b><span>מצב מבחן: משימה שלמה על דף, דף אחרי דף, עם בדיקה מול התשובות. בלי מצב המבחן (מסך המאמן): משימת הכתיבה של חמישה משפטים</span></button>
     <button class="plain" id="clear">למחוק את משחק הבדיקה ולהתחיל מההתחלה</button>
     <p class="note">אחרי הבחירה נפתח המשחק. לוחצים "למשימה" ובוחרים "עם אבא או אמא". קוד מסך המאמן במשחק הבדיקה: 1111 (לחיצה ארוכה על מונה הכוכבים).</p>
     <p class="note">ביום 6 וביום 8 ההקלטות מתנגנות מהאתר של ECB. בלי רשת, או אם הקובץ לא נטען, באה במקומן שיחה קצרה בקול של המכשיר.</p>
@@ -74,6 +75,9 @@
     day6: { lands: [0, 1, 2, 3, 4, 5], packs: ['u1', 'u2', 'sd', 'u3'], stories: ['A1', 'A2', 'B1'], level: 2, writing: { rung: 3, clean: 1, seq: 3 } },
     day8: { lands: [0, 1, 2, 3, 4, 5, 6, 7], packs: ['u1', 'u2', 'sd', 'u3', 'u4a', 'u4b', 'lp'], stories: ['A1', 'A2', 'B1', 'B2', 'B3'], level: 2, writing: { rung: 4, clean: 0, seq: 6 },
       boss: { hits: 17, total: 20, sec: { L: [4, 4], V: [4, 5], G: [3, 4], R: [5, 5], W: [1, 2] }, misses: ['Dana puts the toys in the box.', 'Omer [has] a dog.', 'Tom has a ball.'] }, heard: ['rec1'] },
+    // day 11, the paper day: the three recordings heard, the stories up to C3 met, and test mode set to open today
+    day11: { lands: [0, 1, 2, 3, 4, 5, 6, 7], packs: ['u1', 'u2', 'sd', 'u3', 'u4a', 'u4b', 'lp'], stories: ['A1', 'A2', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'], level: 3, writing: { rung: 5, clean: 0, seq: 9 }, paper: true,
+      boss: { hits: 17, total: 20, sec: { L: [4, 4], V: [4, 5], G: [3, 4], R: [5, 5], W: [1, 2] }, misses: ['Dana puts the toys in the box.', 'Omer [has] a dog.', 'Tom has a ball.'] }, heard: ['rec1', 'rec2', 'rec3'] },
   };
 
   function build(p, skin) {
@@ -102,6 +106,7 @@
       cards, landsIntroduced: p.lands.map((id, i) => ({ id, date: day(i - n) })), days,
       settings: { freePlayCapMin: 15, autoSpeak: true, coachPin: '1111' }, log: [],
     };
+    if (p.paper) s.settings.testDay = day(0);
     // day 3 is left exactly as an M1 save looks (none of the fields below), which also exercises the upgrade path
     if (p.packs.length) {
       s.packsIntroduced = p.packs.map((id, i) => ({ id, date: day(i - p.packs.length) }));

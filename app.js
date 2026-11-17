@@ -2,6 +2,7 @@
    then the mystery box and the wardrobe, streak freeze, brag card, reading minute and letter-tile cards.
    M3, the test-facing half: bonus land, word-bank and sentence-halves sets, sentence-cloze and listen-and-pick
    cards, the mid-boss, the listening track, and a quest that can be played in two sittings.
+   M4, so far: writing rung 5 (the test's five-sentence task) and test mode, a whole sitting on paper.
    Vanilla JS, no build step. State in localStorage. See prd.md (v4).
    Every line the kid reads comes from the `copy` table in content.js, through t(). */
 (() => {
@@ -74,12 +75,14 @@
       sets: { bankSeq: 0, hvSeq: 0, history: [] },           // word-bank and sentence-halves sets: history: [{ date, n, kind, sid, misses }]
       listening: { done: {}, runs: [] },                     // done[id] = { stars, total, date } · runs: [{ id, date, n, plays, stars, total, hints, fallback, for }]
       boss: { mid: null },                                   // mid = { date, n, hits, total, sec, misses }
+      // M4. Absent from an older save; same rule.
+      test: { runs: [] },                                    // test mode on paper: runs: [{ date, n, hits, total, sec: { L: [points, of], … }, misses }]
     };
   }
   // An older save lacks the newer fields. It gets their defaults; nothing it holds is dropped or renamed.
   function adopt(s) {
     const f = freshState(); const st = Object.assign({}, f, s);
-    ['settings', 'story', 'writing', 'loot', 'streak', 'reading', 'sets', 'listening', 'boss'].forEach(k => { st[k] = Object.assign({}, f[k], s[k]); });
+    ['settings', 'story', 'writing', 'loot', 'streak', 'reading', 'sets', 'listening', 'boss', 'test'].forEach(k => { st[k] = Object.assign({}, f[k], s[k]); });
     return st;
   }
   let S = load();
@@ -525,7 +528,7 @@
     return { rung, paper: rung >= 3 };
   }
   const estStory = s => s.reread ? 2.5 : (s.p.tier === 'A' ? 3 : (s.p.tier === 'C' ? 6.5 : 4.5));
-  const estWriting = w => w.paper ? 3 : 1.5;
+  const estWriting = w => w.rung >= 5 ? 6 : (w.paper ? 3 : 1.5);   // rung 5 is the test's whole task: five sentences
 
   // The mid-boss (PRD §8, day 6): once, with a parent, from the day after the last of the 50 words is in.
   const midBossDue = () => !S.boss.mid && phase2() && packIntroduced('u1') && BANK.length > 0;
@@ -542,7 +545,7 @@
     const ses = daySessions(S.days[todayStr()]);
     if (!ses.length || ses.some(r => r.mode === 'parent')) return false;
     const newLand = nextLandForToday(), story = storyForSession('parent', newLand);
-    return !!(newLand || unitForToday(newLand) || sdForToday(newLand) || (story && !story.reread));
+    return !!(newLand || unitForToday(newLand) || sdForToday(newLand) || (story && !story.reread) || testDue('parent'));
   }
   function planFor(mode) {
     const parent = mode === 'parent';
@@ -581,11 +584,12 @@
     settleHalves();
     const half = today().half || null;
     if (half) mode = 'parent';                                // the second sitting is the one with a parent
+    if (!half && testDue(mode)) return startTest();           // the paper day (PRD §6.4): the whole sitting is test mode
     const n = half ? half.n : S.sessionCount + 1;
     const parent = mode === 'parent';
     let sitting = 'full';
     if (half) sitting = 'long';
-    else if (how !== 'full' && isLongDay(planFor('parent'))) {
+    else if (how !== 'full' && !testDue('parent') && isLongDay(planFor('parent'))) {   // on the paper day a solo session is an ordinary one
       if (!parent) sitting = 'cards';
       else if (how === 'cards' || how === 'single') sitting = how;
       else if (todayDone()) sitting = 'single';               // a second quest the same day is never split again: the cards were played
@@ -630,6 +634,7 @@
 
   // after the mission screen: the warm read first, then the mid-boss or the review
   function beginQuest() {
+    if (R.test) { view = 'test'; return render(); }
     if (R.plan.warm && !R.warmed) { R.warmed = true; R.warmAt = Date.now(); view = 'warm'; return render(); }
     if (R.plan.boss && !R.boss) return startBoss();
     nextCard();
@@ -751,6 +756,7 @@
       reading: R.rdResult,                                               // the parent's marks: coach log only
       listening: R.lsResult,
     };
+    if (R.test) rec.test = { hits: R.test.hits, total: R.test.total };
     // two sittings, one quest: the first half's numbers join this one's
     const h = today().half;
     if (h) {
@@ -1004,7 +1010,8 @@
   // ---------- writing track (PRD §6.6) ----------
   // Four frames only: be1 "Dana is happy." · be2 "Maya and Noa are tall." · have1 "Omer has a dog." · have2 "Tom and Roni have a ball."
   // Rungs: 1 build with tiles · 2 build with capital letter and full stop · 3 build, then copy on paper ·
-  // 4 write on paper from the picture and a word bank (rung 5, the full test task, arrives in M4).
+  // 4 write on paper from the picture and a word bank · 5 the test's own task: one picture of six labelled people,
+  // a bank of bare words, five sentences (two with is / are, three with has / have), no frame shown.
   const WR = C.writing;
   function makeWSpec(frame, avoid) {
     const two = frame.endsWith('2'), be = frame.startsWith('be');
@@ -1051,6 +1058,7 @@
     // the plan was made before today's grammar unit opened, so check again now
     if (!R.plan.writing || !packIntroduced('u1')) { R.plan.writing = null; return startStory(); }
     const parent = R.mode === 'parent', wr = S.writing, odd = wr.seq % 2 === 1;
+    if (parent && wr.rung >= 5) { R.w = { five: true, parent, scene: makeScene(), stage: 'write', marks: [null, null, null, null, null] }; setPhase('writing'); view = 'writing'; return render(); }
     const frames = packIntroduced('u2') ? [odd ? 'have2' : 'have1', odd ? 'be1' : 'be2'] : [odd ? 'be2' : 'be1', odd ? 'be1' : 'be2'];
     const specs = parent ? wr.again.slice(0, 2) : [];          // sentences marked "again" come back first, with a parent
     frames.forEach(f => { if (specs.length < 2) specs.push(makeWSpec(f, specs.flatMap(s => s.who))); });
@@ -1118,9 +1126,9 @@
     if (w.idx < w.items.length) return openWItem();
     const wr = S.writing; const paper = w.results.filter(r => r.paper);
     if (w.parent) wr.again = w.results.map((r, i) => r.paper === 'again' ? w.items[i].spec : null).filter(Boolean);
-    // from rung 3: one rung up after three clean parent sessions (rung 5 arrives in M4)
+    // from rung 3: one rung up after three clean parent sessions, up to rung 5
     if (w.parent && paper.length && paper.every(r => r.paper === 'ok') && w.results.every(r => r.tiles !== false)) {
-      wr.clean++; if (wr.clean >= 3 && wr.rung === 3) { wr.rung = 4; wr.clean = 0; }
+      wr.clean++; if (wr.clean >= 3 && wr.rung >= 3 && wr.rung < 5) { wr.rung++; wr.clean = 0; }
     }
     wr.seq++;
     R.wResult = { items: w.results };
@@ -1130,6 +1138,7 @@
     startStory();
   }
   function writingView() {
+    if (R.w.five) return fiveView(R.w);
     const w = R.w, it = w.items[w.idx]; const sub = t('wCount', { i: w.idx + 1, n: w.items.length }); const pic = wPicture(it);
     const pair = it.be ? ['is', 'are'] : ['has', 'have'];
     if (w.stage === 'build') {
@@ -1173,6 +1182,286 @@
             <button class="btn" data-action="w-again">${t('wAgain')}</button>
           </div>
         </div>`;
+  }
+
+  // ----- rung 5: the test's writing task (PRD §6.6). Also the last sheet of test mode. -----
+  // Six people in five groups (one pair), each group with one thing to say with is / are and one with has / have.
+  function makeScene() {
+    const ppl = shuffle(WR.people).map(p => p.name);
+    const whos = [[ppl[0], ppl[1]], [ppl[2]], [ppl[3]], [ppl[4]], [ppl[5]]];
+    // tall and short once each, so each has the other to stand next to; a mood comes twice
+    const adjs = shuffle(WR.adjs.map(a => a.w)); adjs.push(sample(WR.adjs.filter(a => a.badge), 1)[0].w);
+    const nouns = sample(WR.nouns, 6).map(n => n.w);          // five in the picture and one spare in the bank
+    const figs = shuffle(whos.map((who, i) => {
+      const two = who.length > 1;
+      return { who, adj: adjs[i], has: nouns[i], be: wItem({ frame: two ? 'be2' : 'be1', who, x: adjs[i] }), have: wItem({ frame: two ? 'have2' : 'have1', who, x: nouns[i] }) };
+    }));
+    return { figs, bank: shuffle([...new Set(adjs), ...nouns]) };
+  }
+  function scenePic(sc) {
+    const group = f => {
+      const adj = WR.adjs.find(a => a.w === f.adj), noun = WR.nouns.find(n => n.w === f.has);
+      const one = name => {
+        const p = WR.people.find(x => x.name === name) || { g: 'f' };
+        const body = adj.badge ? `<div class="wface">${adj.badge}</div>` : `<div class="wbody ${adj.size}">${p.g === 'f' ? '🧍‍♀️' : '🧍‍♂️'}</div>`;
+        return `<div class="wfig">${body}<div class="wname en">${esc(name)}</div></div>`;
+      };
+      return `<div class="wgroup">${f.who.map(one).join('')}<div class="wfig"><div class="wthing">${noun.e}</div><div class="wname">&nbsp;</div></div></div>`;
+    };
+    return `<div class="wscene">${sc.figs.map(group).join('')}</div>`;
+  }
+  // the key: what could be written about each of them, and the checks
+  function sceneKey(sc) {
+    const noA = sc.figs.filter(f => f.have.noA).map(f => f.has);
+    return `
+      <div class="w5lead">${t('w5KeyLead')}</div>
+      <div class="w5key en">${sc.figs.map(f => `<div><span>${esc(f.be.model)}</span><span>${esc(f.have.model)}</span></div>`).join('')}</div>
+      <ol class="wchecks">
+        <li>${t('wCheck1')}</li>
+        <li>${t('w5Check2')}</li>
+        <li>${noA.length ? t('w5Check3NoA', { x: noA.join(' / ') }) : t('w5Check3')}</li>
+        <li>${t('w5Check4')}</li>
+      </ol>`;
+  }
+  // a row per answer on his paper: ✓ or 🔁 (never a red X, PRD §7.6)
+  const markRows = (labels, marks, act, nums = true) => `<div class="mrows">${labels.map((k, i) => `
+      <div class="mrow">${nums ? `<b class="mnum">${i + 1}</b>` : ''}<div class="mlab">${k}</div>
+        <div class="rdmarks"><button class="rdbtn sm ${marks[i] === 'ok' ? 'on' : ''}" data-action="${act}" data-i="${i}" data-m="ok">✓</button><button class="rdbtn sm ${marks[i] === 'again' ? 'on' : ''}" data-action="${act}" data-i="${i}" data-m="again">🔁</button></div>
+      </div>`).join('')}</div>`;
+  const fiveItems = marks => marks.map((m, i) => ({ model: `5 sentences · ${i + 1}`, rung: 5, tiles: null, paper: m }));
+  function recordFive(items) {
+    const wr = S.writing; wr.seq++;
+    R.wResult = { items };
+    wr.history.push({ date: todayStr(), n: R.n, mode: R.mode, items }); if (wr.history.length > 40) wr.history.shift();
+    logEvent('writing', { items }); save();
+  }
+  function w5Mark(i, m) { const w = R.w; if (!w || !w.five || w.stage !== 'check') return; w.marks[i] = m; Audio.tick(); render(); }
+  function w5Done() {
+    const w = R.w; if (!w || !w.five || w.marks.some(m => !m)) return;
+    recordFive(fiveItems(w.marks));
+    R.w = null; startStory();
+  }
+  function fiveView(w) {
+    const sc = w.scene;
+    if (w.stage === 'write') return `
+        ${topbar(t('w5Title'), '')}
+        <div class="card wcard">
+          <div class="wbank en">${sc.bank.map(x => `<span>${esc(x)}</span>`).join('')}</div>
+          ${scenePic(sc)}
+          <div class="center">${t('w5Ask')}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="w-pendown">${t('wPenDown')}</button></div>
+        </div>`;
+    return `
+        ${topbar(t('wCheckTitle'), '')}
+        <div class="card wcard">
+          ${sceneKey(sc)}
+          <div class="w5lead">${t('w5Mark')}</div>
+          ${markRows(w.marks.map((_, i) => t('w5Row', { i: i + 1 })), w.marks, 'w5-mark', false)}
+          <div class="bigcta"><button class="btn primary block" data-action="w5-done" ${w.marks.every(Boolean) ? '' : 'disabled'}>${t('w5Done')}</button></div>
+        </div>`;
+  }
+
+  // ---------- test mode (PRD §6.4, §8 day 11) ----------
+  // One whole sitting on paper, with a parent, in the test's own order: listening, vocabulary, grammar, reading,
+  // writing. Each sheet looks like a worksheet: black on white, no sound but the listening itself, nothing to tap,
+  // no hints. He writes on his own paper. "Pen down" shows the sheet's key, and he marks each line ✓ or 🔁 with
+  // the parent beside him. The marks move the cards: a miss takes a card down a box, a right answer on a card that
+  // was due takes it up. What he sees at the end is a count of right answers; the points by the test's weights
+  // are on the coach screen only.
+  const ABC = i => 'abcdefghij'[i], HEB = i => 'אבגדהוזחטי'[i];
+  // from the date in the content file, once; the coach can open it on another day, or shut it
+  function testDue(mode) {
+    if (mode !== 'parent' || !phase2() || !packIntroduced('u2')) return false;
+    const set = S.settings.testDay || '';
+    if (set === 'off' || S.test.runs.some(r => r.date === todayStr())) return false;
+    if (set === todayStr()) return true;
+    return !S.test.runs.length && !!C.testModeFrom && todayStr() >= C.testModeFrom;
+  }
+  function testCard(cid, ok) {
+    const st = S.cards[cid]; if (!st) return;
+    const due = isDue(st, R.n) && !todayNs().includes(st.lastSession);       // a box moves up only after a gap, once a day
+    if (ok) { if (due && st.box < 5) { st.box++; R.promoted++; if (st.box === MASTERED_BOX) R.mastered.push(cid); } }
+    else { st.misses++; if (st.box > 1) { st.box--; R.demoted++; } }
+    st.lastSession = R.n; st.priority = 0;
+  }
+  const qKey = q => {
+    if (q.type === 'yn') return `<b>${q.ok ? 'Yes' : 'No'}</b>`;
+    if (q.type === 'tf') return `<b>${q.ok ? 'True' : 'False'}</b>`;
+    if (q.type === 'write2') return q.model.map(m => esc(m)).join(' &nbsp;·&nbsp; ');
+    return q.choices.map((c, i) => c.ok ? `<b>${ABC(i)}</b> ${c.e ? `<span class="emo">${c.e}</span> ` : ''}${esc(c.en)}` : '').filter(Boolean).join(' &nbsp;+&nbsp; ');
+  };
+  const qSheet = (q, n) => {
+    const stem = `<div class="tq"><b>${n}.</b> <span>${esc(q.en)}${q.type === 'tick2' && !/tick/i.test(q.en) ? ` <i>${esc(t('tTick2'))}</i>` : ''}${q.type === 'write2' && !/write/i.test(q.en) ? ` <i>${esc(t('tWrite2'))}</i>` : ''}</span></div>`;
+    if (q.type === 'yn' || q.type === 'tf') return `<div class="titem">${stem}<div class="tyn">${q.type === 'yn' ? 'Yes &nbsp;/&nbsp; No' : 'True &nbsp;/&nbsp; False'}</div></div>`;
+    if (q.type === 'write2') return `<div class="titem">${stem}</div>`;
+    return `<div class="titem">${stem}<div class="tchoices ${q.choices[0].e ? 'pics' : ''}">${q.choices.map((c, i) => `<div><b>${ABC(i)}</b> ${c.e ? `<span class="emo">${c.e}</span> ` : ''}${esc(c.en)}</div>`).join('')}</div></div>`;
+  };
+  function buildTest() {
+    const sheets = [], gOf = cid => GITEMS[cid.split('|')[0]];
+    const low = (cids, k) => shuffle(cids).sort((a, b) => S.cards[a].box - S.cards[b].box).slice(0, k);   // the lowest boxes first
+    const fill = (tx, a) => esc(tx).replace('___', `<b>${esc(a)}</b>`);
+    // Listening 1: five sentences, six pictures
+    const lps = packCards('lp').filter(c => S.cards[c]).map(gOf);
+    if (lps.length >= 5) {
+      let five = sample(lps, 5);
+      for (let k = 0; k < 30 && new Set(five.map(g => g.pics[0])).size < 5; k++) five = sample(lps, 5);
+      const extra = shuffle(five.flatMap(g => g.pics.slice(1))).find(x => !five.some(g => g.pics[0] === x));
+      const pics = shuffle([...five.map(g => g.pics[0]), ...(extra ? [extra] : [])]);
+      sheets.push({ kind: 'pics', sec: 'L', five, pics, plays: 0, items: five.map(g => ({ k: `<b>${ABC(pics.indexOf(g.pics[0]))}</b> <span class="emo">${g.pics[0]}</span> ${esc(g.say)}`, pts: 2, cid: cardId(g.id, 'lp'), label: g.say })) });
+    }
+    // Listening 2: a dialogue he has not heard
+    const dlg = LISTEN.find(x => x.kind === 'dialogue' && !x.fallback && !S.listening.done[x.id]) || LISTEN.find(x => x.kind === 'dialogue' && !S.listening.runs.some(r => r.id === x.id));
+    if (dlg) sheets.push({ kind: 'dialogue', sec: 'L', dlg, plays: 0, items: dlg.questions.map(q => ({ k: qKey(q), pts: q.type === 'yn' ? 1 : 2, label: q.en })) });
+    // Vocabulary 1: ten words to match, half of them from outside the 50 when he has that many (as on the practice copy)
+    const first = w => cardId(w.id, cardTypesFor(w)[0]), has = w => !!S.cards[first(w)];
+    const heOf = w => w.kind === 'num' ? w.he2 : w.he;
+    const seen = new Set(), words = [];
+    [...shuffle((C.bonus || []).filter(has)).slice(0, 5), ...low(C.words.filter(has).map(first), 10).map(c => WORDS[c.split('|')[0]])].forEach(w => {
+      if (words.length < 10 && !seen.has(heOf(w))) { seen.add(heOf(w)); words.push({ en: w.en, he: heOf(w), cid: first(w) }); }
+    });
+    if (words.length >= 5) {
+      const ws = shuffle(words), order = shuffle(ws.map((_, i) => i));
+      sheets.push({ kind: 'match', sec: 'V', words: ws, order, items: ws.map((w, i) => ({ k: `${esc(w.en)} &nbsp;=&nbsp; <b class="he">${HEB(order.indexOf(i))}</b> <span class="he">${esc(w.he)}</span>`, pts: 1, cid: w.cid, label: w.en })) });
+    }
+    // Vocabulary 2: the next word-bank set
+    if (BANK.length) {
+      const set = BANK[S.sets.bankSeq % BANK.length], rows = shuffle(set.items);
+      sheets.push({ kind: 'bank', sec: 'V', sid: set.id, rows, bank: shuffle(rows.map(r => r.a)), items: rows.map(r => ({ k: fill(r.t, r.a), pts: 2, cid: cardId(r.w, 'cz'), label: r.t.replace('___', r.a) })) });
+    }
+    // Grammar 1–3: am / is / are · the right form of three · have / has
+    [['be', 'u1', 2], ['circle', 'u3', 1], ['have', 'u2', 1]].forEach(([kind, unit, pts]) => {
+      const cids = !packIntroduced(unit) ? [] : low(packCards(unit).filter(c => c.endsWith('|gc') && S.cards[c]), 5);
+      if (cids.length >= 3) sheets.push({ kind, sec: 'G', gs: cids.map(gOf), items: cids.map(c => ({ k: fill(gOf(c).t, gOf(c).a), pts, cid: c, label: gOf(c).t.replace('___', `[${gOf(c).a}]`) })) });
+    });
+    // Reading 1: the next set of halves joined by meaning
+    if (HALVES_M.length) {
+      const k = S.sets.hvSeq || 0, set = HALVES_M[(k - Math.floor(k / 3)) % HALVES_M.length];
+      const rows = shuffle(set.items), order = shuffle(rows.map((_, i) => i));
+      sheets.push({ kind: 'halves', sec: 'R', sid: set.id, rows, order, items: rows.map((r, i) => ({ k: `${esc(r.a)} <b>${esc(r.b)}</b> &nbsp;(${ABC(order.indexOf(i))})`, pts: 2, label: `${r.a} ${r.b}` })) });
+    }
+    // Reading 2: the next story he has not met, whole, with all its questions under it; a long one again when none is left
+    const p = STORIES.find(x => !S.story.done[x.id]) || [...STORIES].reverse().find(x => x.tier === 'C');
+    if (p) {
+      const qs = p.questions.filter(q => q.type !== 'he').map(q => q.choices ? Object.assign({}, q, { choices: shuffle(q.choices) }) : q);
+      sheets.push({ kind: 'story', sec: 'R', p, qs, items: qs.map(q => ({ k: qKey(q), pts: q.type === 'tf' ? 2 : 4, label: q.en })) });
+    }
+    // Writing: the five sentences
+    const scene = makeScene();
+    sheets.push({ kind: 'writing', sec: 'W', scene, items: [1, 2, 3, 4, 5].map(i => ({ k: t('w5Row', { i }), pts: 2 })) });
+    return sheets;
+  }
+  function startTest() {
+    settleHalves();
+    const n = S.sessionCount + 1, sheets = buildTest();
+    R = {
+      n, mode: 'parent', date: todayStr(), startedAt: Date.now(), phase: 'test', phaseAt: Date.now(), timing: {}, queue: [], current: null,
+      reviewTotal: 0, round: { title: '', total: 0 }, done: 0, correct: 0, wrong: 0, promoted: 0, demoted: 0, combo: 0, maxCombo: 0,
+      newLand: null, introIdx: 0, mastered: [], hardStop: false, firstTry: {}, plan: {}, pack: null, packsDone: [], w: null, st: null, wResult: null, stResult: null,
+      rd: null, rdResult: null, sitting: 'test', stopMin: 120, later: '', boss: null, afterBoss: null, ls: null, lsResult: null,   // a test has no hard stop
+      test: { sheets, idx: 0, stage: 'work', tok: 0, playing: false, startedAt: 0, sec: { L: [0, 0], V: [0, 0], G: [0, 0], R: [0, 0], W: [0, 0] }, hits: 0, total: 0, misses: [] },
+    };
+    logEvent('session_start', { n, mode: 'parent', sitting: 'test' });
+    view = 'mission'; render();
+  }
+  const curSheet = () => { const T = R && R.test; return T ? T.sheets[T.idx] : null; };
+  // the listening sheets: the five sentences one after another, or the dialogue in two voices, at normal speed
+  function tPlay() {
+    const T = R && R.test, sh = curSheet(); if (!sh || T.stage !== 'work' || T.playing || (sh.kind !== 'pics' && sh.kind !== 'dialogue')) return;
+    T.playing = true; const tok = ++T.tok; render();
+    const live = () => !!R && R.test === T && T.tok === tok;
+    const lines = sh.kind === 'dialogue' ? sh.dlg.lines.map(l => ({ en: l.en, who: l.who, gap: 1100 }))
+      : sh.five.flatMap((g, i) => [{ en: `Number ${i + 1}.`, gap: 700 }, { en: g.say, gap: 3200 }]);
+    let i = 0;
+    const step = () => {
+      if (!live()) return;
+      lsBar(100 * i / lines.length);
+      if (i >= lines.length) { T.playing = false; sh.plays++; return render(); }
+      const l = lines[i++]; Audio.speak(l.en, 1, l.who); Audio.afterSpeech(step, l.gap, 9000);
+    };
+    step();
+  }
+  function tPenDown() {
+    const T = R && R.test, sh = curSheet(); if (!sh || T.stage !== 'work') return;
+    T.tok++; T.playing = false; Audio.stop();
+    sh.marks = sh.items.map(() => null); T.stage = 'key';
+    render(); window.scrollTo(0, 0);
+  }
+  function tMark(i, m) { const T = R && R.test, sh = curSheet(); if (!sh || T.stage !== 'key' || !sh.items[i]) return; sh.marks[i] = m; Audio.tick(); render(); }
+  function tNext() {
+    const T = R && R.test, sh = curSheet(); if (!sh || T.stage !== 'key' || sh.marks.some(m => !m)) return;
+    const oks = sh.marks.map(m => m === 'ok'), stars = oks.filter(Boolean).length, total = sh.items.length;
+    sh.items.forEach((it, i) => {
+      T.sec[sh.sec][1] += it.pts; T.total++;
+      if (oks[i]) { T.sec[sh.sec][0] += it.pts; T.hits++; R.correct++; } else { R.wrong++; if (it.label) T.misses.push(it.label); }
+      if (it.cid) testCard(it.cid, oks[i]);
+    });
+    const misses = sh.items.filter((_, i) => !oks[i]).map(it => it.label);
+    if (sh.kind === 'bank' || sh.kind === 'halves') {
+      if (sh.kind === 'bank') S.sets.bankSeq++; else { const k = S.sets.hvSeq || 0; S.sets.hvSeq = k + (k % 3 === 2 ? 2 : 1); }
+      S.sets.history.push({ date: todayStr(), n: R.n, kind: sh.kind, sid: sh.sid, misses, paper: true }); if (S.sets.history.length > 60) S.sets.history.shift();
+    }
+    if (sh.kind === 'dialogue') {
+      const id = sh.dlg.id, prev = S.listening.done[id];
+      if (!sh.dlg.fallback) S.listening.done[id] = { stars: prev ? Math.max(prev.stars, stars) : stars, total, date: prev ? prev.date : todayStr() };
+      S.listening.runs.push({ id, date: todayStr(), n: R.n, plays: sh.plays, stars, total, hints: oks.map(ok => ok ? 0 : 3), fallback: !!sh.dlg.fallback, for: null, paper: true }); if (S.listening.runs.length > 40) S.listening.runs.shift();
+      R.lsResult = { id, stars, total, plays: sh.plays, fallback: !!sh.dlg.fallback };
+    }
+    if (sh.kind === 'story') {
+      const pid = sh.p.id, prev = S.story.done[pid], seconds = Math.round((Date.now() - T.startedAt) / 1000);
+      const best = !prev || stars / total >= prev.stars / prev.total;
+      S.story.done[pid] = Object.assign({}, prev, { stars: best ? stars : prev.stars, total: best ? total : prev.total, date: prev ? prev.date : todayStr(), reads: (prev ? prev.reads : 0) + 1 });
+      S.story.runs.push({ pid, date: todayStr(), n: R.n, level: 5, reread: !!prev, stars, total, taps: 0, audioTaps: 0, heTaps: 0, seconds, lines: sh.p.sentences.length, hints: oks.map(ok => ok ? 0 : 3), clean: false, paper: true }); if (S.story.runs.length > 60) S.story.runs.shift();
+      R.stResult = { pid, reread: !!prev, level: 5, stars, total, taps: 0, seconds };
+    }
+    if (sh.kind === 'writing') recordFive(fiveItems(sh.marks));
+    logEvent('test_sheet', { kind: sh.kind, stars, total });
+    if (T.idx + 1 < T.sheets.length) { T.idx++; T.stage = 'work'; T.startedAt = Date.now(); save(); render(); return window.scrollTo(0, 0); }
+    S.test.runs.push({ date: todayStr(), n: R.n, hits: T.hits, total: T.total, sec: T.sec, misses: T.misses }); if (S.test.runs.length > 10) S.test.runs.shift();
+    logEvent('test', { hits: T.hits, total: T.total, sec: T.sec }); save();
+    view = 'testend'; render(); window.scrollTo(0, 0);
+  }
+  const SHEET_EN = { pics: ['Listening', 'Part 1'], dialogue: ['Listening', 'Part 2'], match: ['Vocabulary', 'Part 1'], bank: ['Vocabulary', 'Part 2'], be: ['Grammar', 'Part 1'], circle: ['Grammar', 'Part 2'], have: ['Grammar', 'Part 3'], halves: ['Reading', 'Part 1'], story: ['Reading', 'Part 2'], writing: ['Writing', ''] };
+  function sheetBody(sh) {
+    const T = R.test;
+    const num = (i, html) => `<div class="titem"><div class="tq"><b>${i + 1}.</b> <span>${html}</span></div></div>`;
+    const blank = tx => esc(tx).replace('___', '<span class="tblank"></span>');
+    const player = () => `<div class="tplayer" dir="rtl">
+        <button class="lsbtn ${T.playing ? 'on' : ''}" data-action="t-play" ${T.playing ? 'disabled' : ''}>${T.playing ? '🔊' : '▶'}</button>
+        <div><div class="lscount">${sh.plays >= 2 ? t('lsAgain') : t('lsPlay', { i: sh.plays + 1 })}</div><div class="progress lsprog"><div id="lsbar" style="width:0%"></div></div><div class="tnote">${t('tPlayNote')}</div></div>
+      </div>`;
+    switch (sh.kind) {
+      case 'pics': return `${player()}<div class="tpics">${sh.pics.map((p, i) => `<div><b>${ABC(i)}</b><span class="emo">${p}</span></div>`).join('')}</div>`;
+      case 'dialogue': return `${player()}${sh.dlg.questions.map((q, i) => qSheet(q, i + 1)).join('')}`;
+      case 'match': return `<div class="tmatch"><div>${sh.words.map((w, i) => `<div><b>${i + 1}.</b> ${esc(w.en)}</div>`).join('')}</div><div class="he" dir="rtl">${sh.order.map((k, i) => `<div><b>${HEB(i)}.</b> ${esc(sh.words[k].he)}</div>`).join('')}</div></div>`;
+      case 'bank': return `<div class="tbank">${sh.bank.map(x => `<span>${esc(x)}</span>`).join('')}</div>${sh.rows.map((r, i) => num(i, blank(r.t))).join('')}`;
+      case 'be': case 'have': return sh.gs.map((g, i) => num(i, blank(g.t))).join('');
+      case 'circle': return sh.gs.map((g, i) => num(i, esc(g.t).replace('___', `<span class="tforms">( ${g.o.map(esc).join(' / ')} )</span>`))).join('');
+      case 'halves': return `<div class="tmatch"><div>${sh.rows.map((r, i) => `<div><b>${i + 1}.</b> ${esc(r.a)}</div>`).join('')}</div><div>${sh.order.map((k, i) => `<div><b>${ABC(i)}.</b> ${esc(sh.rows[k].b)}</div>`).join('')}</div></div>`;
+      case 'story': return `<div class="ttitle">${esc(sh.p.title)}</div>${sh.p.paras.map(ls => `<p class="tpara">${ls.map(i => esc(sh.p.sentences[i].en)).join(' ')}</p>`).join('')}${sh.qs.map((q, i) => qSheet(q, i + 1)).join('')}`;
+      default: return `<div class="tbank">${sh.scene.bank.map(x => `<span>${esc(x)}</span>`).join('')}</div>${scenePic(sh.scene)}<div class="tlines">${[1, 2, 3, 4, 5].map(i => `<div><b>${i}.</b></div>`).join('')}</div>`;
+    }
+  }
+  function testView() {
+    const T = R.test, sh = curSheet(), n = T.sheets.length, K = sh.kind[0].toUpperCase() + sh.kind.slice(1), en = SHEET_EN[sh.kind];
+    if (!T.startedAt) T.startedAt = Date.now();
+    const head = topbar(T.stage === 'key' ? t('tKeyTitle') : `📝 <span class="en">${en[0]}</span>`, t('tSheet', { i: T.idx + 1, n }));
+    if (T.stage === 'work') return `
+        ${head}
+        <div class="sheet" dir="ltr">
+          <div class="shead"><b>${en[0]}</b>${en[1] ? ` &nbsp;·&nbsp; ${en[1]}` : ''}</div>
+          <div class="sins"><div>${esc(t('tEn' + K))}</div><div class="he" dir="rtl">${sh.kind === 'writing' ? t('w5Ask') : t('tHe' + K)}</div></div>
+          ${sheetBody(sh)}
+        </div>
+        <div class="bigcta"><button class="btn primary block" data-action="t-pendown">${t('wPenDown')}</button></div>`;
+    return `
+        ${head}
+        <div class="sheet key" dir="ltr">
+          <div class="shead"><b>${en[0]}</b>${en[1] ? ` &nbsp;·&nbsp; ${en[1]}` : ''}</div>
+          ${sh.kind === 'writing' ? `<div class="he" dir="rtl">${sceneKey(sh.scene)}</div>` : ''}
+          <div class="sins"><div class="he" dir="rtl">${t(sh.kind === 'writing' ? 'w5Mark' : 'tKeyLead')}</div></div>
+          ${markRows(sh.items.map(x => x.k), sh.marks, 't-mark', sh.kind !== 'writing')}
+        </div>
+        <div class="bigcta"><button class="btn primary block" data-action="t-next" ${sh.marks.every(Boolean) ? '' : 'disabled'}>${t(T.idx + 1 < n ? 'tNext' : 'tLast')}</button></div>`;
   }
 
   // ---------- story track (PRD §6.5) ----------
@@ -2084,6 +2373,7 @@
 
     mission() {
       const items = [];
+      if (R.test) items.push(t('missionTest', { n: R.test.sheets.length }), t('missionTestSub'), t('missionTestPaper'));
       if (R.plan.warm) items.push(t('missionWarm'));
       if (R.plan.boss) items.push(t('missionBoss'));
       if (R.reviewTotal) items.push(t('missionReview', { n: R.reviewTotal }));
@@ -2091,7 +2381,7 @@
       const pl = R.plan;
       if (pl.unit) items.push(t('missionTower', { title: esc(pl.unit.title) }));
       if (pl.sd) items.push(t('missionSd'));
-      if (pl.writing) items.push(t(pl.writing.paper ? 'missionPen' : 'missionTiles'));
+      if (pl.writing) items.push(t(pl.writing.rung >= 5 ? 'missionPen5' : (pl.writing.paper ? 'missionPen' : 'missionTiles')));
       if (pl.story) items.push(pl.story.reread ? t('missionRevisit', { name: esc(pl.story.p.friend.name) }) : t('missionFriend'));
       if (pl.reread) items.push(t('missionRevisit', { name: esc(pl.reread.p.friend.name) }));
       if (pl.listening) items.push(t('missionListen'));
@@ -2158,6 +2448,21 @@
     },
 
     listening() { return listeningView(); },
+    test() { return testView(); },
+    // the last sheet is marked: a count of right answers, no total and no score (those are on the coach screen)
+    testend() {
+      const T = R && R.test;
+      if (!T) { view = 'map'; return VIEWS.map(); }
+      onRendered(() => { Audio.fanfare(); confetti(60); });
+      return `
+        ${topbar(t('testEndTitle'), '')}
+        <div class="card bosscard">
+          <div class="bossbig">📝</div>
+          <div class="lead">${t('testEndHits', { n: T.hits })}</div>
+          <div class="muted">${t('testEndSub')}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="t-end">${t('testEndGo')}</button></div>
+        </div>`;
+    },
     // a paragraph he knows, read once as the session opens; the time is measured silently
     warm() {
       const w = R.plan.warm, p = w.p;
@@ -2385,8 +2690,8 @@
     const lands = S.landsIntroduced.map(l => `${landName(C.lands.find(x => x.id === l.id) || { id: l.id })} (${l.date})`).join(', ') || 'עדיין לא';
     // M2: per-step log, grammar towers, writing track, story track
     const wr = S.writing, sto = S.story;
-    const PHASE_HE = { boss: 'מיני-בוס', review: 'חזרה', intro: 'היכרות', new: 'מילים חדשות', pintro: 'כלל', pack: 'דקדוק', writing: 'כתיבה', story: 'סיפור', listening: 'האזנה', reading: 'קריאה בקול' };
-    const RUNG_HE = { 1: 'בנייה באריחים', 2: 'בנייה עם אות גדולה ונקודה', 3: 'בנייה ואז העתקה לדף', 4: 'כתיבה על דף מתמונה ובנק מילים' };
+    const PHASE_HE = { boss: 'מיני-בוס', review: 'חזרה', intro: 'היכרות', new: 'מילים חדשות', pintro: 'כלל', pack: 'דקדוק', writing: 'כתיבה', story: 'סיפור', listening: 'האזנה', reading: 'קריאה בקול', test: 'מצב מבחן' };
+    const RUNG_HE = { 1: 'בנייה באריחים', 2: 'בנייה עם אות גדולה ונקודה', 3: 'בנייה ואז העתקה לדף', 4: 'כתיבה על דף מתמונה ובנק מילים', 5: 'משימת המבחן: חמישה משפטים על תמונה אחת' };
     const LEVEL_HE = { 1: 'מקשיב ועוקב', 2: 'קורא עם הקראה לפי בקשה', 3: 'קורא עם עזרה במילים', 4: 'קורא לבד', 5: 'קורא בקול להורה' };
     const mmss = s => `${Math.floor(s / 60)}:${pad2(s % 60)}`;
     const steps = d.session && d.session.secs ? Object.entries(d.session.secs).filter(([k]) => PHASE_HE[k]).map(([k, s]) => `${PHASE_HE[k]} ${mmss(s)}`).join(' · ') : '';
@@ -2397,7 +2702,7 @@
     const m2 = `
         <h3>דקדוק (שולט / קלפים)</h3>
         <div>${towers}</div>
-        <h3>כתיבה · שלב ${wr.rung}: ${RUNG_HE[wr.rung] || ''} · מפגשים נקיים ${wr.clean}/3</h3>
+        <h3>כתיבה · שלב ${wr.rung}: ${RUNG_HE[wr.rung] || ''} · ${wr.rung >= 5 ? 'השלב האחרון' : `מפגשים נקיים ${wr.clean}/3`}</h3>
         <div class="row wrap"><button class="btn small" data-action="writing-rung" data-d="-1">שלב אחד למטה</button><button class="btn small" data-action="writing-rung" data-d="1">שלב אחד למעלה</button></div>
         ${wRows ? `<table><tr><th>מתי</th><th>משפט</th><th>שלב</th><th>תוצאה</th></tr>${wRows}</table>` : '<div class="muted">עוד לא התחיל</div>'}
         ${wr.again.length ? `<div>חוזרים במפגש הבא: <span class="en">${wr.again.map(s => esc(wItem(s).model)).join(' ')}</span></div>` : ''}
@@ -2439,6 +2744,17 @@
     const setRows = S.sets.history.slice(-6).reverse().map(h => `<tr><td>${h.date}</td><td>${h.kind === 'bank' ? 'בנק מילים' : 'חצאי משפטים'}</td><td class="en">${h.misses.length ? h.misses.map(esc).join('<br>') : '✓'}</td></tr>`).join('');
     const lRows = S.listening.runs.slice(-6).reverse().map(r => `<tr><td>${r.date}</td><td><span class="en">${esc((LITEM[r.id] || { title: r.id }).title)}</span>${r.fallback ? ' (שיחה במקום הקלטה)' : ''}</td><td><bdi>${r.stars}/${r.total}</bdi></td><td>${r.plays}</td><td>${r.hints.filter(x => x === 3).length}</td></tr>`).join('');
     const czs = Object.keys(S.cards).filter(isCz);
+    // M4: test mode on paper
+    const tr = S.test.runs[S.test.runs.length - 1], tSet = S.settings.testDay || '';
+    const trScore = tr ? Math.round(Object.keys(SEC_W).reduce((k, x) => k + (tr.sec[x] && tr.sec[x][1] ? SEC_W[x] * tr.sec[x][0] / tr.sec[x][1] : 0), 0)) : 0;
+    const trOf = tr ? Object.keys(SEC_W).reduce((k, x) => k + (tr.sec[x] && tr.sec[x][1] ? SEC_W[x] : 0), 0) : 0;
+    const m4 = `
+        <h3>מצב מבחן: משימה שלמה על דף</h3>
+        <div class="row wrap"><button class="btn small" data-action="toggle-test">מתי: ${tSet === todayStr() ? 'היום, במשימה הבאה עם הורה' : (tSet === 'off' ? 'כבוי' : `אוטומטי (פעם אחת, מ-${C.testModeFrom || '—'})`)}</button></div>
+        ${tr ? `<div>${tr.date} · תשובות נכונות <bdi>${tr.hits}/${tr.total}</bdi> · לפי משקלי המבחן: בערך ${trScore} מתוך ${trOf} · למטה: נקודות בכל חלק</div>
+        <div class="boxes">${Object.keys(SEC_HE).map(x => `<div><b><bdi>${tr.sec[x][0]}/${tr.sec[x][1]}</bdi></b>${SEC_HE[x]}</div>`).join('')}</div>
+        ${tr.misses.length ? `<div>לחזור על: <span class="en">${tr.misses.map(esc).join(' · ')}</span></div>` : ''}` : '<div class="muted">עוד לא היה.</div>'}
+        <div class="muted">כעשרה דפים קצרים בסדר של המבחן: האזנה, אוצר מילים, דקדוק, קריאה, כתיבה. הוא כותב על דף משלו. אחרי כל דף לוחצים "העט על השולחן", התשובות מופיעות, והוא מסמן ✓ או 🔁 לכל שורה כשאתם לידו. כ-25 דקות, בלי עצירה אוטומטית. הסימונים מזיזים את הקלפים. הוא רואה בסוף רק כמה תשובות נכונות היו; הנקודות כאן מיועדות להורים בלבד. אם הקולות של המכשיר לא ברורים בהאזנה, אפשר להשמיע שוב כמה שצריך.</div>`;
     const m3 = `
         <h3>מיני-בוס: חמשת חלקי המבחן</h3>
         ${mb ? `<div>${mb.date} · <bdi>${mb.hits}/${mb.total}</bdi> · לפי משקלי המבחן: בערך ${mbScore} מתוך 100</div>
@@ -2466,6 +2782,7 @@
         <div>${sk.territoriesLabel} שנפתחו: ${lands}</div>
         ${m2}
         ${m3}
+        ${m4}
         ${game}
         <h3>קלפים קשים (3+ טעויות)</h3>
         ${tricky.length ? `<table><tr><th>קלף</th><th>סוג</th><th>טעויות</th><th>קופסה</th></tr>${tricky.map(([cid, st]) => { const p = parseCard(cid); return `<tr><td class="en">${esc(cardLabel(cid))}</td><td>${{ rec: 'משמעות', lineup: 'שמיעה→קריאה', img: 'תמונה', tile: 'בנייה מאותיות', gc: 'דקדוק', np: 'כינוי גוף', sd: 'same / different', num: 'מספר', cz: 'מילה במשפט', lp: 'האזנה לתמונה' }[p.type] || p.type}</td><td>${st.misses}</td><td>${st.box}</td></tr>`; }).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
@@ -2570,6 +2887,14 @@
       case 'w-slot': wUnplace(Number(a.dataset.i)); break;
       case 'w-built': wAfterBuild(); break;
       case 'w-pendown': R.w.stage = 'check'; render(); break;
+      case 'w5-mark': w5Mark(Number(a.dataset.i), a.dataset.m); break;
+      case 'w5-done': w5Done(); break;
+      case 't-play': tPlay(); break;
+      case 't-pendown': tPenDown(); break;
+      case 't-mark': tMark(Number(a.dataset.i), a.dataset.m); break;
+      case 't-next': tNext(); break;
+      case 't-end': if (R && R.test) finishSession(); break;
+      case 'toggle-test': { const cur = S.settings.testDay || ''; S.settings.testDay = cur === todayStr() ? 'off' : (cur === 'off' ? '' : todayStr()); save(); render(); break; }
       case 'w-ok': R.w.res.paper = 'ok'; Audio.ding(4); wDone(); break;
       case 'w-again': R.w.res.paper = 'again'; wDone(); break;
       case 'st-read': stStartRead(); break;
@@ -2607,7 +2932,7 @@
       case 'brag-back': view = bragFrom; render(); break;
       case 'to-close': view = 'close'; render(); break;
       case 'story-level': S.story.level = clamp(S.story.level + Number(a.dataset.d), 1, 5); S.story.clean = 0; save(); render(); break;
-      case 'writing-rung': S.writing.rung = clamp(S.writing.rung + Number(a.dataset.d), 1, 4); S.writing.clean = 0; save(); render(); break;
+      case 'writing-rung': S.writing.rung = clamp(S.writing.rung + Number(a.dataset.d), 1, 5); S.writing.clean = 0; save(); render(); break;
       case 'coach-freeze': { const k = coachFreeze(); toast(k < 0 ? 'אין רצף להקפיא: לא הייתה משימה בשלושת השבועות האחרונים' : (k ? `הוקפאו ${k} ימים. הרצף נשמר.` : 'אין ימים חסרים')); render(); break; }
       case 'toggle-box': S.settings.boxEvery = (S.settings.boxEvery || 1) === 2 ? 1 : 2; save(); render(); break;
       case 'to-map': view = 'map'; render(); break;
@@ -2752,5 +3077,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene };
 })();

@@ -216,6 +216,46 @@ How it was made, and what to look at before he sits it:
   day-8 sample save. **Not tried on the iPad or on a real printer; the real device voices were not
   heard.**
 
+## What 3.6.0 added (17 Nov: the five-sentence task and test mode)
+
+Two more items of M4's test-facing list, and the second unheard dialogue. The final boss and the
+"then" list are still not built.
+
+- **Writing rung 5, the test's own task.** One picture of six labelled people in five groups (one
+  pair), a bank of ten bare words (four adjectives, six nouns, one of them spare), and five
+  sentences to write on paper: two with *is / are*, three with *has / have*. No frame is shown.
+  "העט על השולחן" shows what could be written about each group, four checks, and a ✓ or 🔁 for each
+  of his five sentences. Rung 4 moves up to rung 5 after three clean parent sessions, like the
+  rungs before it; the coach screen's rung buttons now reach 5. At rung 5 the writing is planned at
+  6 minutes instead of 3.
+- **Test mode: a whole sitting on paper** (prd.md §6.4, day 11). It opens by itself, once, in the
+  first parent session from 19 Nov (`testModeFrom` in `content.js`). The coach screen has a button
+  to open it today or to shut it. It is about ten short sheets in the test's order, each black on
+  white in a plain font, with nothing to tap and no hints:
+  Listening 1 (five sentences, six pictures), Listening 2 (a dialogue he has not heard), Vocabulary
+  1 (ten words to match, half from outside the 50), Vocabulary 2 (a word-bank set), Grammar 1–3
+  (am / is / are, the right form of three, have / has), Reading 1 (halves joined by meaning),
+  Reading 2 (the next story he has not met, whole, with all its questions under it) and Writing
+  (the five sentences). He writes on his own paper. After each sheet "העט על השולחן" shows the key
+  and he marks every line ✓ or 🔁 with the parent beside him.
+  - The points per sheet are the test's, so a full run adds up to 20 / 20 / 20 / 30 / 10.
+  - The marks move the cards: a miss takes the card down a box; a right answer takes it up when the
+    card was due. The words and grammar items are drawn from the lowest boxes first.
+  - He sees a count of right answers at the end, with no total and no score. The points by
+    section and the estimate out of 100 are on the coach screen only.
+  - There is no hard stop. A solo session on that day is an ordinary one, and the day is not
+    offered in two sittings. The story and the dialogue count as met and heard afterwards.
+  - Leaving in the middle keeps the marks of the sheets already checked and offers test mode
+    again next time.
+- **A second unheard dialogue** ("Noa and Omer", 12 lines, six questions in the practice copy's
+  order). It follows "Maya and Dan" in the listening track; test mode takes whichever comes next.
+- `test.html` has a **day 11** save: test mode set to open today, writing at rung 5.
+
+Checked in the browser at iPad size (820×1180) from the day-11 sample save: a whole test-mode
+sitting to the close screen, rung 5 inside an ordinary quest, the date rule (18 and 19 Nov on a
+fixed clock), the coach screen, and the older sample saves still starting. **Not tried on the iPad;
+the device voices were stubbed.**
+
 ## What 3.4.0 changed in the game (15 Nov, after the scan of the practice copy)
 
 Two of the five gaps that prd.md §4.4 lists between the test and what the game trains:
