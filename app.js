@@ -620,7 +620,7 @@
     // word bank and sentence halves: one set of each in the review; on the mid-boss day they are inside the boss
     const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? ['halves'] : ['bank', 'halves']);
     // the review stack is what gives way to everything else in the sitting
-    const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + sets.length + (warm ? 0.5 : 0) + 1;
+    const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + (warm ? 0.5 : 0) + 1;   // the sets are outside the clock (see minLeft)
     const short = boss || sitting === 'single';
     const cap = short ? 6 : clamp(Math.floor((stopMin - other) * CARDS_PER_MIN), 8, C.reviewStackCap);
     const queue = cards ? buildReviewQueue(n, cap, short) : [];
@@ -657,7 +657,9 @@
   // minutes still owed to the parts that are never cut (writing, story) and to today's new content
   function estLong() { const pl = R.plan; return (pl.writing && !R.wResult ? estWriting(pl.writing) : 0) + (pl.story && !R.stResult ? estStory(pl.story) : 0) + (pl.listening && !R.lsResult ? estListening(pl.listening) : 0); }
   function estNew() { return (R.newLand && !landIntroduced(R.newLand.id) ? 3.5 : 0) + (R.plan.unit && !packIntroduced(R.plan.unit.id) ? 2 : 0) + (R.plan.sd && !packIntroduced('sd') ? 1 : 0); }
-  const minLeft = () => R.stopMin - elapsedMin();
+  // the time inside a word-bank or halves set is not on the cards' clock: a set runs minutes, not seconds, and
+  // two of them once used up a whole cards sitting, so the review stopped after ten cards (the 17 Nov save)
+  const minLeft = () => R.stopMin - elapsedMin() + (R.setMs || 0) / 60000;
   // review stops early enough to leave room for the new content and the long forms; new-content rounds
   // stop early enough to leave room for the long forms; the long forms themselves are never cut
   // (the mid-boss is never cut short: it is the day's review, and it is one fight)
@@ -665,9 +667,16 @@
 
   function nextCard() {
     if (!R) return;
-    if (R.queue.length && cardTimeUp()) { R.hardStop = true; R.queue = []; }
+    if (R.current && R.current.set && R.current.setAt) { R.setMs = (R.setMs || 0) + (Date.now() - R.current.setAt); R.current.setAt = 0; }
+    if (R.queue.length && cardTimeUp()) {
+      // a land that has opened always gets its first round: each new card once; only the second tries give way
+      const keep = R.phase === 'new' ? R.queue.filter(x => !x.retry) : [];
+      if (keep.length < R.queue.length) R.hardStop = true;
+      R.queue = keep;
+    }
     if (!R.queue.length) return afterRound();
     R.current = R.queue.shift();
+    if (R.current.set) R.current.setAt = Date.now();
     if (R.phase === 'review' && goldRoll(R.current, C.surprise.goldQuest)) R.current.gold = true;
     R.current.view = R.current.set ? makeSetView(R.current) : (R.current.build ? makeBuildView(R.current) : makeCardView(R.current.cid));
     view = 'card'; render();
