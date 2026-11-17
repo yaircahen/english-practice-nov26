@@ -586,3 +586,83 @@ a.btn { text-decoration: none; }
 .minil i { width: 12px; height: 12px; border-radius: 4px; background: color-mix(in srgb, var(--ink) 14%, transparent); }
 .minil i.on { background: var(--accent); }
 .minil i.top { background: var(--gold); }
+
+/* writing rung 5: one picture of six labelled people (also the last sheet of test mode) */
+.wscene { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; direction: ltr; align-self: stretch; }
+.wgroup { display: flex; gap: 8px; align-items: flex-end; padding: 8px 12px 6px; border: 2px solid var(--card-edge); border-radius: 16px; background: var(--paper); }
+.wscene .wface { font-size: 54px; }
+.wscene .wbody { font-size: 62px; }
+.wscene .wbody.tall { font-size: 92px; }
+.wscene .wbody.short { font-size: 40px; }
+.wscene .wthing { font-size: 46px; line-height: 1.2; }
+.wscene .wname { font-size: 20px; min-height: 30px; padding: 0 8px; }
+.w5lead { align-self: stretch; font-size: 22px; font-weight: 700; }
+.w5key { align-self: stretch; display: flex; flex-direction: column; gap: 4px; }
+.w5key > div { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 20px; line-height: 1.5; padding: 4px 10px; border-bottom: 1px solid var(--card-edge); text-align: left; letter-spacing: 0.02em; word-spacing: 0.1em; }
+.mrows { align-self: stretch; display: flex; flex-direction: column; gap: 8px; }
+.mrow { display: flex; align-items: center; gap: 12px; padding: 6px 4px; border-bottom: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); }
+.mrow .mnum { flex: none; width: 1.6em; text-align: center; }
+.mrow .mlab { flex: 1; min-width: 0; font-size: 22px; line-height: 1.5; }
+.mrow .rdmarks { flex: none; direction: ltr; }
+
+/* test mode: a worksheet. Black on white in a plain font, whatever the skin (prd.md §6.4) */
+.sheet { background: #fff; color: #111; border: 1px solid #999; border-radius: 4px; padding: 22px 26px 26px; margin-top: 12px; font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; font-size: 23px; line-height: 1.6; text-align: left; }
+.sheet .he { font-family: var(--he-font); text-align: right; }
+.sheet .emo { font-family: "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", sans-serif; }
+.sheet .shead { font-size: 26px; border-bottom: 2px solid #111; padding-bottom: 4px; margin-bottom: 10px; }
+.sheet .sins { border: 1.5px solid #111; border-radius: 4px; padding: 8px 12px; margin-bottom: 16px; font-size: 20px; line-height: 1.5; }
+.sheet .sins .en { font-family: inherit; letter-spacing: 0; word-spacing: 0; }
+.sheet .titem { margin: 14px 0; }
+.sheet .tq { display: flex; gap: 10px; }
+.sheet .tq i { font-style: normal; color: #444; font-size: .85em; }
+.sheet .tblank { display: inline-block; width: 5.5em; border-bottom: 2px solid #111; margin: 0 6px; }
+.sheet .tforms { white-space: nowrap; font-weight: 700; }
+.sheet .tchoices { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; margin: 6px 0 0 34px; }
+.sheet .tchoices.pics { grid-template-columns: repeat(5, auto); font-size: 19px; }
+.sheet .tchoices.pics .emo { font-size: 38px; display: block; line-height: 1.2; }
+.sheet .tyn { margin: 4px 0 0 34px; font-weight: 700; }
+.sheet .tbank { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center; border: 2px solid #111; padding: 10px 14px; margin-bottom: 16px; font-weight: 700; }
+.sheet .tmatch { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.sheet .tmatch > div > div { border: 1.5px solid #111; border-radius: 4px; padding: 6px 12px; margin-bottom: 8px; }
+.sheet .tpics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.sheet .tpics > div { border: 1.5px solid #111; border-radius: 4px; padding: 8px 10px; display: flex; align-items: center; gap: 12px; min-height: 96px; }
+.sheet .tpics .emo { font-size: 44px; line-height: 1.2; flex: 1; text-align: center; }
+.sheet .ttitle { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+.sheet .tpara { margin: 0 0 14px; line-height: 1.75; }
+.sheet .tlines > div { border-bottom: 1.5px solid #111; height: 46px; display: flex; align-items: flex-end; padding-bottom: 2px; }
+.sheet .tplayer { display: flex; align-items: center; gap: 18px; border: 1.5px dashed #777; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+.sheet .tplayer > div { flex: 1; display: flex; flex-direction: column; gap: 6px; font-family: var(--he-font); }
+.sheet .tplayer .lsbtn { width: 84px; height: 84px; font-size: 36px; border-bottom-width: 6px; flex: none; }
+.sheet .tplayer .lscount { color: #111; font-size: 22px; }
+.sheet .tplayer .tnote { font-size: 17px; color: #444; }
+.sheet .wscene { margin-bottom: 16px; }
+.sheet .wgroup { border-color: #111; background: #fff; }
+.sheet .wname.en { background: #fff; border-color: #111; font-family: inherit; }
+.sheet.key .mrow { border-bottom-color: #bbb; }
+.sheet.key .mlab .he { font-family: var(--he-font); }
+.sheet.key .w5key > div { border-bottom-color: #bbb; }
+.sheet.key .w5key, .sheet.key .wchecks, .sheet.key .w5lead { margin-bottom: 12px; }
+@media (max-width: 600px) {
+  .sheet { padding: 14px 12px 18px; font-size: 19px; }
+  .sheet .tchoices { grid-template-columns: 1fr; }
+  .sheet .tchoices.pics { grid-template-columns: repeat(3, auto); }
+  .sheet .tpics { grid-template-columns: repeat(2, 1fr); }
+  .w5key > div { grid-template-columns: 1fr; gap: 0; }
+}
+
+/* "about me": the template on the way to paper, the fields a parent types into, and the paragraph on his card */
+.ablines { align-self: stretch; display: flex; flex-direction: column; gap: 12px; direction: ltr; }
+.abline { background: var(--paper); border: 2px dashed var(--card-edge); border-radius: 16px; padding: 10px 16px; text-align: left; }
+.abline .en { font-size: 30px; font-weight: 600; line-height: 1.6; }
+.abline .she { text-align: right; direction: rtl; font-size: 17px; color: var(--ink-muted); padding: 0; }
+.abgap { display: inline-block; width: 4.2em; border-bottom: 3px solid var(--ink); margin: 0 4px; }
+.ablines.type .abline { border-style: solid; }
+.ablines.type .abline .en { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 24px; }
+.abin { flex: 1; min-width: 150px; font: inherit; font-weight: 600; color: var(--ink); background: #fff; border: 2px solid var(--card-edge); border-radius: 10px; padding: 6px 10px; }
+.abin:focus { outline: 3px solid var(--accent); border-color: var(--accent); }
+.abtext { margin-top: 16px; font-size: 28px; line-height: 1.8; font-weight: 600; text-align: left; }
+button.fchip { font: inherit; cursor: pointer; }
+.fchip.own { background: color-mix(in srgb, var(--gold) 22%, transparent); }
+/* speed round */
+.spprog { height: 18px; }
+.spprog > div { transition: width .1s linear; }
