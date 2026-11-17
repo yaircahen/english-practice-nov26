@@ -2,7 +2,8 @@
    then the mystery box and the wardrobe, streak freeze, brag card, reading minute and letter-tile cards.
    M3, the test-facing half: bonus land, word-bank and sentence-halves sets, sentence-cloze and listen-and-pick
    cards, the mid-boss, the listening track, and a quest that can be played in two sittings.
-   M4, so far: writing rung 5 (the test's five-sentence task) and test mode, a whole sitting on paper.
+   M4: writing rung 5 (the test's five-sentence task), test mode (a whole sitting on paper), the final boss (the
+   mock inside the game), his own "about me" card, and the speed round.
    Vanilla JS, no build step. State in localStorage. See prd.md (v4).
    Every line the kid reads comes from the `copy` table in content.js, through t(). */
 (() => {
@@ -74,15 +75,17 @@
       // M3. Absent from an older save; same rule.
       sets: { bankSeq: 0, hvSeq: 0, history: [] },           // word-bank and sentence-halves sets: history: [{ date, n, kind, sid, misses }]
       listening: { done: {}, runs: [] },                     // done[id] = { stars, total, date } · runs: [{ id, date, n, plays, stars, total, hints, fallback, for }]
-      boss: { mid: null },                                   // mid = { date, n, hits, total, sec, misses }
+      boss: { mid: null, final: null, ready: null },         // mid, final = { date, n, hits, total, sec, misses } · ready = the date a parent signed the badge
       // M4. Absent from an older save; same rule.
       test: { runs: [] },                                    // test mode on paper: runs: [{ date, n, hits, total, sec: { L: [points, of], … }, misses }]
+      about: { date: null, f: {}, text: [] },                // his own card: f = what was typed into the template's fields · text = the sentences
+      speed: { best: 0, runs: [] },                          // speed round: runs: [{ date, hits, misses }]
     };
   }
   // An older save lacks the newer fields. It gets their defaults; nothing it holds is dropped or renamed.
   function adopt(s) {
     const f = freshState(); const st = Object.assign({}, f, s);
-    ['settings', 'story', 'writing', 'loot', 'streak', 'reading', 'sets', 'listening', 'boss', 'test'].forEach(k => { st[k] = Object.assign({}, f[k], s[k]); });
+    ['settings', 'story', 'writing', 'loot', 'streak', 'reading', 'sets', 'listening', 'boss', 'test', 'about', 'speed'].forEach(k => { st[k] = Object.assign({}, f[k], s[k]); });
     return st;
   }
   let S = load();
@@ -408,6 +411,8 @@
     TERR.filter(tr => !S.loot.cleared.includes(tr.key) && terrCleared(tr)).slice(0, 2).forEach(tr => { S.loot.cleared.push(tr.key); give('rare', tr.key); });
     // the mid-boss leaves a rare find behind when he runs
     if (S.boss.mid && !S.loot.cleared.includes('midboss')) { S.loot.cleared.push('midboss'); give('rare', 'midboss'); }
+    // ... and the final boss a golden one
+    if (S.boss.final && !S.loot.cleared.includes('boss')) { S.loot.cleared.push('boss'); give('golden', 'boss'); }
     return drops;
   }
   function previewLoot(it) {
@@ -525,10 +530,12 @@
   function writingForSession(mode, unit) {
     if (!(packIntroduced('u1') || (unit && unit.id === 'u1'))) return null;
     const rung = mode === 'parent' ? S.writing.rung : Math.min(S.writing.rung, 2);
-    return { rung, paper: rung >= 3 };
+    // his own card, once, with a parent: it is that day's writing (PRD §6.5, §6.6)
+    const about = mode === 'parent' && !S.about.date && !midBossDue() && phase2() && packIntroduced('u2') && rung >= 3 && !!(C.about || []).length;
+    return { rung, paper: rung >= 3, about };
   }
   const estStory = s => s.reread ? 2.5 : (s.p.tier === 'A' ? 3 : (s.p.tier === 'C' ? 6.5 : 4.5));
-  const estWriting = w => w.rung >= 5 ? 6 : (w.paper ? 3 : 1.5);   // rung 5 is the test's whole task: five sentences
+  const estWriting = w => w.about || w.rung >= 5 ? 6 : (w.paper ? 3 : 1.5);   // rung 5 is the test's whole task: five sentences
 
   // The mid-boss (PRD §8, day 6): once, with a parent, from the day after the last of the 50 words is in.
   const midBossDue = () => !S.boss.mid && phase2() && packIntroduced('u1') && BANK.length > 0;
@@ -545,7 +552,7 @@
     const ses = daySessions(S.days[todayStr()]);
     if (!ses.length || ses.some(r => r.mode === 'parent')) return false;
     const newLand = nextLandForToday(), story = storyForSession('parent', newLand);
-    return !!(newLand || unitForToday(newLand) || sdForToday(newLand) || (story && !story.reread) || testDue('parent'));
+    return !!(newLand || unitForToday(newLand) || sdForToday(newLand) || (story && !story.reread) || testDue('parent') || finalDue('parent'));
   }
   function planFor(mode) {
     const parent = mode === 'parent';
@@ -584,12 +591,13 @@
     settleHalves();
     const half = today().half || null;
     if (half) mode = 'parent';                                // the second sitting is the one with a parent
+    if (!half && finalDue(mode)) return startTest(true);      // the final boss: the mock, inside the game
     if (!half && testDue(mode)) return startTest();           // the paper day (PRD §6.4): the whole sitting is test mode
     const n = half ? half.n : S.sessionCount + 1;
     const parent = mode === 'parent';
     let sitting = 'full';
     if (half) sitting = 'long';
-    else if (how !== 'full' && !testDue('parent') && isLongDay(planFor('parent'))) {   // on the paper day a solo session is an ordinary one
+    else if (how !== 'full' && !testDue('parent') && !finalDue('parent') && isLongDay(planFor('parent'))) {   // on the paper day a solo session is an ordinary one
       if (!parent) sitting = 'cards';
       else if (how === 'cards' || how === 'single') sitting = how;
       else if (todayDone()) sitting = 'single';               // a second quest the same day is never split again: the cards were played
@@ -634,7 +642,7 @@
 
   // after the mission screen: the warm read first, then the mid-boss or the review
   function beginQuest() {
-    if (R.test) { view = 'test'; return render(); }
+    if (R.test) { view = R.test.boss ? 'finalintro' : 'test'; return render(); }
     if (R.plan.warm && !R.warmed) { R.warmed = true; R.warmAt = Date.now(); view = 'warm'; return render(); }
     if (R.plan.boss && !R.boss) return startBoss();
     nextCard();
@@ -756,7 +764,7 @@
       reading: R.rdResult,                                               // the parent's marks: coach log only
       listening: R.lsResult,
     };
-    if (R.test) rec.test = { hits: R.test.hits, total: R.test.total };
+    if (R.test) rec[R.test.boss ? 'final' : 'test'] = { hits: R.test.hits, total: R.test.total };
     // two sittings, one quest: the first half's numbers join this one's
     const h = today().half;
     if (h) {
@@ -1058,6 +1066,7 @@
     // the plan was made before today's grammar unit opened, so check again now
     if (!R.plan.writing || !packIntroduced('u1')) { R.plan.writing = null; return startStory(); }
     const parent = R.mode === 'parent', wr = S.writing, odd = wr.seq % 2 === 1;
+    if (R.plan.writing.about && !S.about.date) return startAbout(true);
     if (parent && wr.rung >= 5) { R.w = { five: true, parent, scene: makeScene(), stage: 'write', marks: [null, null, null, null, null] }; setPhase('writing'); view = 'writing'; return render(); }
     const frames = packIntroduced('u2') ? [odd ? 'have2' : 'have1', odd ? 'be1' : 'be2'] : [odd ? 'be2' : 'be1', odd ? 'be1' : 'be2'];
     const specs = parent ? wr.again.slice(0, 2) : [];          // sentences marked "again" come back first, with a parent
@@ -1194,19 +1203,19 @@
     const nouns = sample(WR.nouns, 6).map(n => n.w);          // five in the picture and one spare in the bank
     const figs = shuffle(whos.map((who, i) => {
       const two = who.length > 1;
-      return { who, adj: adjs[i], has: nouns[i], be: wItem({ frame: two ? 'be2' : 'be1', who, x: adjs[i] }), have: wItem({ frame: two ? 'have2' : 'have1', who, x: nouns[i] }) };
+      const adj = WR.adjs.find(a => a.w === adjs[i]), noun = WR.nouns.find(x => x.w === nouns[i]);
+      return { who, g: who.map(nm => (WR.people.find(x => x.name === nm) || { g: 'f' }).g), badge: adj.badge || '', size: adj.size || '', e: noun.e, has: nouns[i],
+        be: wItem({ frame: two ? 'be2' : 'be1', who, x: adjs[i] }), have: wItem({ frame: two ? 'have2' : 'have1', who, x: nouns[i] }) };
     }));
     return { figs, bank: shuffle([...new Set(adjs), ...nouns]) };
   }
   function scenePic(sc) {
     const group = f => {
-      const adj = WR.adjs.find(a => a.w === f.adj), noun = WR.nouns.find(n => n.w === f.has);
-      const one = name => {
-        const p = WR.people.find(x => x.name === name) || { g: 'f' };
-        const body = adj.badge ? `<div class="wface">${adj.badge}</div>` : `<div class="wbody ${adj.size}">${p.g === 'f' ? '🧍‍♀️' : '🧍‍♂️'}</div>`;
+      const one = (name, i) => {
+        const body = f.badge ? `<div class="wface">${f.badge}</div>` : `<div class="wbody ${f.size}">${f.g[i] === 'f' ? '🧍‍♀️' : '🧍‍♂️'}</div>`;
         return `<div class="wfig">${body}<div class="wname en">${esc(name)}</div></div>`;
       };
-      return `<div class="wgroup">${f.who.map(one).join('')}<div class="wfig"><div class="wthing">${noun.e}</div><div class="wname">&nbsp;</div></div></div>`;
+      return `<div class="wgroup">${f.who.map(one).join('')}<div class="wfig"><div class="wthing">${f.e}</div><div class="wname">&nbsp;</div></div></div>`;
     };
     return `<div class="wscene">${sc.figs.map(group).join('')}</div>`;
   }
@@ -1268,10 +1277,10 @@
   // the parent beside him. The marks move the cards: a miss takes a card down a box, a right answer on a card that
   // was due takes it up. What he sees at the end is a count of right answers; the points by the test's weights
   // are on the coach screen only.
-  const ABC = i => 'abcdefghij'[i], HEB = i => 'אבגדהוזחטי'[i];
+  const ABC = i => 'abcdefghij'[i];
   // from the date in the content file, once; the coach can open it on another day, or shut it
   function testDue(mode) {
-    if (mode !== 'parent' || !phase2() || !packIntroduced('u2')) return false;
+    if (mode !== 'parent' || !phase2() || !packIntroduced('u2') || S.boss.final) return false;   // after the boss there is nothing left to rehearse
     const set = S.settings.testDay || '';
     if (set === 'off' || S.test.runs.some(r => r.date === todayStr())) return false;
     if (set === todayStr()) return true;
@@ -1287,14 +1296,14 @@
   const qKey = q => {
     if (q.type === 'yn') return `<b>${q.ok ? 'Yes' : 'No'}</b>`;
     if (q.type === 'tf') return `<b>${q.ok ? 'True' : 'False'}</b>`;
-    if (q.type === 'write2') return q.model.map(m => esc(m)).join(' &nbsp;·&nbsp; ');
+    if (q.type === 'write2') return q.model.map(m => esc(m)).join(' &nbsp;·&nbsp; ') + (q.any && q.any < q.model.length ? ` &nbsp;(${q.any})` : '');
     return q.choices.map((c, i) => c.ok ? `<b>${ABC(i)}</b> ${c.e ? `<span class="emo">${c.e}</span> ` : ''}${esc(c.en)}` : '').filter(Boolean).join(' &nbsp;+&nbsp; ');
   };
-  const qSheet = (q, n) => {
+  const qSheet = (q, n, bare) => {       // bare: a picture choice without its word, as the test prints it
     const stem = `<div class="tq"><b>${n}.</b> <span>${esc(q.en)}${q.type === 'tick2' && !/tick/i.test(q.en) ? ` <i>${esc(t('tTick2'))}</i>` : ''}${q.type === 'write2' && !/write/i.test(q.en) ? ` <i>${esc(t('tWrite2'))}</i>` : ''}</span></div>`;
     if (q.type === 'yn' || q.type === 'tf') return `<div class="titem">${stem}<div class="tyn">${q.type === 'yn' ? 'Yes &nbsp;/&nbsp; No' : 'True &nbsp;/&nbsp; False'}</div></div>`;
     if (q.type === 'write2') return `<div class="titem">${stem}</div>`;
-    return `<div class="titem">${stem}<div class="tchoices ${q.choices[0].e ? 'pics' : ''}">${q.choices.map((c, i) => `<div><b>${ABC(i)}</b> ${c.e ? `<span class="emo">${c.e}</span> ` : ''}${esc(c.en)}</div>`).join('')}</div></div>`;
+    return `<div class="titem">${stem}<div class="tchoices ${q.choices[0].e ? 'pics' : ''}">${q.choices.map((c, i) => `<div><b>${ABC(i)}</b> ${c.e ? `<span class="emo">${c.e}</span> ` : ''}${c.e && bare ? '' : esc(c.en)}</div>`).join('')}</div></div>`;
   };
   function buildTest() {
     const sheets = [], gOf = cid => GITEMS[cid.split('|')[0]];
@@ -1321,7 +1330,7 @@
     });
     if (words.length >= 5) {
       const ws = shuffle(words), order = shuffle(ws.map((_, i) => i));
-      sheets.push({ kind: 'match', sec: 'V', words: ws, order, items: ws.map((w, i) => ({ k: `${esc(w.en)} &nbsp;=&nbsp; <b class="he">${HEB(order.indexOf(i))}</b> <span class="he">${esc(w.he)}</span>`, pts: 1, cid: w.cid, label: w.en })) });
+      sheets.push({ kind: 'match', sec: 'V', words: ws, order, items: ws.map((w, i) => ({ k: `${esc(w.en)} &nbsp;=&nbsp; <b>${ABC(order.indexOf(i))}</b> <span class="he">${esc(w.he)}</span>`, pts: 1, cid: w.cid, label: w.en })) });
     }
     // Vocabulary 2: the next word-bank set
     if (BANK.length) {
@@ -1350,17 +1359,58 @@
     sheets.push({ kind: 'writing', sec: 'W', scene, items: [1, 2, 3, 4, 5].map(i => ({ k: t('w5Row', { i }), pts: 2 })) });
     return sheets;
   }
-  function startTest() {
+
+  // The final boss's sheets: the mock itself (`mock` in content.js, the same data mock.html prints), in the printed
+  // order and with the printed letters, so a printed copy and the screen agree. Nothing here is drawn from his cards.
+  function buildMock() {
+    const M = C.mock, L = M.listening, V = M.vocab, G = M.grammar, Rd = M.reading, W = M.writing, sheets = [];
+    const fill = (tx, a) => esc(tx).replace('___', `<b>${esc(a)}</b>`);
+    // a miss on a word he has a card for moves that card; a miss in the grammar puts two cards of that form first tomorrow
+    const wordCid = en => { const w = ALL_WORDS.find(x => x.en === en), cid = w ? cardId(w.id, cardTypesFor(w)[0]) : ''; return S.cards[cid] ? cid : null; };
+    const pri = (unit, a) => shuffle(packCards(unit).filter(c => c.endsWith('|gc') && S.cards[c] && GITEMS[c.split('|')[0]].a.toLowerCase() === a.toLowerCase())).slice(0, 2);
+    const spoken = L.pics.items.filter(x => x.say), pics = L.pics.order.map(n => L.pics.items[n - 1].pic);
+    sheets.push({ kind: 'pics', sec: 'L', five: spoken, pics, plays: 0, items: spoken.map(x => ({ k: `<b>${ABC(pics.indexOf(x.pic))}</b> <span class="emo">${x.pic}</span> ${esc(x.say)}`, pts: L.pics.pts, label: x.say })) });
+    const D = L.dialogue;
+    sheets.push({ kind: 'dialogue', sec: 'L', dlg: { id: 'mock', lines: D.lines, questions: D.questions }, plays: 0, items: D.questions.map(q => ({ k: qKey(q), pts: q.pts, label: q.en })) });
+    const mo = V.match.order.map(n => n - 1);
+    sheets.push({ kind: 'match', sec: 'V', words: V.match.items, order: mo, items: V.match.items.map((w, i) => ({ k: `${esc(w.en)} &nbsp;=&nbsp; <b>${ABC(mo.indexOf(i))}</b> <span class="he">${esc(w.he)}</span>`, pts: V.match.pts, cid: wordCid(w.en), label: w.en })) });
+    sheets.push({ kind: 'bank', sec: 'V', rows: V.bank.items, bank: V.bank.order.map(n => V.bank.items[n - 1].a), items: V.bank.items.map(r => ({ k: fill(r.t, r.a), pts: V.bank.pts, label: r.t.replace('___', r.a) })) });
+    [['be', 'u1'], ['circle', 'u3'], ['have', 'u2']].forEach(([kind, unit]) => {
+      sheets.push({ kind, sec: 'G', gs: G[kind].items, items: G[kind].items.map(g => ({ k: fill(g.t, g.a), pts: G[kind].pts, pri: pri(unit, g.a), label: g.t.replace('___', `[${g.a}]`) })) });
+    });
+    const H = Rd.halves, ho = H.order.map(n => n - 1);
+    sheets.push({ kind: 'halves', sec: 'R', rows: H.items, order: ho, items: H.items.map((r, i) => ({ k: `${esc(r.a)} <b>${esc(r.b)}</b> &nbsp;(${ABC(ho.indexOf(i))})`, pts: H.pts, label: `${r.a} ${r.b}` })) });
+    sheets.push({ kind: 'story', sec: 'R', p: Rd.story, qs: Rd.story.questions, items: Rd.story.questions.map(q => ({ k: qKey(q), pts: q.pts, label: q.en })) });
+    const figs = W.figs.map(f => {
+      const two = f.who.length > 1, names = f.who.join(' and ');
+      return { who: f.who, g: f.g, badge: f.look === 'old' ? '👴' : (f.mood === 'happy' ? '😀' : (f.mood === 'sad' ? '😢' : '')), size: f.size === 'mid' ? '' : f.size, e: f.e, has: f.has,
+        be: { model: `${names} ${two ? 'are' : 'is'} ${f.adj}.` }, have: { model: `${names} ${two ? 'have' : 'has'} ${f.many ? '' : 'a '}${f.has}.`, noA: !!f.many } };
+    });
+    sheets.push({ kind: 'writing', sec: 'W', scene: { figs, bank: W.bank }, items: [1, 2, 3, 4, 5].map(i => ({ k: t('w5Row', { i }), pts: W.pts })) });
+    sheets.forEach(sh => { sh.mock = true; });
+    return sheets;
+  }
+  // The final boss (PRD §8 day 12): from the date in the content file, once, with a parent. The coach can open it
+  // on another day, or shut it.
+  function finalDue(mode) {
+    if (mode !== 'parent' || !phase2() || !C.mock || S.boss.final) return false;
+    const set = S.settings.finalDay || '';
+    if (set === 'off') return false;
+    return set === todayStr() || (!!C.finalBossFrom && todayStr() >= C.finalBossFrom);
+  }
+  // the gate on the map: the share of his cards in Box 3 and up
+  const gatePct = () => { const cids = Object.keys(S.cards).filter(known); return cids.length ? Math.round(100 * cids.filter(c => S.cards[c].box >= 3).length / cids.length) : 0; };
+  function startTest(boss) {
     settleHalves();
-    const n = S.sessionCount + 1, sheets = buildTest();
+    const n = S.sessionCount + 1, sheets = boss ? buildMock() : buildTest();
     R = {
-      n, mode: 'parent', date: todayStr(), startedAt: Date.now(), phase: 'test', phaseAt: Date.now(), timing: {}, queue: [], current: null,
+      n, mode: 'parent', date: todayStr(), startedAt: Date.now(), phase: boss ? 'final' : 'test', phaseAt: Date.now(), timing: {}, queue: [], current: null,
       reviewTotal: 0, round: { title: '', total: 0 }, done: 0, correct: 0, wrong: 0, promoted: 0, demoted: 0, combo: 0, maxCombo: 0,
       newLand: null, introIdx: 0, mastered: [], hardStop: false, firstTry: {}, plan: {}, pack: null, packsDone: [], w: null, st: null, wResult: null, stResult: null,
       rd: null, rdResult: null, sitting: 'test', stopMin: 120, later: '', boss: null, afterBoss: null, ls: null, lsResult: null,   // a test has no hard stop
-      test: { sheets, idx: 0, stage: 'work', tok: 0, playing: false, startedAt: 0, sec: { L: [0, 0], V: [0, 0], G: [0, 0], R: [0, 0], W: [0, 0] }, hits: 0, total: 0, misses: [] },
+      test: { boss: !!boss, sheets, idx: 0, stage: 'work', tok: 0, playing: false, startedAt: 0, sec: { L: [0, 0], V: [0, 0], G: [0, 0], R: [0, 0], W: [0, 0] }, hits: 0, total: 0, misses: [] },
     };
-    logEvent('session_start', { n, mode: 'parent', sitting: 'test' });
+    logEvent('session_start', { n, mode: 'parent', sitting: boss ? 'final' : 'test' });
     view = 'mission'; render();
   }
   const curSheet = () => { const T = R && R.test; return T ? T.sheets[T.idx] : null; };
@@ -1383,9 +1433,12 @@
   function tPenDown() {
     const T = R && R.test, sh = curSheet(); if (!sh || T.stage !== 'work') return;
     T.tok++; T.playing = false; Audio.stop();
-    sh.marks = sh.items.map(() => null); T.stage = 'key';
+    // the boss is the whole test first and the keys after it; test mode shows each sheet's key at once
+    if (T.boss && T.idx + 1 < T.sheets.length) T.idx++;
+    else { (T.boss ? T.sheets : [sh]).forEach(x => { x.marks = x.items.map(() => null); }); T.stage = 'key'; if (T.boss) T.idx = 0; }
     render(); window.scrollTo(0, 0);
   }
+  function tPrev() { const T = R && R.test; if (!T || !T.boss || T.stage !== 'work' || !T.idx || T.playing) return; T.idx--; render(); window.scrollTo(0, 0); }
   function tMark(i, m) { const T = R && R.test, sh = curSheet(); if (!sh || T.stage !== 'key' || !sh.items[i]) return; sh.marks[i] = m; Audio.tick(); render(); }
   function tNext() {
     const T = R && R.test, sh = curSheet(); if (!sh || T.stage !== 'key' || sh.marks.some(m => !m)) return;
@@ -1394,19 +1447,20 @@
       T.sec[sh.sec][1] += it.pts; T.total++;
       if (oks[i]) { T.sec[sh.sec][0] += it.pts; T.hits++; R.correct++; } else { R.wrong++; if (it.label) T.misses.push(it.label); }
       if (it.cid) testCard(it.cid, oks[i]);
+      if (it.pri && !oks[i]) it.pri.forEach(c => { S.cards[c].priority = 1; });
     });
     const misses = sh.items.filter((_, i) => !oks[i]).map(it => it.label);
-    if (sh.kind === 'bank' || sh.kind === 'halves') {
+    if (!sh.mock && (sh.kind === 'bank' || sh.kind === 'halves')) {
       if (sh.kind === 'bank') S.sets.bankSeq++; else { const k = S.sets.hvSeq || 0; S.sets.hvSeq = k + (k % 3 === 2 ? 2 : 1); }
       S.sets.history.push({ date: todayStr(), n: R.n, kind: sh.kind, sid: sh.sid, misses, paper: true }); if (S.sets.history.length > 60) S.sets.history.shift();
     }
-    if (sh.kind === 'dialogue') {
+    if (!sh.mock && sh.kind === 'dialogue') {
       const id = sh.dlg.id, prev = S.listening.done[id];
       if (!sh.dlg.fallback) S.listening.done[id] = { stars: prev ? Math.max(prev.stars, stars) : stars, total, date: prev ? prev.date : todayStr() };
       S.listening.runs.push({ id, date: todayStr(), n: R.n, plays: sh.plays, stars, total, hints: oks.map(ok => ok ? 0 : 3), fallback: !!sh.dlg.fallback, for: null, paper: true }); if (S.listening.runs.length > 40) S.listening.runs.shift();
       R.lsResult = { id, stars, total, plays: sh.plays, fallback: !!sh.dlg.fallback };
     }
-    if (sh.kind === 'story') {
+    if (!sh.mock && sh.kind === 'story') {
       const pid = sh.p.id, prev = S.story.done[pid], seconds = Math.round((Date.now() - T.startedAt) / 1000);
       const best = !prev || stars / total >= prev.stars / prev.total;
       S.story.done[pid] = Object.assign({}, prev, { stars: best ? stars : prev.stars, total: best ? total : prev.total, date: prev ? prev.date : todayStr(), reads: (prev ? prev.reads : 0) + 1 });
@@ -1415,7 +1469,12 @@
     }
     if (sh.kind === 'writing') recordFive(fiveItems(sh.marks));
     logEvent('test_sheet', { kind: sh.kind, stars, total });
-    if (T.idx + 1 < T.sheets.length) { T.idx++; T.stage = 'work'; T.startedAt = Date.now(); save(); render(); return window.scrollTo(0, 0); }
+    if (T.idx + 1 < T.sheets.length) { T.idx++; if (!T.boss) T.stage = 'work'; T.startedAt = Date.now(); save(); render(); return window.scrollTo(0, 0); }
+    if (T.boss) {
+      S.boss.final = { date: todayStr(), n: R.n, hits: T.hits, total: T.total, sec: T.sec, misses: T.misses };
+      logEvent('finalboss', { hits: T.hits, total: T.total, sec: T.sec }); save();
+      view = 'finalend'; render(); return window.scrollTo(0, 0);
+    }
     S.test.runs.push({ date: todayStr(), n: R.n, hits: T.hits, total: T.total, sec: T.sec, misses: T.misses }); if (S.test.runs.length > 10) S.test.runs.shift();
     logEvent('test', { hits: T.hits, total: T.total, sec: T.sec }); save();
     view = 'testend'; render(); window.scrollTo(0, 0);
@@ -1431,8 +1490,8 @@
       </div>`;
     switch (sh.kind) {
       case 'pics': return `${player()}<div class="tpics">${sh.pics.map((p, i) => `<div><b>${ABC(i)}</b><span class="emo">${p}</span></div>`).join('')}</div>`;
-      case 'dialogue': return `${player()}${sh.dlg.questions.map((q, i) => qSheet(q, i + 1)).join('')}`;
-      case 'match': return `<div class="tmatch"><div>${sh.words.map((w, i) => `<div><b>${i + 1}.</b> ${esc(w.en)}</div>`).join('')}</div><div class="he" dir="rtl">${sh.order.map((k, i) => `<div><b>${HEB(i)}.</b> ${esc(sh.words[k].he)}</div>`).join('')}</div></div>`;
+      case 'dialogue': return `${player()}${sh.dlg.questions.map((q, i) => qSheet(q, i + 1, sh.mock)).join('')}`;
+      case 'match': return `<div class="tmatch"><div>${sh.words.map((w, i) => `<div><b>${i + 1}.</b> ${esc(w.en)}</div>`).join('')}</div><div class="he" dir="rtl">${sh.order.map((k, i) => `<div><bdi><b>${ABC(i)}.</b></bdi> ${esc(sh.words[k].he)}</div>`).join('')}</div></div>`;
       case 'bank': return `<div class="tbank">${sh.bank.map(x => `<span>${esc(x)}</span>`).join('')}</div>${sh.rows.map((r, i) => num(i, blank(r.t))).join('')}`;
       case 'be': case 'have': return sh.gs.map((g, i) => num(i, blank(g.t))).join('');
       case 'circle': return sh.gs.map((g, i) => num(i, esc(g.t).replace('___', `<span class="tforms">( ${g.o.map(esc).join(' / ')} )</span>`))).join('');
@@ -1452,9 +1511,16 @@
           <div class="sins"><div>${esc(t('tEn' + K))}</div><div class="he" dir="rtl">${sh.kind === 'writing' ? t('w5Ask') : t('tHe' + K)}</div></div>
           ${sheetBody(sh)}
         </div>
-        <div class="bigcta"><button class="btn primary block" data-action="t-pendown">${t('wPenDown')}</button></div>`;
+        <div class="bigcta ${T.boss && T.idx ? 'row' : ''}">
+          ${T.boss && T.idx ? `<button class="btn" data-action="t-prev">${t('tPrev')}</button>` : ''}
+          <button class="btn primary ${T.boss && T.idx ? 'grow' : 'block'}" data-action="t-pendown">${t(!T.boss ? 'wPenDown' : (T.idx + 1 < n ? 'tNext' : 'tToKeys'))}</button>
+        </div>`;
+    // in the boss fight every ✓ is a hit: his bar empties as the keys are marked
+    const all = T.sheets.reduce((k, x) => k + x.items.length, 0), hit = T.sheets.reduce((k, x) => k + (x.marks || []).filter(m => m === 'ok').length, 0);
+    const hp = T.boss ? `<div class="bosshp"><span class="bossface">${skin().bossIcon}</span><div class="progress"><div style="width:${Math.round(100 * (all - hit) / all)}%"></div></div><span class="bosshpn">${all - hit}</span></div>` : '';
     return `
         ${head}
+        ${hp}
         <div class="sheet key" dir="ltr">
           <div class="shead"><b>${en[0]}</b>${en[1] ? ` &nbsp;·&nbsp; ${en[1]}` : ''}</div>
           ${sh.kind === 'writing' ? `<div class="he" dir="rtl">${sceneKey(sh.scene)}</div>` : ''}
@@ -1462,6 +1528,144 @@
           ${markRows(sh.items.map(x => x.k), sh.marks, 't-mark', sh.kind !== 'writing')}
         </div>
         <div class="bigcta"><button class="btn primary block" data-action="t-next" ${sh.marks.every(Boolean) ? '' : 'disabled'}>${t(T.idx + 1 < n ? 'tNext' : 'tLast')}</button></div>`;
+  }
+
+  // ---------- "about me": his own friend card, number 14 (PRD §6.5) ----------
+  // A template of five lines. He copies it onto paper and fills the gaps in his own words; then a parent types
+  // what he wrote, the app reads it back, and the paragraph becomes his card. It is that day's writing.
+  // Outside a quest the card opens from the map, to hear it again or to correct the typing.
+  let AB = null;
+  const ABOUT = C.about || [];
+  const aboutSentences = f => ABOUT.map(l => {
+    const a = (f[l.id] || '').trim(), b = l.id2 ? (f[l.id2] || '').trim() : '';
+    return a ? `${l.pre} ${a}${b ? ` ${l.mid} ${b}` : ''}.` : '';
+  }).filter(Boolean);
+  const aboutCardData = () => { const f = S.about.f; return { friend: { emoji: '😎', name: (f.name || S.hero.name || '').slice(0, 16), facts: [f.am, f.hobby, f.have].filter(Boolean).map(x => x.slice(0, 18)) } }; };
+  function startAbout(inQuest) {
+    AB = { inQuest: !!inQuest, stage: inQuest ? 'write' : 'card', f: Object.assign({}, S.about.f), first: !S.about.date };
+    if (inQuest) setPhase('writing');
+    view = 'about'; render();
+  }
+  function abRead() { const lines = S.about.text.slice(); const step = () => { if (!AB || AB.stage !== 'card' || !lines.length) return; Audio.speak(lines.shift(), 0.9); Audio.afterSpeech(step, 900, 9000); }; step(); }
+  // the fields are read from the page: typing never redraws the screen
+  function abSave() {
+    document.querySelectorAll('.abin').forEach(el => { AB.f[el.dataset.f] = el.value.replace(/\s+/g, ' ').trim().replace(/[.!?]+$/, '').slice(0, 60); });   // the template has the full stop
+    const text = aboutSentences(AB.f);
+    if (text.length < 3) { toast(t('abNeed')); return; }
+    S.about = { date: S.about.date || todayStr(), f: AB.f, text };
+    if (AB.inQuest && !R.wResult) recordFive(text.map(m => ({ model: m, rung: 'own', tiles: null, paper: 'ok' })));
+    logEvent('about', { n: text.length }); save();
+    AB.stage = 'card'; AB.fresh = true; render(); window.scrollTo(0, 0);
+  }
+  function abDone() { const q = AB && AB.inQuest; AB = null; Audio.stop(); if (q && R) return startStory(); view = 'map'; render(); }
+  function abSkip() { AB = null; R.plan.writing.about = false; startWriting(); }
+  function aboutView() {
+    if (!AB) { view = 'map'; return VIEWS.map(); }
+    if (AB.stage === 'write') return `
+        ${topbar(t('abTitle'), '')}
+        <div class="card wcard">
+          <div class="center">${t('abLead')}</div>
+          <div class="ablines">${ABOUT.map(l => `<div class="abline"><div class="en">${esc(l.pre)} <span class="abgap"></span>${l.mid ? ` ${esc(l.mid)} <span class="abgap"></span>` : ''}.</div><div class="she">${esc(l.he)}</div></div>`).join('')}</div>
+          <div class="center">${t('abAsk')}</div>
+          <div class="bigcta row"><button class="btn" data-action="ab-skip">${t('abSkip')}</button><button class="btn primary grow" data-action="ab-pendown">${t('wPenDown')}</button></div>
+        </div>`;
+    if (AB.stage === 'type') {
+      const inp = (id, ph) => `<input class="abin en" data-f="${id}" value="${esc(AB.f[id] || '')}" placeholder="${esc(ph)}" maxlength="60" autocapitalize="off" autocorrect="off" spellcheck="false">`;
+      return `
+        ${topbar(t('abTypeTitle'), '')}
+        <div class="card wcard">
+          <div class="center">${t('abTypeLead')}</div>
+          <div class="ablines type">${ABOUT.map(l => `<div class="abline"><div class="en"><span>${esc(l.pre)}</span>${inp(l.id, l.ph)}${l.mid ? `<span>${esc(l.mid)}</span>${inp(l.id2, l.ph2)}` : ''}<span>.</span></div></div>`).join('')}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="ab-save">${t('abSave')}</button></div>
+        </div>`;
+    }
+    if (AB.fresh) { AB.fresh = false; onRendered(() => { Audio.fanfare(); if (AB.first) confetti(70); setTimeout(abRead, 900); }); }
+    return `
+        ${topbar(t(AB.first ? 'abCardTitle' : 'abTitle'), t('abCardSub'))}
+        <div class="card center">
+          ${friendCard(aboutCardData(), true)}
+          <div class="abtext en">${S.about.text.map(x => `<div>${esc(x)}</div>`).join('')}</div>
+          <div class="row wrap" style="justify-content:center; gap:12px; margin-top:14px">
+            <button class="btn" data-action="ab-read">${t('abRead')}</button>
+            <button class="btn" data-action="ab-edit">${t('abEdit')}</button>
+          </div>
+          <div class="bigcta"><button class="btn primary block" data-action="ab-done">${t(AB.inQuest ? 'abDone' : 'back')}</button></div>
+        </div>`;
+  }
+
+  // ---------- speed round (PRD §6.3 item 7, §7.7) ----------
+  // The one timed mode, and only by his choice: in the training grounds, on the meanings of words whose Recognition
+  // card is already mastered. No card moves, whatever happens. A best is announced only when it is beaten.
+  let SP = null, spTimer = null;
+  const SPEED_SEC = C.speedSec || 60;
+  const speedPool = () => C.words.filter(w => { const st = S.cards[cardId(w.id, 'rec')]; return st && st.box >= MASTERED_BOX; });
+  const speedOpen = () => phase2() && speedPool().length >= 12;
+  function startSpeed() {
+    if (today().freePlaySec >= S.settings.freePlayCapMin * 60) { toast(t('practiceShut')); return; }
+    if (!speedOpen()) return;
+    SP = { stage: 'pre', hits: 0, misses: 0, q: [], cur: null, endsAt: 0, lock: false, best: false };
+    view = 'speed'; render();
+  }
+  function spNext() { if (!SP.q.length) SP.q = shuffle(speedPool()); const w = SP.q.shift(); SP.cur = { w, options: hebrewOptions(w), picked: null }; SP.lock = false; render(); }
+  function spGo() {
+    if (!SP || SP.stage === 'run') return;
+    Object.assign(SP, { stage: 'run', hits: 0, misses: 0, q: [], best: false, endsAt: Date.now() + SPEED_SEC * 1000 });
+    clearInterval(spTimer);
+    spTimer = setInterval(() => {
+      if (!SP || SP.stage !== 'run') return clearInterval(spTimer);
+      const left = SP.endsAt - Date.now(), bar = document.getElementById('spbar');
+      if (bar) bar.style.width = clamp(100 * left / (SPEED_SEC * 1000), 0, 100) + '%';
+      if (left <= 0) spEnd();
+    }, 100);
+    spNext();
+  }
+  function spPick(id) {
+    if (!SP || SP.stage !== 'run' || SP.lock) return;
+    SP.lock = true; SP.cur.picked = id;
+    const ok = id === SP.cur.w.id;
+    if (ok) { SP.hits++; Audio.ding(SP.hits); } else { SP.misses++; Audio.hm(); }
+    render();
+    const cur = SP.cur; setTimeout(() => { if (SP && SP.stage === 'run' && SP.cur === cur) spNext(); }, ok ? 200 : 1000);   // a miss shows the right meaning for a second
+  }
+  function spEnd() {
+    clearInterval(spTimer); if (!SP || SP.stage !== 'run') return;
+    SP.stage = 'end'; SP.best = SP.hits > S.speed.best;
+    if (SP.best) S.speed.best = SP.hits;
+    S.speed.runs.push({ date: todayStr(), hits: SP.hits, misses: SP.misses }); if (S.speed.runs.length > 40) S.speed.runs.shift();
+    today().freePlaySec += SPEED_SEC;                          // it is free play, and counts in the parent's cap
+    logEvent('speed', { hits: SP.hits, misses: SP.misses }); save();
+    render(); Audio.fanfare(); if (SP.best) confetti(70);
+  }
+  function endSpeed() { clearInterval(spTimer); SP = null; view = 'map'; render(); }
+  function speedView() {
+    if (!SP) { view = 'map'; return VIEWS.map(); }
+    const out = `<button class="btn small" data-action="sp-end">${t('practiceEnd')}</button>`;
+    if (SP.stage === 'pre') return `
+        ${topbar(t('spTitle'), '', out)}
+        <div class="card bosscard">
+          <div class="bossbig">⚡</div>
+          <div class="lead">${t('spLead', { sec: SPEED_SEC })}</div>
+          <div class="muted">${t('spSub')}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="sp-go">${t('spGo')}</button></div>
+        </div>`;
+    if (SP.stage === 'run') {
+      const c = SP.cur, left = clamp(100 * (SP.endsAt - Date.now()) / (SPEED_SEC * 1000), 0, 100);
+      const cls = o => c.picked == null ? '' : (o.id === c.w.id ? 'good' : (o.id === c.picked ? 'miss' : 'dim'));
+      return `
+        ${topbar(t('spTitle'), t('spCount', { n: SP.hits }), out)}
+        <div class="progress spprog"><div id="spbar" style="width:${left}%"></div></div>
+        <div class="card question" style="margin-top:14px"><div class="en big">${esc(c.w.en)}</div></div>
+        <div class="options">${c.options.map(o => `<button class="opt he ${cls(o)}" data-action="sp-pick" data-id="${esc(o.id)}" ${c.picked == null ? '' : 'disabled'}>${esc(o.he)}</button>`).join('')}</div>`;
+    }
+    const capLeft = today().freePlaySec < S.settings.freePlayCapMin * 60;
+    return `
+        ${topbar(t('spEndTitle'), '')}
+        <div class="card bosscard">
+          <div class="bossbig">⚡</div>
+          <div class="lead">${SP.hits === 1 ? t('spEndOne', { sec: SPEED_SEC }) : t('spEndHits', { n: SP.hits, sec: SPEED_SEC })}</div>
+          ${SP.best ? `<div class="lead">${t('spBest')}</div>` : ''}
+          <div class="bigcta row"><button class="btn" data-action="sp-end">${t('back')}</button>${capLeft ? `<button class="btn primary grow" data-action="sp-go">${t('spAgain')}</button>` : ''}</div>
+        </div>`;
   }
 
   // ---------- story track (PRD §6.5) ----------
@@ -2113,10 +2317,10 @@
     }
     const d = all[i], it = LOOT_ID[d.id];
     if (!d.opened) {
-      const tr = TERR.find(x => x.key === d.why), mb = d.why === 'midboss';
+      const tr = TERR.find(x => x.key === d.why), fb = d.why === 'boss', mb = d.why === 'midboss' || fb;
       return `<div class="card lootcard ${tr || mb ? 'flagged' : ''}">
-          <div class="lootlabel">${tr ? `🚩 ${terrName(tr)}` : (mb ? `${sk.midBossIcon} ${sk.midBoss}` : `${sk.boxIcon} ${sk.box}`)}</div>
-          ${tr || mb ? `<div class="lootwhy">${t(tr ? 'boxFlag' : 'boxBoss')}</div>` : ''}
+          <div class="lootlabel">${tr ? `🚩 ${terrName(tr)}` : (fb ? `${sk.bossIcon} ${sk.boss}` : (mb ? `${sk.midBossIcon} ${sk.midBoss}` : `${sk.boxIcon} ${sk.box}`))}</div>
+          ${tr || mb ? `<div class="lootwhy">${t(tr ? 'boxFlag' : (fb ? 'boxFinal' : 'boxBoss'))}</div>` : ''}
           <button class="chest" data-action="box-open" data-i="${i}" aria-label="${esc(sk.box)}"><span class="rays"></span><span class="base"></span><span class="lid"></span><span class="lock">?</span></button>
           <div class="muted">${t('boxTap')}</div>
         </div>`;
@@ -2308,7 +2512,9 @@
           const cls = !p.open ? 'locked' : (p.pct === 100 ? 'done' : '');
           return `<div class="node ${cls}" style="left:${s.x}%; top:${s.y}%"><div class="dot">${p.open ? sk.towerIcon : '🔒'}${p.open && p.pct === 100 ? '<span class="flag">🚩</span>' : ''}${dangle(TERR.find(x => x.g === s.g))}</div><div class="label">${sk.tower}</div><div class="stat en" style="letter-spacing:0">${p.open ? `${p.mastered}/${p.total}` : esc(s.g.short)}</div></div>`;
         }
-        return `<div class="node locked boss" style="left:${s.x}%; top:${s.y}%"><div class="dot">${sk.bossIcon}</div><div class="label">${sk.boss}</div><div class="stat">${t('mapBossShut')}</div></div>`;
+        // the boss: fallen · his gate open (today is the day) · or the gate, filling toward 80%
+        const fell = !!S.boss.final, open = !fell && finalDue('parent');
+        return `<div class="node ${fell ? 'done' : (open ? 'current' : 'locked')} boss" style="left:${s.x}%; top:${s.y}%"><div class="dot">${sk.bossIcon}${fell ? '<span class="flag">🚩</span>' : ''}</div><div class="label">${sk.boss}</div><div class="stat">${fell ? t('mapBossDown') : (open ? t('mapBossOpen') : (phase2() ? t('mapBossGate', { n: gatePct() }) : t('mapBossShut')))}</div></div>`;
       };
       const road = smoothPath(stops.map(s => [s.x, s.y]));
       // the bonus land (PRD §4.1c) is a side path off the trail, from the last word land
@@ -2334,7 +2540,7 @@
       return `
         <div class="topbar">
           <div class="hero" data-action="wardrobe">${avatar()}<div><div class="name">${esc(S.hero.name)}</div><div class="sub">${sk.hero} · ${sk.name}</div></div></div>
-          <div class="row"><button class="pill" data-action="streak-info">🔥 ${st}${freezeLeft() ? '<span class="ice">🧊</span>' : ''}</button><span class="pill accent" id="coachTap">⭐ ${masteredWordCount()}/50</span></div>
+          <div class="row"><button class="pill" data-action="streak-info">🔥 ${st}${freezeLeft() ? '<span class="ice">🧊</span>' : ''}</button>${S.boss.ready ? `<span class="pill">${t('mapReady')}</span>` : ''}<span class="pill accent" id="coachTap">⭐ ${masteredWordCount()}/50</span></div>
         </div>
         <div class="card quest">
           <div><div class="lead">${questLead}</div><div class="muted">${questSub}</div></div>
@@ -2343,6 +2549,7 @@
                 ${boxWaiting ? `<button class="btn primary" data-action="to-close">${sk.boxIcon} ${t('mapBoxWaiting')}</button>` : ''}
                 ${parentToo ? `<button class="btn ${boxWaiting ? '' : 'primary'}" data-action="mode" data-mode="parent">${t('mapParentToo')}</button>` : ''}
                 <button class="btn ${capLeft > 0 && !boxWaiting && !parentToo ? 'primary' : ''}" data-action="practice" ${capLeft > 0 ? '' : 'disabled'}>${capLeft > 0 ? t('mapPractice', { n: capLeft }) : t('mapPracticeShut')}</button>
+                ${speedOpen() ? `<button class="btn" data-action="speed" ${capLeft > 0 ? '' : 'disabled'}>${t('mapSpeed')}</button>` : ''}
                 <button class="btn" data-action="wardrobe">${sk.wardrobeIcon} ${sk.wardrobe}</button>
                 <button class="btn" data-action="shelf">${sk.shelfIcon} ${sk.shelf}</button>
                 <button class="btn" data-action="brag">${t('bragBtn')}</button>
@@ -2358,7 +2565,7 @@
           ${stops.map(node).join('')}${bonusNode()}
         </div>
         ${ranksRow()}
-        ${friends.length || pets.length ? `<div class="friends">${friends.map(([pid, d]) => friendChip(STORY[pid], d.stars === d.total)).join('')}${pets.map(([id, d]) => friendChip({ friend: LITEM[id].pet }, d.stars === d.total)).join('')}</div>` : ''}`;
+        ${friends.length || pets.length || S.about.date ? `<div class="friends">${S.about.date ? `<button class="fchip gold own" data-action="about-open"><span>😎</span><b class="en">${esc(aboutCardData().friend.name)}</b></button>` : ''}${friends.map(([pid, d]) => friendChip(STORY[pid], d.stars === d.total)).join('')}${pets.map(([id, d]) => friendChip({ friend: LITEM[id].pet }, d.stars === d.total)).join('')}</div>` : ''}`;
     },
 
     modepick() {
@@ -2373,7 +2580,8 @@
 
     mission() {
       const items = [];
-      if (R.test) items.push(t('missionTest', { n: R.test.sheets.length }), t('missionTestSub'), t('missionTestPaper'));
+      if (R.test && R.test.boss) items.push(t('missionFinal'), t('missionFinalSheets', { n: R.test.sheets.length }), t('missionFinalPaper'));
+      else if (R.test) items.push(t('missionTest', { n: R.test.sheets.length }), t('missionTestSub'), t('missionTestPaper'));
       if (R.plan.warm) items.push(t('missionWarm'));
       if (R.plan.boss) items.push(t('missionBoss'));
       if (R.reviewTotal) items.push(t('missionReview', { n: R.reviewTotal }));
@@ -2381,7 +2589,7 @@
       const pl = R.plan;
       if (pl.unit) items.push(t('missionTower', { title: esc(pl.unit.title) }));
       if (pl.sd) items.push(t('missionSd'));
-      if (pl.writing) items.push(t(pl.writing.rung >= 5 ? 'missionPen5' : (pl.writing.paper ? 'missionPen' : 'missionTiles')));
+      if (pl.writing) items.push(t(pl.writing.about ? 'missionAbout' : pl.writing.rung >= 5 ? 'missionPen5' : (pl.writing.paper ? 'missionPen' : 'missionTiles')));
       if (pl.story) items.push(pl.story.reread ? t('missionRevisit', { name: esc(pl.story.p.friend.name) }) : t('missionFriend'));
       if (pl.reread) items.push(t('missionRevisit', { name: esc(pl.reread.p.friend.name) }));
       if (pl.listening) items.push(t('missionListen'));
@@ -2449,6 +2657,33 @@
 
     listening() { return listeningView(); },
     test() { return testView(); },
+    finalintro() {
+      const sk = skin();
+      return `
+        ${topbar(`${sk.bossIcon} ${sk.boss}`, '')}
+        <div class="card bosscard">
+          <div class="bossbig">${sk.bossIcon}</div>
+          <div class="lead">${t('fbIntroLead')}</div>
+          <div>${t('fbIntroSub')}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="fb-go">${t('bossGo')}</button></div>
+        </div>`;
+    },
+    // he sees the hits, as with the mid-boss; the score out of 100 is on the coach screen
+    finalend() {
+      const sk = skin(), b = S.boss.final;
+      if (!b || !R) { view = 'map'; return VIEWS.map(); }
+      onRendered(() => { Audio.fanfare(); confetti(120); });
+      return `
+        ${topbar(t('fbEndTitle'), '')}
+        <div class="card bosscard">
+          <div class="bossbig run">${sk.bossIcon}</div>
+          <div class="lead">${t('fbEndHits', { n: b.hits })}</div>
+          <div class="muted">${t('fbEndSub')}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="t-end">${t('testEndGo')}</button></div>
+        </div>`;
+    },
+    about() { return aboutView(); },
+    speed() { return speedView(); },
     // the last sheet is marked: a count of right answers, no total and no score (those are on the coach screen)
     testend() {
       const T = R && R.test;
@@ -2690,7 +2925,7 @@
     const lands = S.landsIntroduced.map(l => `${landName(C.lands.find(x => x.id === l.id) || { id: l.id })} (${l.date})`).join(', ') || 'עדיין לא';
     // M2: per-step log, grammar towers, writing track, story track
     const wr = S.writing, sto = S.story;
-    const PHASE_HE = { boss: 'מיני-בוס', review: 'חזרה', intro: 'היכרות', new: 'מילים חדשות', pintro: 'כלל', pack: 'דקדוק', writing: 'כתיבה', story: 'סיפור', listening: 'האזנה', reading: 'קריאה בקול', test: 'מצב מבחן' };
+    const PHASE_HE = { boss: 'מיני-בוס', review: 'חזרה', intro: 'היכרות', new: 'מילים חדשות', pintro: 'כלל', pack: 'דקדוק', writing: 'כתיבה', story: 'סיפור', listening: 'האזנה', reading: 'קריאה בקול', test: 'מצב מבחן', final: 'הבוס הסופי' };
     const RUNG_HE = { 1: 'בנייה באריחים', 2: 'בנייה עם אות גדולה ונקודה', 3: 'בנייה ואז העתקה לדף', 4: 'כתיבה על דף מתמונה ובנק מילים', 5: 'משימת המבחן: חמישה משפטים על תמונה אחת' };
     const LEVEL_HE = { 1: 'מקשיב ועוקב', 2: 'קורא עם הקראה לפי בקשה', 3: 'קורא עם עזרה במילים', 4: 'קורא לבד', 5: 'קורא בקול להורה' };
     const mmss = s => `${Math.floor(s / 60)}:${pad2(s % 60)}`;
@@ -2748,6 +2983,21 @@
     const tr = S.test.runs[S.test.runs.length - 1], tSet = S.settings.testDay || '';
     const trScore = tr ? Math.round(Object.keys(SEC_W).reduce((k, x) => k + (tr.sec[x] && tr.sec[x][1] ? SEC_W[x] * tr.sec[x][0] / tr.sec[x][1] : 0), 0)) : 0;
     const trOf = tr ? Object.keys(SEC_W).reduce((k, x) => k + (tr.sec[x] && tr.sec[x][1] ? SEC_W[x] : 0), 0) : 0;
+    const fbr = S.boss.final, fSet = S.settings.finalDay || '';
+    const fbScore = fbr ? Math.round(Object.keys(SEC_W).reduce((k, x) => k + (fbr.sec[x] && fbr.sec[x][1] ? SEC_W[x] * fbr.sec[x][0] / fbr.sec[x][1] : 0), 0)) : 0;
+    const m4b = `
+        <h3>הבוס הסופי: המבחן לדוגמה בתוך המשחק</h3>
+        ${fbr ? '' : `<div class="row wrap"><button class="btn small" data-action="toggle-final">מתי: ${fSet === todayStr() ? 'היום, במשימה הבאה עם הורה' : (fSet === 'off' ? 'כבוי' : `אוטומטי (פעם אחת, מ-${C.finalBossFrom || '—'})`)}</button></div>`}
+        ${fbr ? `<div>${fbr.date} · תשובות נכונות <bdi>${fbr.hits}/${fbr.total}</bdi> · <b>ציון: ${fbScore} מתוך 100</b> · למטה: נקודות בכל חלק</div>
+        <div class="boxes">${Object.keys(SEC_HE).map(x => `<div><b><bdi>${fbr.sec[x][0]}/${fbr.sec[x][1]}</bdi></b>${SEC_HE[x]}</div>`).join('')}</div>
+        ${fbr.misses.length ? `<div>לחזור על: <span class="en">${fbr.misses.map(esc).join(' · ')}</span></div>` : ''}
+        <div class="row wrap"><button class="btn small" data-action="toggle-ready">${S.boss.ready ? `תג "מוכן" נחתם ב-${S.boss.ready} · לבטל` : 'לחתום איתו על תג "מוכן"'}</button></div>` : '<div class="muted">עוד לא היה.</div>'}
+        <div class="muted">זה המבחן לדוגמה, אותו תוכן כמו בדפים להדפסה, דף אחרי דף. עם דפים מודפסים הוא כותב עליהם, והמסך משמיע את ההאזנה ומתקדם איתו. בלי מדפסת הוא קורא מהמסך וכותב על דף רגיל. קודם כל הדפים, ורק בסוף בודקים יחד מול התשובות. כ-40 דקות, בלי עצירה אוטומטית. הוא רואה רק כמה מכות חטף הבוס; הציון כאן מיועד להורים בלבד (פרס הבוס שסוכם איתו: 90 ומעלה). טעות במילה שיש לה קלף מורידה אותו קופסה, וטעות בדקדוק מעלה שני קלפים מאותו סוג לראש החזרה של מחר. אחרי הבוס מצב המבחן כבר לא נפתח.</div>`;
+    const sp = S.speed, ab = S.about;
+    const m4c = `
+        <h3>הקלף שלו ("about me") וסיבוב המהירות</h3>
+        <div>${ab.date ? `נכתב ב-${ab.date}: <span class="en">${ab.text.map(esc).join(' ')}</span>` : 'הקלף שלו עוד לא נכתב. הוא מגיע במקום שני המשפטים, במשימה עם הורה (לא ביום מבחן או בוס): הוא כותב חמישה משפטים על דף לפי תבנית, ואתם מקלידים אותם.'}</div>
+        <div>סיבוב מהירות (מגרש האימונים, לבחירתו): ${sp.runs.length ? `${sp.runs.length} סיבובים · שיא ${sp.best} · אחרון ${sp.runs[sp.runs.length - 1].hits} נכון, ${sp.runs[sp.runs.length - 1].misses} טעויות` : 'עוד לא שיחק'}</div>`;
     const m4 = `
         <h3>מצב מבחן: משימה שלמה על דף</h3>
         <div class="row wrap"><button class="btn small" data-action="toggle-test">מתי: ${tSet === todayStr() ? 'היום, במשימה הבאה עם הורה' : (tSet === 'off' ? 'כבוי' : `אוטומטי (פעם אחת, מ-${C.testModeFrom || '—'})`)}</button></div>
@@ -2783,6 +3033,8 @@
         ${m2}
         ${m3}
         ${m4}
+        ${m4b}
+        ${m4c}
         ${game}
         <h3>קלפים קשים (3+ טעויות)</h3>
         ${tricky.length ? `<table><tr><th>קלף</th><th>סוג</th><th>טעויות</th><th>קופסה</th></tr>${tricky.map(([cid, st]) => { const p = parseCard(cid); return `<tr><td class="en">${esc(cardLabel(cid))}</td><td>${{ rec: 'משמעות', lineup: 'שמיעה→קריאה', img: 'תמונה', tile: 'בנייה מאותיות', gc: 'דקדוק', np: 'כינוי גוף', sd: 'same / different', num: 'מספר', cz: 'מילה במשפט', lp: 'האזנה לתמונה' }[p.type] || p.type}</td><td>${st.misses}</td><td>${st.box}</td></tr>`; }).join('')}</table>` : '<div class="muted">אין עדיין</div>'}
@@ -2829,6 +3081,9 @@
     S.listening.runs = S.listening.runs.filter(r => r.date !== dt);
     S.sets.history = S.sets.history.filter(h => h.date !== dt);
     if (S.boss.mid && S.boss.mid.date === dt) S.boss.mid = null;
+    if (S.boss.final && S.boss.final.date === dt) { S.boss.final = null; S.boss.ready = null; }
+    S.test.runs = S.test.runs.filter(r => r.date !== dt);
+    if (S.about.date === dt) S.about = { date: null, f: {}, text: [] };
     S.landsIntroduced = S.landsIntroduced.filter(l => l.date !== dt);
     S.packsIntroduced = S.packsIntroduced.filter(p => p.date !== dt);
     S.story.runs = S.story.runs.filter(r => r.date !== dt);
@@ -2890,6 +3145,21 @@
       case 'w5-mark': w5Mark(Number(a.dataset.i), a.dataset.m); break;
       case 'w5-done': w5Done(); break;
       case 't-play': tPlay(); break;
+      case 't-prev': tPrev(); break;
+      case 'fb-go': if (R && R.test) { view = 'test'; render(); } break;
+      case 'toggle-final': { const cur = S.settings.finalDay || ''; S.settings.finalDay = cur === todayStr() ? 'off' : (cur === 'off' ? '' : todayStr()); save(); render(); break; }
+      case 'toggle-ready': S.boss.ready = S.boss.ready ? null : todayStr(); save(); render(); break;
+      case 'about-open': if (S.about.date && view === 'map') startAbout(false); break;
+      case 'ab-pendown': AB.stage = 'type'; render(); break;
+      case 'ab-skip': abSkip(); break;
+      case 'ab-save': abSave(); break;
+      case 'ab-read': abRead(); break;
+      case 'ab-edit': Audio.stop(); AB.f = Object.assign({}, S.about.f); AB.first = false; AB.stage = 'type'; render(); break;
+      case 'ab-done': abDone(); break;
+      case 'speed': startSpeed(); break;
+      case 'sp-go': spGo(); break;
+      case 'sp-pick': spPick(a.dataset.id); break;
+      case 'sp-end': endSpeed(); break;
       case 't-pendown': tPenDown(); break;
       case 't-mark': tMark(Number(a.dataset.i), a.dataset.m); break;
       case 't-next': tNext(); break;
@@ -3077,5 +3347,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; } };
 })();

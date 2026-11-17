@@ -1423,6 +1423,52 @@ window.CONTENT = {
     testEndSub: 'המילים גילו שגם על נייר אין להן איפה להתחבא.',
     testEndGo: 'לשלל ←',
 
+    // the final boss: the mock, sheet by sheet inside the game; the key comes only at the end (prd.md §8 day 12)
+    mapBossGate: 'השער: {n}% מתוך 80%',
+    mapBossOpen: 'השער פתוח!',
+    mapBossDown: 'נפל 🏆',
+    mapReady: '🎖️ מוכן',
+    missionFinal: '{bossIcon} {boss}. היום.',
+    missionFinalSheets: '📝 {n} דפים. כל תשובה נכונה היא מכה.',
+    missionFinalPaper: '🖨️ יש דפים מודפסים? כותבים עליהם. אין? על דף רגיל.',
+    fbIntroLead: 'כל המילים וכל הכללים התאספו במקום אחד.',
+    fbIntroSub: 'קודם כותבים הכול, דף אחרי דף. בסוף בודקים יחד, וכל תשובה נכונה היא מכה.',
+    tPrev: '→ לדף הקודם',
+    tToKeys: 'זה היה הדף האחרון. העט על השולחן',
+    fbEndTitle: '{boss}: נגמר 🏆',
+    fbEndHits: '{n} מכות',
+    fbEndSub: 'המפה כולה שלך.',
+    boxFinal: 'זה מה שנשאר אחרי הקרב הגדול.',
+
+    // "about me": his own friend card, number 14 (prd.md §6.5). He writes it by hand, a parent types it in.
+    missionAbout: '🪪 הקלף ה-14 באוסף: שלך. להכין עט ודף!',
+    abTitle: '🪪 הקלף שלך',
+    abLead: 'לכל חבר באוסף יש קלף. הקלף ה-14 הוא עליך.',
+    abAsk: 'חמישה משפטים על הדף. כל קו ממלאים במילים שלך.',
+    abSkip: 'לא היום',
+    abTypeTitle: '⌨️ מהדף למסך',
+    abTypeLead: 'הורה מקליד את מה שכתוב על הדף.',
+    abNeed: 'צריך לפחות שלושה משפטים מלאים',
+    abSave: 'לקלף ←',
+    abCardTitle: 'קלף מספר 14 באוסף!',
+    abCardSub: 'הקלף שמקריאים לסבא ולסבתא.',
+    abRead: '🔊 להקריא',
+    abDone: 'המשך ←',
+    abEdit: '✏️ לתקן',
+
+    // speed round: his own choice, in the training grounds; no card moves (prd.md §6.3 item 7)
+    mapSpeed: '⚡ סיבוב מהירות',
+    spTitle: '⚡ סיבוב מהירות',
+    spLead: '{sec} שניות. כמה מילים נופלות?',
+    spSub: 'רק מילים שכבר בכיס שלך. שום קלף לא זז מכאן.',
+    spGo: 'צא!',
+    spCount: '{n} נפלו',
+    spEndTitle: 'הזמן נגמר ⏱️',
+    spEndHits: '{n} מילים נפלו ב-{sec} שניות',
+    spEndOne: 'מילה אחת נפלה ב-{sec} שניות',
+    spBest: '🏆 שיא חדש!',
+    spAgain: 'עוד סיבוב',
+
     // stories
     stNew: '📖 חבר חדש',
     stNewPair: '📖 שני חברים חדשים',
@@ -1559,6 +1605,16 @@ window.CONTENT = {
   cardsStopMin: 10,               // was 8 until 15 Nov; the cards sitting of a quest played in two sittings (PRD §7.4)
   freePlayCapMinDefault: 15,
   reviewStackCap: 80,      // about 7–8 minutes at his pace; the sitting's time budget and hard stop still bound it
+  finalBossFrom: '2026-11-20',  // day 12: from this date a parent session is the final boss (the mock inside the game), once
+  speedSec: 60,                 // the speed round's length; it opens with 12 of the 50 words mastered
+  // "about me": the five lines of his own card. `he` is the hint under a line; `ph` is an example shown in an empty field.
+  about: [
+    { id: 'name',  pre: 'My name is',  he: 'השם שלך',            ph: 'Dan' },
+    { id: 'am',    pre: 'I am',        he: 'בן כמה, או איך אתה', ph: 'ten years old' },
+    { id: 'have',  pre: 'I have',      he: 'משהו שיש לך',        ph: 'a dog' },
+    { id: 'hobby', pre: 'My hobby is', he: 'התחביב שלך',         ph: 'chess' },
+    { id: 'like',  pre: 'I like',      he: 'משהו שאתה אוהב, ולמה', ph: 'to swim', mid: 'because', id2: 'why', ph2: 'it is fun' },
+  ],
   testModeFrom: '2026-11-19',   // day 11: from this date a parent session is test mode on paper, once (prd.md §6.4, §8)
   masteredBox: 3,          // "mastered" = Box 3–5 (PRD §2), i.e. two correct recalls after a gap: the ⭐, the map, the stamp
 };

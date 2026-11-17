@@ -649,3 +649,20 @@ a.btn { text-decoration: none; }
   .sheet .tpics { grid-template-columns: repeat(2, 1fr); }
   .w5key > div { grid-template-columns: 1fr; gap: 0; }
 }
+
+/* "about me": the template on the way to paper, the fields a parent types into, and the paragraph on his card */
+.ablines { align-self: stretch; display: flex; flex-direction: column; gap: 12px; direction: ltr; }
+.abline { background: var(--paper); border: 2px dashed var(--card-edge); border-radius: 16px; padding: 10px 16px; text-align: left; }
+.abline .en { font-size: 30px; font-weight: 600; line-height: 1.6; }
+.abline .she { text-align: right; direction: rtl; font-size: 17px; color: var(--ink-muted); padding: 0; }
+.abgap { display: inline-block; width: 4.2em; border-bottom: 3px solid var(--ink); margin: 0 4px; }
+.ablines.type .abline { border-style: solid; }
+.ablines.type .abline .en { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 24px; }
+.abin { flex: 1; min-width: 150px; font: inherit; font-weight: 600; color: var(--ink); background: #fff; border: 2px solid var(--card-edge); border-radius: 10px; padding: 6px 10px; }
+.abin:focus { outline: 3px solid var(--accent); border-color: var(--accent); }
+.abtext { margin-top: 16px; font-size: 28px; line-height: 1.8; font-weight: 600; text-align: left; }
+button.fchip { font: inherit; cursor: pointer; }
+.fchip.own { background: color-mix(in srgb, var(--gold) 22%, transparent); }
+/* speed round */
+.spprog { height: 18px; }
+.spprog > div { transition: width .1s linear; }

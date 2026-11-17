@@ -256,6 +256,46 @@ sitting to the close screen, rung 5 inside an ordinary quest, the date rule (18 
 fixed clock), the coach screen, and the older sample saves still starting. **Not tried on the iPad;
 the device voices were stubbed.**
 
+## What 3.7.0 added (17 Nov: the rest of M4)
+
+M4's last test-facing item and its "then" list. With this, everything on M4's list is built.
+
+- **The final boss** (prd.md §8, day 12) is the mock inside the game: the same content as
+  `mock.html` (`mock` in `content.js`), ten sheets, in the printed order and with the printed
+  letters. With a printed copy he writes on it, and the screen plays the listening and moves along
+  with him; without a printer he reads from the screen and writes on plain paper.
+  - It opens once, in the first parent session from 20 Nov (`finalBossFrom` in `content.js`). The
+    coach screen has a button to open it today or to shut it. That day is not split into two
+    sittings, and a solo session on it is an ordinary one.
+  - Unlike test mode, the whole test comes first and the keys only at the end, sheet by sheet;
+    "לדף הקודם" goes back while he is still writing. Every ✓ is a hit, and the boss's bar empties
+    as the keys are marked. The points are the mock's own: 100 in all.
+  - He sees the number of hits. **The score out of 100 is on the coach screen only**, with the
+    points by section and the lines to go over.
+  - A miss on a word he has a card for takes that card down a box. A miss in a grammar task puts
+    two cards of that form first in the next review.
+  - The boss leaves a golden item in the box. On the map his node shows the gate as a percentage
+    (cards in Box 3 and up, toward 80%) until the day, then "the gate is open", then a flag.
+  - After the boss the coach screen offers to sign the "ready" badge (day 13); the map then shows
+    🎖️. Test mode no longer opens once the boss has fallen.
+- **His own card, "about me"** (prd.md §6.5): card 14. Once, in a parent session that is not a
+  test day, a boss day or the mid-boss day, it takes the place of the two sentences. He copies
+  five template lines onto paper and fills the gaps in his own words; a parent types what he
+  wrote; the app reads it back and the paragraph becomes his card, first among the friends on the
+  map. Tapping it there opens it again, to hear it or to correct the typing. "לא היום" leaves it
+  for the next parent session. It needs writing at rung 3 or higher.
+- **Speed round** (prd.md §6.3 item 7): a button on the map after the day's quest, once 12 of the
+  50 words are mastered. 60 seconds, meanings only, words whose Recognition card is in Box 3 or
+  higher. No card moves, whatever happens; a best is announced only when it is beaten; the minute
+  counts in the training grounds' daily cap.
+- `test.html` has a **day 12** save: the final boss set to open today.
+
+Checked in the browser at iPad size (820×1180): the boss from the day-12 save to the close screen
+and the map after it, the speed round, the card written inside a quest and reopened from the map,
+the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 20 Nov the boss),
+and the older sample saves still starting. **Not tried on the iPad; the device voices were
+stubbed, and the fields were typed into from a desktop keyboard.**
+
 ## What 3.4.0 changed in the game (15 Nov, after the scan of the practice copy)
 
 Two of the five gaps that prd.md §4.4 lists between the test and what the game trains:
