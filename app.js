@@ -409,6 +409,9 @@
     };
     if (boxDue(n)) give(null, 'box');
     TERR.filter(tr => !S.loot.cleared.includes(tr.key) && terrCleared(tr)).slice(0, 2).forEach(tr => { S.loot.cleared.push(tr.key); give('rare', tr.key); });
+    // a streak day worth a party leaves a rare find (once per mark)
+    const st = streak();
+    if (STREAK_MARKS.includes(st) && !S.loot.cleared.includes('streak' + st)) { S.loot.cleared.push('streak' + st); give('rare', 'streak' + st); }
     // the mid-boss leaves a rare find behind when he runs
     if (S.boss.mid && !S.loot.cleared.includes('midboss')) { S.loot.cleared.push('midboss'); give('rare', 'midboss'); }
     // ... and the final boss a golden one
@@ -663,6 +666,7 @@
     if (R.queue.length && cardTimeUp()) { R.hardStop = true; R.queue = []; }
     if (!R.queue.length) return afterRound();
     R.current = R.queue.shift();
+    if (R.phase === 'review' && goldRoll(R.current, C.surprise.goldQuest)) R.current.gold = true;
     R.current.view = R.current.set ? makeSetView(R.current) : (R.current.build ? makeBuildView(R.current) : makeCardView(R.current.cid));
     view = 'card'; render();
   }
@@ -734,6 +738,7 @@
     }
     if (practice) {
       P.seen++;
+      if (correct) practiceRight(item);
       if (!correct) { P.misses[item.cid] = (P.misses[item.cid] || 0) + 1; if (P.misses[item.cid] >= 3) st.priority = 1; }
     }
     const rt = practice ? P : R;
@@ -803,6 +808,68 @@
     view = 'half'; render();
   }
 
+  // ---------- serendipity (owner, 17 Nov: fatigue, answered with surprise) ----------
+  // Cosmetic and celebratory only, like the box (PRD §7.6): nothing here moves a card, a box or the map.
+  // A golden card: now and then a card is dealt in gold; right, it is a party (in the training grounds, it
+  // opens a surprise too); wrong, it is an ordinary card. The day's hidden treasure: one find a day in the
+  // training grounds, at a right answer he cannot predict; after it, a golden card there opens a joke about
+  // the words instead.
+  const goldRoll = (item, p) => !!item && !!item.cid && !item.retry && !isTile(item.cid) && Math.random() < p;
+  function treasure() {
+    const d = today();
+    if (!d.treasure) { d.treasure = { at: C.surprise.treasureMin + Math.floor(Math.random() * (C.surprise.treasureMax - C.surprise.treasureMin + 1)), found: null }; save(); }
+    return d.treasure;
+  }
+  function practiceRight(item) {
+    const tr = treasure();
+    if (!tr.found && P.correct + 1 >= tr.at) P.surprise = true;
+    if (item.gold) P.surprise = true;
+  }
+  function openSurprise() {
+    const tr = treasure(); let it = null;
+    if (!tr.found) {
+      it = pickLoot(rollTier(null, 'free'));
+      if (it) {
+        S.loot.owned.push(it.id); S.loot.fresh.push(it.id);
+        S.loot.boxes.push({ date: todayStr(), n: S.sessionCount, id: it.id, tier: it.tier, why: 'free' });
+      }
+      tr.found = it ? it.id : 'none';
+      logEvent('treasure', { id: tr.found, at: tr.at });
+    }
+    const jokes = C.copy.surpriseJokes || [];
+    P.sv = { it, joke: it ? null : sample(jokes, 1)[0] || '' };
+    save(); view = 'surprise'; render();
+  }
+  function surpriseView() {
+    const v = P && P.sv; if (!v) { view = 'map'; return VIEWS.map(); }
+    onRendered(() => { Audio.fanfare(); confetti(v.it ? 90 : 50); });
+    const body = v.it
+      ? `<div class="tierchip">${t({ common: 'tierCommon', rare: 'tierRare', golden: 'tierGolden' }[v.it.tier])}</div>
+         <div class="lootitem">${v.it.e}</div><div class="lootname">${esc(v.it.name)}</div><div class="muted">${t('surpriseWardrobe')}</div>`
+      : `<div class="semoji">🤭</div><div class="big center">${v.joke}</div>`;
+    return `
+      ${topbar(t(v.it ? 'surpriseTitle' : 'surpriseJokeTitle'), '')}
+      <div class="card center lootcard revealed surprise ${v.it ? 'tier-' + v.it.tier : ''}">${body}
+        <div class="bigcta"><button class="btn primary block" data-action="surprise-go">${t('surpriseGo')}</button></div>
+      </div>`;
+  }
+
+  // Streak days that are worth a party of their own, and a rare find
+  const STREAK_MARKS = [3, 5, 7, 10, 12, 14, 21, 30];
+  function streakCard(rec) {
+    if (today().earlier && today().earlier.length) return '';            // the day's streak rose with its first quest
+    const st = streak(); if (st < 2) return '';
+    const mark = STREAK_MARKS.includes(st);
+    const lines = C.copy.streakLines || [];
+    const line = mark ? t('streakMark', { n: st }) : (lines.length ? lines[(rec.n + st) % lines.length] : '');
+    const lvl = st >= 10 ? 'blaze' : (st >= 5 ? 'hot' : '');
+    return `<div class="card center streakcard ${lvl} ${mark ? 'mark' : ''}">
+        <div class="flames">${'🔥'.repeat(Math.min(5, 1 + Math.floor(st / 3)))}</div>
+        <div class="snum">${st}</div><div class="slabel">${t('statStreak')}</div>
+        <div class="sline">${line}</div>
+      </div>`;
+  }
+
   // ---------- training grounds ----------
   function startPractice() {
     const cap = S.settings.freePlayCapMin * 60;
@@ -826,8 +893,10 @@
   }
   function nextPracticeCard() {
     if (!tickPractice()) return;
+    if (P.surprise) { P.surprise = false; return openSurprise(); }
     if (!P.queue.length) P.queue = practicePool().map(cid => ({ cid, retry: false, retries: 0 }));
     P.current = P.queue.shift(); P.current.view = makeCardView(P.current.cid);
+    if (goldRoll(P.current, C.surprise.goldPractice)) P.current.gold = true;
     view = 'practice'; render();
   }
   function endPractice(capped) {
@@ -2026,6 +2095,19 @@
     R.ls = newLs(item);
     setPhase('listening'); view = 'listening'; render();
   }
+  // A recording already heard plays again on demand, from its pet in the collection (owner, 17 Nov). It is
+  // practice: the best stars may rise, but no run is logged, so it never stands in for the day's new recording.
+  function startReplay(id) {
+    const item = LITEM[id]; if (!item || !S.listening.done[id]) return;
+    lsStop();
+    R = { replay: true, n: S.sessionCount, mode: 'solo', date: todayStr(), startedAt: Date.now(), phase: 'listening', phaseAt: Date.now(), timing: {}, plan: {}, ls: newLs(item) };
+    view = 'listening'; render();
+  }
+  function endReplay() {
+    const r = R; lsStop();
+    if (r && r.ls) logEvent('listening_replay', { id: r.ls.item.id, plays: r.ls.plays, stars: r.ls.res.filter(x => x.first === true).length, sec: Math.round((Date.now() - r.startedAt) / 1000) });
+    R = null; view = 'map'; render();
+  }
   function lsBar(pct) { const bar = document.getElementById('lsbar'); if (bar) bar.style.width = clamp(Math.round(pct), 0, 100) + '%'; }
   function lsPlay() {
     const ls = R.ls; if (!ls || ls.playing || (ls.stage !== 'play' && ls.stage !== 'review')) return;
@@ -2039,8 +2121,11 @@
       const step = () => { if (!live()) return; lsBar(100 * i / lines.length); if (i >= lines.length) return ended(); const l = lines[i++]; Audio.speak(l.en, 0.9, l.who); Audio.afterSpeech(step, 1100, 9000); };
       return step();
     }
-    const el = document.createElement('audio'); lsAudio = el;
-    el.preload = 'auto'; el.src = C.listening.base + ls.item.src;
+    // the element the "go" tap primed (a phone plays sound only from a tap; the countdown runs between)
+    const el = ls.primed || document.createElement('audio'); ls.primed = null; lsAudio = el;
+    try { el.pause(); el.currentTime = 0; } catch (e) { /* not loaded yet */ }
+    el.muted = false; el.preload = 'auto';
+    if (!el.src) el.src = C.listening.base + ls.item.src;
     el.onended = ended; el.onerror = failed;
     el.ontimeupdate = () => { if (el.duration) lsBar(100 * el.currentTime / el.duration); };
     try { const pr = el.play(); if (pr && pr.catch) pr.catch(failed); } catch (e) { failed(); }
@@ -2050,9 +2135,29 @@
   // A recording that will not load gives its place to a spoken dialogue, and waits for the next parent session.
   function lsFallback() {
     const ls = R.ls, fb = LISTEN.find(x => x.fallback);
+    if (R.replay) { toast(t('lsReplayNone'), 5000); return endReplay(); }
     if (!fb || ls.item.kind === 'dialogue') { toast(t('lsNone'), 5000); R.ls = null; R.plan.listening = null; return startReading(); }
     toast(t('lsFail'), 5000);
     R.ls = newLs(fb, ls.item.id); render();
+  }
+  // Before the first hearing (owner, 17 Nov): to the table, a pencil and a page, a parent beside him; then
+  // "are you sure", then 3-2-1, and the recording starts by itself. A replay from the pet collection skips
+  // to the countdown.
+  function lsGo() {
+    const ls = R && R.ls; if (!ls || ls.stage !== 'sure' && !(ls.stage === 'pre' && R.replay)) return;
+    if (ls.item.kind !== 'dialogue') {
+      const el = document.createElement('audio'); el.preload = 'auto'; el.src = C.listening.base + ls.item.src; el.muted = true;
+      try { const pr = el.play(); if (pr && pr.then) pr.then(() => { if (ls.primed === el) el.pause(); }).catch(() => {}); } catch (e) { /* the play tap later still works */ }
+      ls.primed = el;
+    }
+    ls.stage = 'count'; ls.count = 3; const tok = ++ls.tok; Audio.tick(); render();
+    const step = () => {
+      if (!R || R.ls !== ls || ls.tok !== tok) return;
+      ls.count--;
+      if (ls.count > 0) { Audio.tick(); render(); return setTimeout(step, 1000); }
+      ls.stage = 'play'; render(); lsPlay();
+    };
+    setTimeout(step, 1000);
   }
   const lsRight = (q, id) => q.type === 'yn' ? (id === 'Y') === q.ok : !!q.choices[Number(id)].ok;
   function lsSettle(qi, ok, bad) {
@@ -2088,6 +2193,10 @@
     const item = ls.item, total = item.questions.length, stars = ls.res.filter(r => r.first === true).length;
     const hints = ls.res.map(r => r.first === true ? 0 : (r.revealed ? 3 : 1));
     const prev = S.listening.done[item.id];
+    if (R.replay) {
+      S.listening.done[item.id] = Object.assign({}, prev, { stars: Math.max(prev.stars, stars) }); save();
+      ls.first = false; ls.gold = stars === total; ls.stage = 'end'; return render();
+    }
     if (!item.fallback) S.listening.done[item.id] = { stars: prev ? Math.max(prev.stars, stars) : stars, total, date: prev ? prev.date : todayStr() };
     const run = { id: item.id, date: todayStr(), n: R.n, plays: ls.plays, stars, total, hints, fallback: !!item.fallback, for: ls.forId };
     S.listening.runs.push(run); if (S.listening.runs.length > 40) S.listening.runs.shift();
@@ -2120,8 +2229,9 @@
         <div class="progress lsprog"><div id="lsbar" style="width:0%"></div></div>
         ${note ? `<div class="muted">${note}</div>` : ''}
       </div>`;
+    const quit = R.replay && ls.stage !== 'end' ? `<button class="btn small" data-action="ls-quit">${t('practiceEnd')}</button>` : '';
     if (ls.stage === 'pre') return `
-        ${topbar(t('lsNew'), '')}
+        ${topbar(t(R.replay ? 'lsReplayTitle' : 'lsNew'), '', quit)}
         <div class="card center spre">
           <div class="semoji">${item.emoji}</div>
           <div class="en big">${esc(item.title)}</div>
@@ -2129,14 +2239,37 @@
           <div class="skeys">${item.keys.map(k => `<button class="skey" data-action="speak" data-text="${esc(k.en)}"><span class="en">${esc(k.en)}</span><span>${esc(k.he)}</span></button>`).join('')}</div>
           <div class="bigcta"><button class="btn primary block" data-action="ls-start">${t('lsToPlay')}</button></div>
         </div>`;
-    if (ls.stage === 'play') return `${topbar(head, '')}${player(1, t('lsFirst'))}`;
+    if (ls.stage === 'ready') return `
+        ${topbar(t('lsReadyTitle'), '')}
+        <div class="card spre">
+          <div class="semoji">${item.emoji}</div>
+          <ul class="lsready">
+            <li><span>🪑</span>${t('lsReady1')}</li>
+            <li><span>✏️</span>${t('lsReady2')}</li>
+            <li><span>👨‍👩‍👦</span>${t('lsReady3')}</li>
+          </ul>
+          <div class="bigcta"><button class="btn primary block" data-action="ls-ready">${t('lsReadyBtn')}</button></div>
+        </div>`;
+    if (ls.stage === 'sure') return `
+        ${topbar(t('lsReadyTitle'), '')}
+        <div class="card spre">
+          <div class="semoji">🎧</div>
+          <div class="big center">${t('lsSure')}</div>
+          <div class="muted center">${t('lsSureSub')}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="ls-go">${t('lsSureGo')}</button></div>
+          <button class="btn ghost small" data-action="ls-back">${t('lsSureBack')}</button>
+        </div>`;
+    if (ls.stage === 'count') return `
+        ${topbar(head, '', quit)}
+        <div class="card center lscountdown"><div class="cdnum">${ls.count}</div><div class="muted">${t('lsCountSub')}</div></div>`;
+    if (ls.stage === 'play') return `${topbar(head, '', quit)}${player(1, t('lsFirst'))}`;
     if (ls.stage === 'q') return `
-        ${topbar(head, t('stQCount', { i: ls.qIdx + 1, n }), `<span class="sstars">${marks}</span>`)}
+        ${topbar(head, t('stQCount', { i: ls.qIdx + 1, n }), `<span class="sstars">${marks}</span>${quit}`)}
         ${lsQHtml(ls, ls.qIdx, true)}`;
     if (ls.stage === 'review') {
       const all = lsAllDone(ls);
       return `
-        ${topbar(head, '', `<span class="sstars">${marks}</span>`)}
+        ${topbar(head, '', `<span class="sstars">${marks}</span>${quit}`)}
         ${player(ls.plays + 1, all ? '' : t('lsSecond'))}
         ${item.questions.map((_, qi) => lsQHtml(ls, qi, false)).join('')}
         <div class="bigcta"><button class="btn primary block" data-action="ls-finish" ${all ? '' : 'disabled'}>${t('lsDone')}</button></div>`;
@@ -2333,9 +2466,10 @@
     const d = all[i], it = LOOT_ID[d.id];
     if (!d.opened) {
       const tr = TERR.find(x => x.key === d.why), fb = d.why === 'boss', mb = d.why === 'midboss' || fb;
-      return `<div class="card lootcard ${tr || mb ? 'flagged' : ''}">
-          <div class="lootlabel">${tr ? `🚩 ${terrName(tr)}` : (fb ? `${sk.bossIcon} ${sk.boss}` : (mb ? `${sk.midBossIcon} ${sk.midBoss}` : `${sk.boxIcon} ${sk.box}`))}</div>
-          ${tr || mb ? `<div class="lootwhy">${t(tr ? 'boxFlag' : (fb ? 'boxFinal' : 'boxBoss'))}</div>` : ''}
+      const sm = /^streak(\d+)$/.exec(d.why || '');
+      return `<div class="card lootcard ${tr || mb || sm ? 'flagged' : ''}">
+          <div class="lootlabel">${tr ? `🚩 ${terrName(tr)}` : (fb ? `${sk.bossIcon} ${sk.boss}` : (mb ? `${sk.midBossIcon} ${sk.midBoss}` : (sm ? `🔥 ${sm[1]}` : `${sk.boxIcon} ${sk.box}`)))}</div>
+          ${tr || mb || sm ? `<div class="lootwhy">${sm ? t('boxStreak', { n: sm[1] }) : t(tr ? 'boxFlag' : (fb ? 'boxFinal' : 'boxBoss'))}</div>` : ''}
           <button class="chest" data-action="box-open" data-i="${i}" aria-label="${esc(sk.box)}"><span class="rays"></span><span class="base"></span><span class="lid"></span><span class="lock">?</span></button>
           <div class="muted">${t('boxTap')}</div>
         </div>`;
@@ -2552,13 +2686,14 @@
       const pets = Object.entries(S.listening.done).filter(([id]) => LITEM[id] && LITEM[id].pet);
       const boxWaiting = done && (today().session.loot || []).some(d => !d.done && LOOT_ID[d.id]);
       const parentToo = done && parentExtras();
+      const hidden = done && capLeft > 0 && !(today().treasure && today().treasure.found);
       return `
         <div class="topbar">
           <div class="hero" data-action="wardrobe">${avatar()}<div><div class="name">${esc(S.hero.name)}</div><div class="sub">${sk.hero} · ${sk.name}</div></div></div>
-          <div class="row"><button class="pill" data-action="streak-info">🔥 ${st}${freezeLeft() ? '<span class="ice">🧊</span>' : ''}</button>${S.boss.ready ? `<span class="pill">${t('mapReady')}</span>` : ''}<span class="pill accent" id="coachTap">⭐ ${masteredWordCount()}/50</span></div>
+          <div class="row"><button class="pill streakpill ${st >= 10 ? 'blaze' : (st >= 5 ? 'hot' : '')}" data-action="streak-info">🔥 ${st}${freezeLeft() ? '<span class="ice">🧊</span>' : ''}</button>${S.boss.ready ? `<span class="pill">${t('mapReady')}</span>` : ''}<span class="pill accent" id="coachTap">⭐ ${masteredWordCount()}/50</span></div>
         </div>
         <div class="card quest">
-          <div><div class="lead">${questLead}</div><div class="muted">${questSub}</div></div>
+          <div><div class="lead">${questLead}</div><div class="muted">${questSub}</div>${hidden ? `<div class="treasurehint">${t('mapTreasure')}</div>` : ''}</div>
           ${done
             ? `<div class="row wrap questbtns">
                 ${boxWaiting ? `<button class="btn primary" data-action="to-close">${sk.boxIcon} ${t('mapBoxWaiting')}</button>` : ''}
@@ -2580,7 +2715,7 @@
           ${stops.map(node).join('')}${bonusNode()}
         </div>
         ${ranksRow()}
-        ${friends.length || pets.length || S.about.date ? `<div class="friends">${S.about.date ? `<button class="fchip gold own" data-action="about-open"><span>😎</span><b class="en">${esc(aboutCardData().friend.name)}</b></button>` : ''}${friends.map(([pid, d]) => friendChip(STORY[pid], d.stars === d.total)).join('')}${pets.map(([id, d]) => friendChip({ friend: LITEM[id].pet }, d.stars === d.total)).join('')}</div>` : ''}`;
+        ${friends.length || pets.length || S.about.date ? `<div class="friends">${S.about.date ? `<button class="fchip gold own" data-action="about-open"><span>😎</span><b class="en">${esc(aboutCardData().friend.name)}</b></button>` : ''}${friends.map(([pid, d]) => friendChip(STORY[pid], d.stars === d.total)).join('')}${pets.map(([id, d]) => `<button class="fchip pet ${d.stars === d.total ? 'gold' : ''}" data-action="ls-replay" data-id="${esc(id)}"><span>${LITEM[id].pet.emoji}</span><b class="en">${esc(LITEM[id].pet.name)}</b><span class="replay">🎧</span></button>`).join('')}</div>` : ''}`;
     },
 
     modepick() {
@@ -2724,6 +2859,7 @@
 
     card() { return cardScreen(R, false); },
     practice() { return cardScreen(P, true); },
+    surprise() { return surpriseView(); },
 
     // one screen with the rule, before a grammar unit's first cards
     pintro() {
@@ -2778,6 +2914,7 @@
         <div class="stats">
           ${stat(rec.correct, 'statCorrect')}${stat(rec.promoted, 'statUp')}${stat(masteredWordCount(), 'statMastered')}${stat(streak(), 'statStreak')}
         </div>
+        ${streakCard(rec)}
         ${rec.maxCombo >= 5 ? `<div class="card center">${t('closeCombo', { n: rec.maxCombo })}</div>` : ''}
         ${rec.story && STORY[rec.story.pid] ? `<div class="card center" style="margin-top:12px"><div class="muted">${t(rec.story.reread ? 'closeVisited' : 'closeNewFriend')}</div>${friendCard(STORY[rec.story.pid], rec.story.stars === rec.story.total)}</div>` : ''}
         ${rec.listening && LITEM[rec.listening.id] && LITEM[rec.listening.id].pet ? `<div class="card center" style="margin-top:12px"><div class="muted">${t('closePet')}</div>${friendCard({ friend: LITEM[rec.listening.id].pet }, rec.listening.stars === rec.listening.total)}</div>` : ''}
@@ -2855,7 +2992,8 @@
     return `
       ${header}
       ${bar}
-      <div class="card question" style="margin-top:14px">${prompt}<div style="position:absolute; top:14px; left:16px">${ladder}</div></div>
+      ${item.gold ? `<div class="goldbanner">${t('goldBanner')}</div>` : ''}
+      <div class="card question ${item.gold ? 'gold' : ''}" style="margin-top:14px">${prompt}<div style="position:absolute; top:14px; left:16px">${ladder}</div></div>
       <div class="options ${optCls}" id="options">${options}</div>
       <div id="feedback"></div>`;
   }
@@ -2903,7 +3041,9 @@
         if (mastered) { confetti(); Audio.fanfare(); }
       }
       const milestone = rt.combo >= 5 && rt.combo % 5 === 0;
-      $fb.innerHTML = `<div class="feedback good">
+      if (item.gold) { confetti(80); Audio.fanfare(); }
+      $fb.innerHTML = `<div class="feedback good ${item.gold ? 'goldfb' : ''}">
+        ${item.gold ? `<span class="goldword">${t('goldRight')}</span>` : ''}
         <span class="bigmark">✓</span>
         ${v.kind === 'lineup' ? `<span class="he big">${esc(w.he)}</span>` : ''}
         ${g && g.he ? `<span class="he mid">${esc(g.he)}</span>` : ''}
@@ -3135,12 +3275,17 @@
       case 'boss-next': afterBoss(); break;
       case 'set-pick': setPick(Number(a.dataset.id)); break;
       case 'set-row': setRow(Number(a.dataset.i)); break;
-      case 'ls-start': R.ls.stage = 'play'; render(); break;
+      case 'ls-start': if (R.replay) lsGo(); else { R.ls.stage = 'ready'; render(); } break;
+      case 'ls-ready': R.ls.stage = 'sure'; render(); break;
+      case 'ls-back': R.ls.stage = 'ready'; render(); break;
+      case 'ls-go': lsGo(); break;
       case 'ls-play': lsPlay(); break;
       case 'ls-pick': lsPick(Number(a.dataset.q), a.dataset.id); break;
       case 'ls-check': lsCheck(Number(a.dataset.q)); break;
       case 'ls-finish': lsFinish(); break;
-      case 'ls-done': R.ls = null; startReading(); break;
+      case 'ls-done': if (R.replay) endReplay(); else { R.ls = null; startReading(); } break;
+      case 'ls-replay': if (!todayDone()) { toast(t('lsReplayLater')); break; } startReplay(a.dataset.id); break;
+      case 'ls-quit': endReplay(); break;
       case 'speak': Audio.speak(a.dataset.text); break;
       case 'answer': handleAnswer(a.dataset.id); break;
       case 'continue': P ? nextPracticeCard() : nextCard(); break;
@@ -3210,7 +3355,8 @@
       case 'shelf': if (!todayDone()) { toast(t('shelfLocked')); break; } view = 'shelf'; render(); break;
       case 'shelf-flip': { a.classList.toggle('flipped'); const w = WORDS[a.dataset.id]; if (w && a.classList.contains('flipped')) Audio.speak(w.en); break; }
       case 'ward-close': S.loot.fresh = []; save(); view = 'map'; render(); break;
-      case 'streak-info': toast(t(freezeLeft() ? 'freezeInfo' : 'freezeUsed'), 5000); break;
+      case 'streak-info': { const n = streak(), next = STREAK_MARKS.find(m => m > n); toast(`${t('streakInfo', { n })}${next ? ' ' + t('streakNext', { n: next }) : ''} · ${t(freezeLeft() ? 'freezeInfo' : 'freezeUsed')}`, 6500); break; }
+      case 'surprise-go': if (P) { P.sv = null; nextPracticeCard(); } else { view = 'map'; render(); } break;
       // one tap: the share sheet opens right away when the picture is ready; the card is also shown, to save or to send again
       case 'brag': if (!todayDone()) break; bragFrom = view === 'close' ? 'close' : 'map'; shareBrag(); view = 'brag'; render(); break;
       case 'brag-share': shareBrag(); break;
@@ -3362,5 +3508,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; } };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, get practice() { return P; }, startPractice, startReplay, finishSession };
 })();
