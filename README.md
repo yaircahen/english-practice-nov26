@@ -296,6 +296,22 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.8 added (17 Nov: after the day-10 save)
+
+- **Sentence halves first.** A halves set opens the review (the word bank comes a few cards in); a
+  single-sitting day plays halves only. A halves set with a miss comes back whole as the next halves
+  set, at most twice (whole, because each meaning set was checked as a set).
+- **Getting ready for a recording.** A new recording opens with a list (the table, a pencil and a
+  page, a parent), "I'm ready", "are you sure?", then 3-2-1, and plays by itself. **Check on the
+  iPad:** the tap on "are you sure" primes the audio so it may start after the countdown; if Safari
+  refuses, the session falls back to the spoken dialogue.
+- **Replays.** The pet chips on the map (🎧) play a heard recording again, with its questions, after
+  the day's quest. No run is logged.
+- **Serendipity** (prd.md §7.6): golden cards, a hidden find a day in the training grounds, a party
+  every 10 right in a row and a find for the day's first 15 in a row, a streak card on the close
+  screen, a glowing 🔥 on the map, and a rare find on streak days 3, 5, 7, 10, 12, 14. Numbers in
+  `surprise` in `content.js`.
+
 ## What 3.4.0 changed in the game (15 Nov, after the scan of the practice copy)
 
 Two of the five gaps that prd.md §4.4 lists between the test and what the game trains:

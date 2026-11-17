@@ -1562,6 +1562,15 @@ window.CONTENT = {
       'הרצף ממשיך. המילים העבירו ישיבה לחדר אחר.',
       'עוד גפרור במדורה. המילים מתרחקות ממנה.',
     ],
+    surpriseComboTitle: '⚡ x{n} ברצף! המילים השאירו משהו מאחור',
+    boxCombo: '{n} נכונות ברצף. המילים ברחו והשאירו את זה.',
+    comboLines: [
+      'המילים מחפשות מסתור.',
+      'במילון הכריזו על כוננות.',
+      'אף מילה לא מרימה את הראש.',
+      'המילים ביקשו הפסקה. לא אושר.',
+      'השמועה במילון: אין דרך לעצור את זה.',
+    ],
     boxStreak: '{n} ימים ברצף. זה מגיע לך.',
     lsReplayNone: 'ההקלטה לא נטענת כרגע. נסה אחר כך.',
 
@@ -1641,8 +1650,9 @@ window.CONTENT = {
   // Serendipity (owner, 17 Nov). Cosmetic and celebratory only: nothing here moves a card or a box.
   // goldQuest / goldPractice: the chance a dealt card is a golden one, in the quest's review and in the
   // training grounds. treasureMin..Max: the day's hidden find in the training grounds waits behind this
-  // many right answers there (drawn once a day).
-  surprise: { goldQuest: 0.04, goldPractice: 0.12, treasureMin: 4, treasureMax: 11 },
+  // many right answers there (drawn once a day). comboFind: right answers in a row, in the quest or the
+  // training grounds, for the day's combo find (once a day); every tenth in a row is a party with a line.
+  surprise: { goldQuest: 0.04, goldPractice: 0.12, treasureMin: 4, treasureMax: 11, comboFind: 15 },
 
   // Leitner: sessions between reviews, by box. Box 5 is done: it leaves the daily review.
   // Short gaps (1/1/2/3, not 1/2/4/7): the run is two weeks, and every word must reach the ⭐ by day 11.

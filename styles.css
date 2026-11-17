@@ -696,3 +696,4 @@ button.fchip { font: inherit; cursor: pointer; }
 .streakpill.blaze { box-shadow: 0 0 18px 4px rgba(255, 90, 30, .7); animation: flicker 1.8s ease-in-out infinite; }
 @keyframes flicker { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.06); filter: brightness(1.18); } }
 @media (prefers-reduced-motion: reduce) { .goldbanner, .treasurehint, .streakcard .flames, .streakpill.blaze, .cdnum { animation: none; } }
+.comboline { font-size: 20px; font-weight: 700; color: var(--accent-deep); animation: lootpop .5s ease-out both; }

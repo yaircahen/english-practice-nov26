@@ -409,6 +409,8 @@
     };
     if (boxDue(n)) give(null, 'box');
     TERR.filter(tr => !S.loot.cleared.includes(tr.key) && terrCleared(tr)).slice(0, 2).forEach(tr => { S.loot.cleared.push(tr.key); give('rare', tr.key); });
+    // a run of comboFind right answers in the quest: a find, once a day
+    if (R && R.maxCombo >= C.surprise.comboFind && !comboFoundToday()) give(null, 'combo');
     // a streak day worth a party leaves a rare find (once per mark)
     const st = streak();
     if (STREAK_MARKS.includes(st) && !S.loot.cleared.includes('streak' + st)) { S.loot.cleared.push('streak' + st); give('rare', 'streak' + st); }
@@ -820,14 +822,21 @@
     if (!d.treasure) { d.treasure = { at: C.surprise.treasureMin + Math.floor(Math.random() * (C.surprise.treasureMax - C.surprise.treasureMin + 1)), found: null }; save(); }
     return d.treasure;
   }
+  // a run of right answers: x10 is a party; the first run of comboFind in a day, quest or training grounds, is a find
+  const comboFoundToday = () => S.loot.boxes.some(b => b.why === 'combo' && b.date === todayStr());
   function practiceRight(item) {
     const tr = treasure();
-    if (!tr.found && P.correct + 1 >= tr.at) P.surprise = true;
-    if (item.gold) P.surprise = true;
+    if (!comboFoundToday() && P.combo + 1 >= C.surprise.comboFind) P.surprise = 'combo';
+    else if (!tr.found && P.correct + 1 >= tr.at) P.surprise = 'treasure';
+    else if (item.gold) P.surprise = 'gold';
   }
-  function openSurprise() {
+  function openSurprise(why) {
     const tr = treasure(); let it = null;
-    if (!tr.found) {
+    if (why === 'combo') {
+      it = pickLoot(rollTier(null, 'combo'));
+      if (it) { S.loot.owned.push(it.id); S.loot.fresh.push(it.id); S.loot.boxes.push({ date: todayStr(), n: S.sessionCount, id: it.id, tier: it.tier, why: 'combo' }); }
+      logEvent('combo_find', { id: it ? it.id : null, combo: P.combo });
+    } else if (!tr.found) {
       it = pickLoot(rollTier(null, 'free'));
       if (it) {
         S.loot.owned.push(it.id); S.loot.fresh.push(it.id);
@@ -837,7 +846,7 @@
       logEvent('treasure', { id: tr.found, at: tr.at });
     }
     const jokes = C.copy.surpriseJokes || [];
-    P.sv = { it, joke: it ? null : sample(jokes, 1)[0] || '' };
+    P.sv = { it, combo: why === 'combo' ? P.combo : 0, joke: it ? null : sample(jokes, 1)[0] || '' };
     save(); view = 'surprise'; render();
   }
   function surpriseView() {
@@ -848,7 +857,7 @@
          <div class="lootitem">${v.it.e}</div><div class="lootname">${esc(v.it.name)}</div><div class="muted">${t('surpriseWardrobe')}</div>`
       : `<div class="semoji">🤭</div><div class="big center">${v.joke}</div>`;
     return `
-      ${topbar(t(v.it ? 'surpriseTitle' : 'surpriseJokeTitle'), '')}
+      ${topbar(v.combo ? t('surpriseComboTitle', { n: v.combo }) : t(v.it ? 'surpriseTitle' : 'surpriseJokeTitle'), '')}
       <div class="card center lootcard revealed surprise ${v.it ? 'tier-' + v.it.tier : ''}">${body}
         <div class="bigcta"><button class="btn primary block" data-action="surprise-go">${t('surpriseGo')}</button></div>
       </div>`;
@@ -893,7 +902,7 @@
   }
   function nextPracticeCard() {
     if (!tickPractice()) return;
-    if (P.surprise) { P.surprise = false; return openSurprise(); }
+    if (P.surprise) { const why = P.surprise; P.surprise = false; return openSurprise(why); }
     if (!P.queue.length) P.queue = practicePool().map(cid => ({ cid, retry: false, retries: 0 }));
     P.current = P.queue.shift(); P.current.view = makeCardView(P.current.cid);
     if (goldRoll(P.current, C.surprise.goldPractice)) P.current.gold = true;
@@ -2466,10 +2475,10 @@
     const d = all[i], it = LOOT_ID[d.id];
     if (!d.opened) {
       const tr = TERR.find(x => x.key === d.why), fb = d.why === 'boss', mb = d.why === 'midboss' || fb;
-      const sm = /^streak(\d+)$/.exec(d.why || '');
-      return `<div class="card lootcard ${tr || mb || sm ? 'flagged' : ''}">
-          <div class="lootlabel">${tr ? `🚩 ${terrName(tr)}` : (fb ? `${sk.bossIcon} ${sk.boss}` : (mb ? `${sk.midBossIcon} ${sk.midBoss}` : (sm ? `🔥 ${sm[1]}` : `${sk.boxIcon} ${sk.box}`)))}</div>
-          ${tr || mb || sm ? `<div class="lootwhy">${sm ? t('boxStreak', { n: sm[1] }) : t(tr ? 'boxFlag' : (fb ? 'boxFinal' : 'boxBoss'))}</div>` : ''}
+      const sm = /^streak(\d+)$/.exec(d.why || ''), cm = d.why === 'combo';
+      return `<div class="card lootcard ${tr || mb || sm || cm ? 'flagged' : ''}">
+          <div class="lootlabel">${tr ? `🚩 ${terrName(tr)}` : (fb ? `${sk.bossIcon} ${sk.boss}` : (mb ? `${sk.midBossIcon} ${sk.midBoss}` : (sm ? `🔥 ${sm[1]}` : (cm ? `⚡ x${C.surprise.comboFind}` : `${sk.boxIcon} ${sk.box}`))))}</div>
+          ${tr || mb || sm || cm ? `<div class="lootwhy">${cm ? t('boxCombo', { n: C.surprise.comboFind }) : sm ? t('boxStreak', { n: sm[1] }) : t(tr ? 'boxFlag' : (fb ? 'boxFinal' : 'boxBoss'))}</div>` : ''}
           <button class="chest" data-action="box-open" data-i="${i}" aria-label="${esc(sk.box)}"><span class="rays"></span><span class="base"></span><span class="lid"></span><span class="lock">?</span></button>
           <div class="muted">${t('boxTap')}</div>
         </div>`;
@@ -3041,13 +3050,15 @@
         if (mastered) { confetti(); Audio.fanfare(); }
       }
       const milestone = rt.combo >= 5 && rt.combo % 5 === 0;
-      if (item.gold) { confetti(80); Audio.fanfare(); }
+      const party = rt.combo >= 10 && rt.combo % 10 === 0;
+      if (item.gold || party) { confetti(party ? 110 : 80); Audio.fanfare(); }
       $fb.innerHTML = `<div class="feedback good ${item.gold ? 'goldfb' : ''}">
         ${item.gold ? `<span class="goldword">${t('goldRight')}</span>` : ''}
         <span class="bigmark">✓</span>
         ${v.kind === 'lineup' ? `<span class="he big">${esc(w.he)}</span>` : ''}
         ${g && g.he ? `<span class="he mid">${esc(g.he)}</span>` : ''}
         ${milestone ? `<span class="combo-big">x${rt.combo} 🔥</span>` : ''}
+        ${party ? `<span class="comboline">${sample(C.copy.comboLines || [''], 1)[0]}</span>` : ''}
         ${mastered ? `<span class="he big">${t('mastered')}</span>` : ''}
         ${res.born ? `<span class="bornchip">${t('tileBorn')}</span>` : ''}
       </div>`;
