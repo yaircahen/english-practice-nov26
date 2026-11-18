@@ -556,6 +556,10 @@
   function parentExtras() {
     const ses = daySessions(S.days[todayStr()]);
     if (!ses.length || ses.some(r => r.mode === 'parent')) return false;
+    return parentOnly();
+  }
+  // what only a sitting with a parent can open today
+  function parentOnly() {
     const newLand = nextLandForToday(), story = storyForSession('parent', newLand);
     return !!(newLand || unitForToday(newLand) || sdForToday(newLand) || (story && !story.reread) || testDue('parent') || finalDue('parent'));
   }
@@ -591,6 +595,16 @@
   // sitting: full = an ordinary day · cards = the first half of a long day (review, new land; stops early) ·
   // long = its second half (writing, story, listening, the close) · single = a long day in one sitting
   // (a short review in front, then the long forms).
+  // The day's first sitting is the one alone (18 Nov): it carries the review, so the sitting with a parent keeps
+  // its time for the new land and the long forms. Not on a day with nothing to play alone (the first day, or
+  // every card resting) or with nothing left for the parent sitting afterwards, and a parent can switch it off on the coach screen. Only the buttons ask: startSession does not.
+  const soloToday = () => daySessions(S.days[todayStr()]).some(r => r.mode === 'solo') || !!(today().half && today().half.mode === 'solo');
+  function soloFirstDue() {
+    if (S.settings.soloFirst === false || today().half || soloToday()) return false;
+    // only on a day the map still offers the parent sitting after the one alone: its second half, or a quest of its own
+    if (!isLongDay(planFor('parent')) && !parentOnly()) return false;
+    return buildReviewQueue(S.sessionCount + 1).length > 0;
+  }
   let pendingMode = null;                                     // a long day, with a parent: the split screen is asking how to play it
   function startSession(mode, how) {
     settleHalves();
@@ -620,7 +634,7 @@
     // word bank and sentence halves: one set of each in the review; on the mid-boss day they are inside the boss
     const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? ['halves'] : ['bank', 'halves']);
     // the review stack is what gives way to everything else in the sitting
-    const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + sets.length + (warm ? 0.5 : 0) + 1;
+    const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + (warm ? 0.5 : 0) + 1;   // the sets are outside the clock (see minLeft)
     const short = boss || sitting === 'single';
     const cap = short ? 6 : clamp(Math.floor((stopMin - other) * CARDS_PER_MIN), 8, C.reviewStackCap);
     const queue = cards ? buildReviewQueue(n, cap, short) : [];
@@ -657,7 +671,9 @@
   // minutes still owed to the parts that are never cut (writing, story) and to today's new content
   function estLong() { const pl = R.plan; return (pl.writing && !R.wResult ? estWriting(pl.writing) : 0) + (pl.story && !R.stResult ? estStory(pl.story) : 0) + (pl.listening && !R.lsResult ? estListening(pl.listening) : 0); }
   function estNew() { return (R.newLand && !landIntroduced(R.newLand.id) ? 3.5 : 0) + (R.plan.unit && !packIntroduced(R.plan.unit.id) ? 2 : 0) + (R.plan.sd && !packIntroduced('sd') ? 1 : 0); }
-  const minLeft = () => R.stopMin - elapsedMin();
+  // the time inside a word-bank or halves set is not on the cards' clock: a set runs minutes, not seconds, and
+  // two of them once used up a whole cards sitting, so the review stopped after ten cards (the 17 Nov save)
+  const minLeft = () => R.stopMin - elapsedMin() + (R.setMs || 0) / 60000;
   // review stops early enough to leave room for the new content and the long forms; new-content rounds
   // stop early enough to leave room for the long forms; the long forms themselves are never cut
   // (the mid-boss is never cut short: it is the day's review, and it is one fight)
@@ -665,9 +681,16 @@
 
   function nextCard() {
     if (!R) return;
-    if (R.queue.length && cardTimeUp()) { R.hardStop = true; R.queue = []; }
+    if (R.current && R.current.set && R.current.setAt) { R.setMs = (R.setMs || 0) + (Date.now() - R.current.setAt); R.current.setAt = 0; }
+    if (R.queue.length && cardTimeUp()) {
+      // a land that has opened always gets its first round: each new card once; only the second tries give way
+      const keep = R.phase === 'new' ? R.queue.filter(x => !x.retry) : [];
+      if (keep.length < R.queue.length) R.hardStop = true;
+      R.queue = keep;
+    }
     if (!R.queue.length) return afterRound();
     R.current = R.queue.shift();
+    if (R.current.set) R.current.setAt = Date.now();
     if (R.phase === 'review' && goldRoll(R.current, C.surprise.goldQuest)) R.current.gold = true;
     R.current.view = R.current.set ? makeSetView(R.current) : (R.current.build ? makeBuildView(R.current) : makeCardView(R.current.cid));
     view = 'card'; render();
@@ -2731,8 +2754,11 @@
       return `
         ${topbar(t('modeTitle'), t('modeSub'))}
         <div class="card" style="display:flex; flex-direction:column; gap:14px">
-          <button class="btn primary block" style="min-height:90px" data-action="mode" data-mode="parent">${t('modeParent')}</button>
-          <button class="btn block" style="min-height:90px" data-action="mode" data-mode="solo">${t('modeSolo')}</button>
+          ${soloFirstDue()
+            ? `<button class="btn primary block" style="min-height:90px" data-action="mode" data-mode="solo">${t('modeSoloFirst')}</button>
+          <button class="btn block" style="min-height:90px" data-action="mode" data-mode="parent" disabled>${t('modeParentAfter')}</button>`
+            : `<button class="btn primary block" style="min-height:90px" data-action="mode" data-mode="parent">${t('modeParent')}</button>
+          <button class="btn block" style="min-height:90px" data-action="mode" data-mode="solo">${t('modeSolo')}</button>`}
           <button class="btn ghost small" data-action="to-map">${t('back')}</button>
         </div>`;
     },
@@ -3218,6 +3244,7 @@
           <label>מגרש האימונים, דקות ביום: <input class="text" style="width:90px; font-size:18px; padding:6px 10px" type="number" min="0" max="60" id="capInput" value="${S.settings.freePlayCapMin}"></label>
           <button class="btn small" data-action="save-cap">שמור</button>
           <button class="btn small" data-action="toggle-speak">הקראה אוטומטית: ${S.settings.autoSpeak ? 'פועלת' : 'כבויה'}</button>
+          <button class="btn small" data-action="toggle-solofirst">קודם משימה לבד, אחר כך עם הורה: ${S.settings.soloFirst === false ? 'כבוי' : 'פועל'}</button>
           <button class="btn small" data-action="change-pin">שינוי קוד מאמן</button>
         </div>
         <h3>גיבוי</h3>
@@ -3277,7 +3304,7 @@
         view = 'map'; render(); break;
       }
       case 'start': view = 'modepick'; render(); break;
-      case 'mode': startSession(a.dataset.mode); break;
+      case 'mode': if (a.dataset.mode === 'parent' && soloFirstDue()) { toast(t('soloFirstToast'), 3500); view = 'modepick'; render(); break; } startSession(a.dataset.mode); break;
       case 'start2': startSession('parent'); break;             // the second sitting of a quest already half done
       case 'split': startSession(pendingMode || 'parent', a.dataset.how); break;
       case 'go': beginQuest(); break;
@@ -3381,6 +3408,7 @@
       case 'practice': startPractice(); break;
       case 'end-practice': endPractice(false); break;
       case 'save-cap': { const v = parseInt(document.getElementById('capInput').value, 10); if (!isNaN(v)) { S.settings.freePlayCapMin = clamp(v, 0, 60); save(); toast('נשמר'); render(); } break; }
+      case 'toggle-solofirst': S.settings.soloFirst = S.settings.soloFirst === false; save(); render(); break;
       case 'toggle-speak': S.settings.autoSpeak = !S.settings.autoSpeak; save(); render(); break;
       case 'change-pin': { const p = prompt('קוד חדש, 4 ספרות'); if (p && /^\d{4}$/.test(p.trim())) { S.settings.coachPin = p.trim(); save(); toast('הקוד הוחלף'); } else if (p !== null) toast('צריך 4 ספרות'); break; }
       case 'export': exportSave(); break;
@@ -3519,5 +3547,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, get practice() { return P; }, startPractice, startReplay, finishSession };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, get practice() { return P; }, startPractice, startReplay, finishSession, soloFirstDue };
 })();

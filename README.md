@@ -296,6 +296,35 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.8.3 changed (18 Nov: the sitting alone comes first)
+
+On the mode screen the parent button stays locked until the day's sitting alone is done; the sitting
+alone carries the review, so the parent sitting keeps its time for the new land and the long forms.
+On a long day the solo sitting is the cards half and the map then offers the second half; on the
+paper day and the boss day it is an ordinary solo quest and the map then offers the parent one.
+
+- The rule is off on a day with nothing to play alone (the first day, every card resting) and on a
+  day when the map would offer no parent sitting after the solo one.
+- A parent can switch it off on the coach screen (`settings.soloFirst`, on unless `false`).
+- Only the buttons ask. `__game.startSession('parent')` still starts a parent session directly;
+  `__game.soloFirstDue()` says whether the lock is on.
+
+Played in the browser from the owner's 17 Nov save on clocks fixed to 18, 19 and 20 Nov. Not on the iPad.
+
+## What 3.8.2 changed (17 Nov: after the day-11 save)
+
+The day-11 save showed the review stalled: 328 of 334 cards due, and land 7 opened with none of its
+cards played. The two sets took about 9.5 of the cards sitting's 10 minutes.
+
+- **Sets are off the cards' clock.** The time inside a word-bank or halves set no longer counts
+  toward the stop (`session.setMs`), and the sets no longer shrink the review stack. A cards sitting
+  is therefore 10 minutes of cards plus the sets, so it runs longer than before on the clock.
+- **An opened land plays its first round.** Once a land's intro is shown, each of its new cards is
+  played once even if the time is up; only the second tries of missed cards give way.
+
+Played in the browser from the owner's 17 Nov save on a clock fixed to 18 Nov, with two 5-minute
+sets: 52 review cards, both sets, and all 12 cards of land 8. Not on the iPad.
+
 ## What 3.8 added (17 Nov: after the day-10 save)
 
 - **Sentence halves first.** A halves set opens the review (the word bank comes a few cards in); a
