@@ -3,7 +3,7 @@
 A game for one child (Gilad) to prepare for an English test on 22 Nov 2026 (Hey! Unit 1, ECB). Static PWA: vanilla JS, no build step, no backend. State is in `localStorage`. The UI copy is Hebrew.
 
 ## Read first
-- `prd.md` is v4 and the source of truth. Build from it. `archive/prd-v3.md` is history only.
+- `prd.md` is v4.1 (19 Nov) and the source of truth. Its §12, row M5, says what of v4.1 is built and what is not; `README.md` has a section per version with the details. Build from it. `archive/prd-v3.md` is history only.
 - Before any design or study-plan work, read `actionable-gamification-reference.md` (Octalysis) and `leitner-system-reference.md` (Leitner). Do not re-derive the frameworks.
 - `README.md` covers how to run and deploy.
 
@@ -29,6 +29,11 @@ A game for one child (Gilad) to prepare for an English test on 22 Nov 2026 (Hey!
 - Test mode (a sitting on paper) opens by itself from `testModeFrom` in `content.js`, once. To open it on any day, set `state.settings.testDay` to today's date (`'off'` shuts it) and start a parent session, or call `__game.startTest()`. Its sheets are in `session.test.sheets`; `__game.testDue(mode)` and `__game.makeScene()` (the five-sentence picture) are exposed too. To see rung 5 in an ordinary quest, load the day-11 save and set `testDay` to `'off'`.
 - The final boss opens from `finalBossFrom`, once: set `state.settings.finalDay` to today's date (`'off'` shuts it) or call `__game.startTest(true)`. It uses the same `session.test` as test mode, with `boss: true`: every sheet first (`stage: 'work'`), then every key. To see the "about me" card inside a quest, load the day-12 save, set `finalDay` and `testDay` to `'off'`, start a parent session and call `startWriting()`; `__game.startAbout(false)` opens a saved card. The speed round is `__game.startSpeed()` (state in `__game.speed`); set `speed.endsAt` to end a run early.
 - `mock.html` is the printable mock (`?view=test`, `key` or `coach`); its content is `mock` in `content.js`. Keep that content out of `stories` and `listening`, or the game shows it before the mock. `window.__mock` has `play`, `Say`, `setView` and the point totals; stub `speechSynthesis` to test the player.
+- Training grounds in eight sections (19 Nov, prd.md §7.8): `__game.openGrounds()` opens the tiles (`sections` in `content.js`; ids `words, bank, be, have, art, read, pron, wh`), `__game.startSection(id)` starts a run, `__game.secState(id)` is `{ lvl, ups, runs, seal }`. A card run is `__game.practice` with `sec`, `secN`, `secMiss`. A set (`bank`, `art`, `pron`) or a story (`read`) is `__game.practice.set`: for a set, `tiles` (`home`, `at`), `boxes`, `stage`; click a `.sstile[data-id]` and then a `[data-action="ss-box"][data-id]`, then `ss-done` and `ss-next`. For a story, `stage`, `pi`, `qi`, `step`, `gist`; the actions are `rd-gist`, `rd-para`, `rd-sent`, `rd-next`. A clean run raises the level, `sectionUpsPerDay` (3) a day at most.
+- Seals: the `seal-open` button under the tiles, `#sealInput`, `seal-try`. The phrases are `seals` in `content.js` and again in `papers.js` (printed on the coach's page): change both together.
+- A quest moves the meters too: `session.secTally[id] = { n, miss }`, settled in `finishSession()` (at least `sectionQuestMin` cards, no miss).
+- The day-11 sample save has no sentence-cloze cards and its presets force test mode: set `state.settings.testDay = 'off'` first.
+- The printed papers: `paper.html?n=1..5`, `&view=key`, `&view=coach`. To check that a page fits A4, measure the last child's bottom against the page height; a story over about 125 words runs over.
 - ECB's audio host is usually not reachable from a cloud sandbox. Stub `**/*.mp3` with a short WAV to test the recording player, and abort the route to test the fallback dialogue.
 - Screenshots can lag one frame behind a script that just changed the screen. Wait, or take a second one.
 - Progress is tied to the page's origin. A new address means a fresh save.
