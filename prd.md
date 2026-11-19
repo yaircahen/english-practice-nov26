@@ -98,7 +98,7 @@ pages say nothing about what he knows. They do say that those task shapes are ne
 | Training grounds | One list of activities | Eight sections in the test's own order, each with a mastery level he can see | §7.8 |
 | Reading | A whole long story, questions to pick | One paragraph at a time with a check after each, no read-aloud, answers written on paper | §6.5 |
 | Sets | Word bank of five for five; no sorting tasks | A bank with spare words and sentence-opening blanks; the pronoun table; the a/an/some sort | §6.2 |
-| Paper | Test mode and the final boss clone the practice copy | Both take the teacher's shape | §6.4 |
+| Paper | Test mode and the final boss run a paper sitting from the screen | **Paper and the game are separate.** Five printed papers in the teacher's shape, done at a table with no iPad. The game is screen only. One link: a secret phrase from the parent puts a seal on a section | §6.4 |
 | Listening, picture writing | Daily tracks | **Parked**: out of the daily quest and the paper sittings, still open in the training grounds | §6.6, §6.7 |
 | Short answers, negatives of to be, the short form | In the weights | Their cards keep their boxes and their place in the review. Nothing new is built for them and they are not on paper | §4.2 |
 
@@ -711,21 +711,31 @@ general worksheet generator.
 - **The practice copy itself** can be used once more, for listening only, if the teacher can
   share the recording (§11).
 
-**v4.1 changes to paper mode (19 Nov).**
+**v4.1: paper and the game come apart (19 Nov).** Running a paper sitting from the screen
+turned out clumsy: he moves between pen and iPad inside one sitting, and the parent types
+results in. From 19 Nov the two are separate, each doing what it is good at.
 
-- **Test mode and the final boss take the teacher's shape** (§4.4): the seven tasks that are on
-  the real test, in the test's order and with its points, the bonus last. No listening sheet, no
-  picture-writing sheet, no matching, no halves. All content is new, and the boss's story is
-  unseen.
-- **The first paper sitting opens with the pronoun table and the a/an/some sort**, the two
-  shapes he has not yet worked on paper, so that they are familiar before the 22nd.
-- **Paper is where the pace is practised.** The coach's lines for a sitting are about the
+- **The game is screen only.** No quest and no section asks for a pen. Test mode and the final
+  boss in their paper-on-screen form are switched off (the coach can still open them); the
+  final boss becomes a run on screen through the eight sections (§7.8).
+- **Paper is its own sitting**, at a table, with a pen and no iPad. `mock.html` prints **five
+  papers in the teacher's shape** (§4.4): the seven tasks that count, in the test's order with
+  its points, the bonus last. All content is new in each, and no story or sentence in them
+  appears in the game. Each prints with its key and one page for the coach.
+- **Marking is together, against the key**, as before. The key counts a bank word when it is
+  spelled as the bank spells it, and a sentence-opening word when it has its capital.
+- **Paper is where the method is practised**, and the coach's page says so in lines about the
   method, never about him: Hebrew beside the bank words first; one paragraph at a time under a
-  covering sheet (§6.5); every sheet gets a second look before the key opens. No clock is shown.
-- **The key still checks the copy.** A word taken from a bank counts when it is spelled as the
-  bank spells it, and a sentence-opening word when it has its capital.
-- **`mock.html`** prints the teacher's shape by default. The practice-copy clone stays
-  reachable (`?paper=ecb`) and is not part of the plan.
+  covering sheet (§6.5); every sheet gets a second look before the key comes out. No clock.
+- **The one link: seals.** Each of the seven tasks has a secret phrase in Hebrew, different for
+  each, printed only on the coach's page (they are the parent's to change on the coach
+  screen). When a task comes out clean on paper, the parent tells him its phrase. He types it
+  into that section in the training grounds, and the section's crest takes a seal. A seal is
+  the only thing paper changes in the game: no card moves, and nothing is entered for a miss.
+  It is a gift only the parent can give (Social Treasure, CD5), for the thing the game cannot
+  see.
+- **`mock.html`** keeps the practice-copy clone reachable (`?paper=ecb`); it is not part of
+  the plan.
 
 ### 6.5 Paragraph reading and comprehension track ("stories")
 
@@ -773,22 +783,23 @@ the test is a way of working, so that is what the track now trains, at every lev
   Levels 1 and 2 of the ladder below keep their audio only for stories met before 19 Nov.
 - **The questions come after the whole story, and each one starts with "find it"**: he taps the
   paragraph that holds the answer, and that paragraph comes back beside the question.
-- **The answer is written on paper**, in English, as on the test. The screen then shows the
-  key, and he marks ✓ or "again" with the parent, as in the writing track. The key takes any
-  answer with the right content, in a full sentence or not, and shows a full one.
+- **On screen the answer is found, not written** (§6.4: the game asks for no pen). He taps the
+  words in the paragraph that answer the question; for a *why* question he builds `Because` and
+  the reason from tiles. Writing the answer by hand is practised on the printed papers.
 - **Three moves, each taught once as a one-line tip and kept on demand:** the answer's words
   are in the text, so copy them from there; "write two" needs two; a *why* question is answered
   with `Because` and the sentence that gives the reason.
 - **On paper nobody turns the page for him**, so he does it himself: a blank sheet covers
   everything under the paragraph he is reading, he says in Hebrew in one line what happened, and
-  moves the sheet down. This is practised in both paper sittings and is the one habit to take
+  moves the sheet down. This is practised on every printed paper and is the one habit to take
   into the test.
 - **Nothing here is timed, and nothing is said about pace.** In the skin's words this is how a
   tracker reads a trail: piece by piece, and nothing gets past him. Reading times are still
   kept for the coach and are not announced for these stories.
 
-**Three stories in the teacher's style.** D1 and D2 are met in the quests of 20 and 21 Nov, and
-D3 is the unseen story of the final boss. Each is about 120 words in the third person, in two
+**Stories in the teacher's style.** D1 and D2 are met in the quests of 20 and 21 Nov and D3 is
+the unseen story of the final boss on screen. The five printed papers each have a story of
+their own, written the same way. Each is about 120 words in the third person, in two
 paragraphs and a few short lines: two children, a small adventure, a line or two of direct
 speech, a turn at the end. Five open questions each: one "write two things", one *what*, two
 *why*, one *who and why*. They use the 50, the everyday words and about ten glossed words from
@@ -1306,7 +1317,7 @@ Hebrew copy is written with the build, under §7.1's rule.
 | 3 | am / is / are | 10 cloze cards, pronoun and name subjects mixed | B | 10 |
 | 4 | have / has | 10 cloze cards, half with pronoun subjects (§4.2) | C | 10 |
 | 5 | a / an / some | One sort of 10 words (§6.2) | E | 10 |
-| 6 | Reading | One paragraph of a story he has met, with its check and its questions (§6.5); the written answer only when a parent is there | G | 15 |
+| 6 | Reading | One paragraph of a story he has met, with its check and its questions (§6.5) | G | 15 |
 | 7 | Pronoun table | One sort of 10 nouns (§6.2) | F | 20 |
 | 8 | Wh-questions | 5 sentences with a part underlined: pick the question word from the bank of seven, then put the question in order from tiles (question word, `is` / `are`, the rest) | Bonus | 5 |
 
@@ -1334,8 +1345,10 @@ stronghold taken.
   already done: one level for every two clean sets or clean tens of that kind in his save, up
   to 3. The pronoun table, the sort and the Wh-section have no history in this shape and start
   at 0, with the first run of each offered first.
-- **Level 5 needs paper.** The fifth part of sections 2 to 8 falls only to a clean sheet of
-  that task in a paper sitting. So the meter cannot say "done" about a task he has only tapped.
+- **Paper gives a seal, not a level.** All five levels are won on screen. A clean task on a
+  printed paper earns that section's seal, opened with the parent's secret phrase (§6.4). A
+  crest with its seal is the full trophy, so the screen alone never says "done" about a task
+  he has only tapped.
 
 **The second look.** In a set nothing is checked until he presses "done". Before that he can
 move any tile, and a change is not a miss. When the last blank is filled the screen does not
@@ -1355,8 +1368,8 @@ coach screen only.
 | CD2 Accomplishment | The level is won only by a clean run, so it is a trophy and not a counter. Eight crests on the trophy shelf; the "Ready" badge of 21 Nov is drawn from them and co-signed |
 | CD3 Creativity and feedback | Which section, and when, is his choice, and the choice has a real trade-off because of the two-a-day rule. Sorting by dragging gives a result he can see and rearrange. The second look is his own correction, not the game's |
 | CD4 Ownership | Each crest is his and goes on the shelf beside the friend cards. The meters are the thing he watches grow (Monitor Attachment) |
-| CD5 Social | The parent co-signs level 5 on paper. The brag card for the family on the 22nd shows the eight crests |
-| CD6 Scarcity | Two levels a day per section; the fifth part is behind the paper sitting, in sight and not yet his (Dangling) |
+| CD5 Social | The seal's secret phrase comes only from the parent, for clean work on paper. The brag card for the family on the 22nd shows the eight crests |
+| CD6 Scarcity | Two levels a day per section; the seal's place on each crest is in sight and empty until paper fills it (Dangling) |
 | CD7 Curiosity | Which set comes up is drawn. Golden cards and the day's hidden find work here as they do in the rest of the grounds (§7.6) |
 | CD8 Loss | None added. Three days before a test is no time for it, and a level that could fall would be a mark against him (§7.1) |
 
@@ -1405,18 +1418,15 @@ day 5), and the game opens one land, one grammar unit and one new story a day. T
 recordings before the mock, a recording now comes in every parent session once they start
 (day 8, 9 and 10 of the real run, Mon–Wed 16–18 Nov) instead of every second one.
 
-What moved on 19 Nov (v4.1). The last three rows of the table are replaced by these:
+What moved on 19 Nov (v4.1). The last three rows of the table are replaced by these. Paper
+and the game are separate sittings (§6.4).
 
-| Date | Quest | Paper | Parked |
+| Date | The game | Paper | Parked |
 |---|---|---|---|
-| Thu 19 | As built, until M5 is on the iPad. If test mode opens in its old shape, the coach skips its listening and writing sheets | — | Listening, picture writing |
-| Fri 20 | Review; sections 7, 5, 4, 2 and 3; story D1, one paragraph at a time, answers written | **First sitting in the teacher's shape**: the pronoun table and the a/an/some sort first, then the word bank at full size | the same |
-| Sat 21 | Review of misses; sections 7, 5, 4, 2 and 8; story D2 | **Final boss**: the seven tasks and the bonus, story D3 unseen. Then the "Ready" badge with the eight crests, and stop | the same |
+| Thu 19 | v3.9.0: the quest without listening, picture writing and halves; new has/have, pronoun and a/an/some cards play first | — | Listening, picture writing |
+| Fri 20 | Review; the sections as they are built; story D1 | Paper 1 | the same |
+| Sat 21 | The final boss on screen; the "Ready" badge | The main paper day: how many of papers 2–5, and in how many blocks, is open (§11) | the same |
 | Sun 22 | Test | | |
-
-The final boss moves from 20 to 21 Nov so that the first paper meeting with the two sorting
-tables is not also the boss. If M5 is not on the iPad by the morning of the 20th, both sittings
-are done from the printed `mock.html` in the teacher's shape, which is the first thing built.
 
 Grammar is interleaved from day 3, not left for week 2, so grammar cards get their full Leitner
 run. New words from the 50 end on day 5 and the bonus land on day 7; the last 6 days are
@@ -1581,8 +1591,10 @@ Open after 19 Nov:
   and a sheet, about half a day's build.
 - **Are `Which` and `How many` expected in the bonus?** They are in its bank. The game shows
   them with Hebrew on tap and builds no cards for them.
-- **A printer for 20 and 21 Nov.** The two sorting tables are far closer to the test on a
-  printed sheet than copied by hand.
+- **The shape of Saturday 21 Nov.** The owner wants it to be the main day, three to four hours
+  together, with five papers printed in all. Open: how many papers that day and how they are
+  split into blocks, given that he tires and that hurrying is the habit to avoid.
+- A printer is available (owner, 19 Nov).
 
 Still open, none blocking the build:
 
@@ -1617,7 +1629,7 @@ Still open, none blocking the build:
 | M2 | Wed 11 Nov (was Tue 10) | **Status, 10 Nov: both lists are built.** *Test-facing list (v2.0.0):* played through six simulated days in the Mac browser at iPad size, starting from an M1 save; Yair then tried it on the iPad, and what came up there (the tall/short picture among it) was fixed before the "then" list was started, per the ordering rule below. *"Then" list (v2.1.0):* played in the Mac browser at iPad size (820×1180) from an M1-shaped save and from M2 saves, in all three skins, with no console errors. **v2.1.0 is not yet tried on the real iPad, and not pushed.** Moved to M3 while building: the level-3 "find it" step, re-asking a question after hint 3 and its coach flag, the one-line comprehension tips, and showing personal-best read times. **Test-facing first:** grammar cards for all four towers in the v4 order (to be; have/has; negatives, questions, short answers; Wh-questions and a/an/some), with names as subjects. Noun→pronoun card. Same-or-different cards. Sentence builder on the four writing frames (rungs 1–2). Writing minute on paper (rungs 3–4: "pen down", key, three checks). Story track v1: tier A and B passages, scaffold levels 1–3, hint ladder, true/false and tick-two questions, friend cards. Coach log. **Then:** copy pass (all strings in one table, new voice), tile production, reading minute, mystery box with loot tiers and a cosmetics wardrobe, streak + freeze, brag card. **The "then" list as built:** *Mystery box* after every finished quest, solo and hard-stopped ones included, one a day. 33 items per skin (17 common, 9 rare, 7 golden) in seven slots: hat, companion, aura, trail, confetti, the correct-answer sound, friend-card frame; hats and companions belong to the skin. The first box is never common and holds something to wear; never three common ones in a row; a golden one at least every sixth box; no duplicates. A territory with all its cards in Box 4–5 gives one guaranteed rare, and an open territory shows a 🎁 until then. The coach can thin the box to every second quest (§7.3's guard). *Wardrobe:* opens from the hero or from the map once the day's quest is done (§7.7); what is still in a closed box stays a "?". *Streak freeze:* each week (Sunday to Saturday) has one free freeze, spent by itself on a single missed day that follows a played one; two missed days in a row end the streak unless the coach freezes them from the coach screen. *Brag card:* a 1080×1350 picture in the skin's colours (the hero as worn, the day number, up to four of the day's numbers); one tap opens the share sheet where the browser can share a file, and the picture stays on screen to save where it cannot. *Reading minute:* after the story, in parent sessions, only with 1.5 minutes or more left; three sentences from a pool of 50, tagged by land and grammar unit; ✓ or 🔁 per sentence (🔁 stands in for ✗, by §7.6's no-red-X rule), the 🔁 ones return first next time; coach log only. *Tile production:* a word's card is born when its Recognition card reaches Box 3 (the 50 words, not the starter kit); at most three a session (`tileCap` in the content file), no same-session retry, and not counted in a land's flag. At that weight §2's target of 70% in Box 4–5 by day 11 will not be reached. *Copy pass:* every line the kid reads is in `copy` in `content.js`, with the voice rules written above it; the coach screen's lines stay in `app.js`. **Not built:** the 👍/👎 at the close and the golden card (§7.4 step 9, §7.6; neither is on a milestone's list yet), map decorations and trophy-shelf stickers as loot (the shelf is M3), the parent-authored real-world pool (§7.5, optional), tile cards in the training grounds (M3's drills) |
 | M3 | Fri 13 Nov (was Thu 12) | **Status, 12 Nov: the test-facing list is built (v3.0.1).** Played in the browser at iPad size (820×1180) from the day-6 and day-8 sample saves and from M1 and M2 saves, in all three skins, six simulated days in a row, with no console errors. **Not yet tried on the real iPad. The recordings could not be played where it was built** (ECB's address was not reachable there), so the player was tested against a stand-in file and against a failed load; the three addresses of §4.3 still need a check on the iPad. *As built:* the mid-boss is 20 answers (4 listen-and-pick, a word-bank set, 4 grammar cloze with has/have twice, a sentence-halves set, 2 tile-built sentences); the kid sees hits on a boss, and the section tally with a number by the test's weights is on the coach screen only (§9.2's "you'd have scored 86" would break §7.1's rule). The word bank is ten fixed sets, each of the 50 words once, each set checked by hand so that a word fits one sentence only; the halves are drawn fresh from six sentence families that cannot be cross-matched. The Sentence-cloze cards of §6.2 were on no milestone's list and are built here, from the word-bank sentences, six a session at most. Bonus land: twelve numbers (Sound-lineup only for the three look-alike pairs), six months, six adjectives (`fat` and `nice` as meaning cards). Listening: the first pass gives no verdict on a miss, the question stays open for the second hearing; there is no sentence to highlight, so the hint ladder is the second hearing, then one more try, then the answer. One spoken dialogue is built already, as the stand-in for a recording that does not load. Two sittings: the cards sitting stops at 8 minutes, at 10 on the mid-boss day (the boss alone is about 5). Story track v2: C1–C4 (C5 belongs to the mock, M4); one paragraph a screen up to level 3, each with its own questions; complete-the-sentence and write-two questions (write-two is tapped up to level 3, on paper from level 4); levels 4 and 5; the second visit two sessions later, one level higher (a long story: one paragraph, his pick); the warm read; reading times kept per paragraph. Also built from what M2 handed on: the level-3 "find it" step, re-asking a question after hint 3 with its coach flag, the five one-line tips. *Differs from §6.5:* a best reading time is announced as the paragraph's own record, with no earlier time beside it (§7.1 rules out a before/after frame; the times are on the coach screen); at level 4 the questions still come one at a time, not all on one page; the level-4 "hear the paragraph" button and the read-along days (§6.3 item 6) are not built. A day with a new long story counts as a long day and offers two sittings. **Then-list: not started.** **Test-facing first:** listening track (Listen-and-pick cards, the three recordings with questions, pet cards; streaming and two voices checked on the iPad). Bonus land. Word-bank and Sentence-halves cards. Story track v2: tier C with one paragraph per screen, complete-the-sentence and write-two questions, levels 4–5, repeated-reading scheduler, warm read, timing. Two-sitting quest. Mid-boss in the test's five sections. **Then:** trophy shelf, tricky-word flow, own-sentence cards, export/import. Training grounds: drills, re-reads, recording replays, sentence building, memory game, parent cap (a minimal "replay Box 1" version ships in M1 so the cap exists from day 1) |
 | M4 | Mon 16 Nov | **Status, 15 Nov: the printable mock and its key are built (v3.3.0), ahead of the rest of the list**, because it is the one piece that works on paper if the screens slip. `mock.html` prints the test (9 pages), the answer key and two pages for the coach, from `mock` in `content.js`. It was first laid out from §4.4 and then rebuilt against the scan of the practice copy, task by task (§4.4, "Checked against the scan"): the same tasks, items, choices, points and sheets, with all content new: ten names neither the practice copy nor the stories use, C5 ("Ella and Yoni", first person, 21 sentences, 136 words), an unheard dialogue (Yael and Noam, 12 lines) spoken twice from the page in two device voices, and a picture of six labelled people with a bank of bare nouns. Checked in the browser as A4 PDFs only: not yet on the iPad, on a printer, or with the real voices. All five gaps the scan shows between the test and the game (§4.4) were closed the same day. v3.4.0: the writing bank on paper is bare, with two nouns that take no article, and C3 and C4 are retold in the test's first-person style. v3.5.0: two halves sets of every three are joined by meaning (six fixed sets); every listening question to complete has four endings in words and the stories' Wh-questions four choices; one unheard dialogue in the practice copy's shape follows the recordings; and twelve everyday words are a small land that may open until 18 Nov (§4.1d). Played in the browser from the day-8 sample save; not on the iPad. The recordings' questions were checked against the transcripts (v3.5.1). **17 Nov (v3.6.0): writing rung 5, the test-mode screen and the second unheard dialogue are built** (`README.md`, "What 3.6.0 added"). Test mode opens once, in the first parent session from 19 Nov, as about ten sheets in the test's order with the test's points, each followed by its key; rung 4 moves up to rung 5 after three clean parent sessions. Played in the browser from the day-11 sample save; not on the iPad. *Differs from §6.4:* the key comes after each sheet, not once at the end, and the sheets keep the test's choices (letters to write down) instead of offering none. **17 Nov (v3.7.0): the final boss and the "then" list are built**, so M4's list is complete (`README.md`, "What 3.7.0 added"). The final boss is the mock inside the game, from 20 Nov: all ten sheets first, then the keys, each ✓ a hit; the kid sees hits, and the score out of 100 is on the coach screen only (as decided for the mid-boss). His "about me" card takes the place of one day's two sentences. The speed round is a 60-second run on the map after the quest, on mastered words, and moves no card. Played in the browser from the day-12 sample save; not on the iPad. *Differs from the plan:* the boss gate's 80% is shown on the map but does not hold the boss back, the date does; the "about me" day is the first free parent session, not day 9. **17 Nov (v3.8), from the day-10 save:** Reading was 2/5 on the mid-boss (three sentence halves of one meaning set) and the run showed fatigue. A halves set now opens the review and a set with a miss comes back whole; a new recording opens with a getting-ready list and 3-2-1 (§6.7); heard recordings replay from their pet cards; and the serendipity layer is built (§7.6, "Serendipity"; free play now gives loot, §7.7). Played in the browser from the owner's save; not on the iPad. **Test-facing first:** writing rung 5 (the full five-sentence task). App-written dialogues for unheard listening. Test-mode screen (worksheet look, self-marking against the key). One printable full mock + answer key, cloned from the practice copy's five sections with all content new. Final boss with unseen passage and unheard dialogue. **Then:** "about me" template, speed round |
-| M5 | Thu 19 – Fri 20 Nov | **Was "tuning, nothing new"; now v4.1 (§0.1). Not started.** In this order, each pushed before the next is begun. **1. Paper:** the teacher's shape in `mock.html` (seven tasks and the bonus, the key, the coach's page), with story D3. **2. Sets:** the pronoun table, the a/an/some sort, the word bank with spares and sentence-opening blanks, with the second look. **3. Weights:** have/has half pronoun subjects; listening and picture writing out of the quest and the paper sittings. **4. Reading:** one paragraph a screen with the Hebrew check, no audio, "find it", written answers with the key; stories D1 and D2. **5. Test mode and the final boss** in the teacher's shape; the boss on 21 Nov. **6. The eight sections** with their meters, the seeded start, the two-a-day rule and the crests; the quest of the last days built from them. **7. Section 8**, the Wh-question from an underlined part. **Then:** the "Ready" badge and the brag card drawn from the crests |
+| M5 | Thu 19 – Fri 20 Nov | **Was "tuning, nothing new"; now v4.1 (§0.1).** In this order, each pushed before the next is begun. **1. Today's patch (built 19 Nov, v3.9.0):** listening, picture writing and halves out of the quest; the old test mode and paper boss no longer open by date; eight has/have cards with pronoun subjects, eight noun→pronoun cards of the table's kinds and eight single-word a/an/some cards, born in Box 1 and played first. Checked in the browser from the day-11 sample save; not on the iPad. **2. Paper:** five printable papers in the teacher's shape in `mock.html`, each with its key and coach's page; paper 1 first. **3. Sets on screen:** the pronoun table, the a/an/some sort, the word bank with spares and sentence-opening blanks, with the second look. **4. Reading:** one paragraph a screen with the Hebrew check, no audio, "find it", answers tapped in the text; stories D1 and D2. **5. The eight sections** with their meters, the seeded start, the two-a-day rule, the crests and the seals with their secret phrases; the quest built from them. **6. Section 8**, the Wh-question from an underlined part. **7. The final boss on screen**, with D3. **Then:** the "Ready" badge and the brag card drawn from the crests |
 
 **Ordering rule (v4).** Nothing was cut, and there are fewer build days than v3 assumed. Inside
 each milestone the test-facing list is built, tested on the iPad and pushed before the rest is

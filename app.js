@@ -461,10 +461,11 @@
   let P = null;     // practice (training grounds)
   let view = 'map';
 
+  const PARKED = C.parked || {};                              // 19 Nov (prd.md §0.1): tracks the teacher's test does not have stay out of the quest
   function buildReviewQueue(n, cap = C.reviewStackCap, short = false) {
     // one promotion per card per day (PRD §6.1): a card already reviewed in today's earlier session waits
     const seenToday = todayNs();
-    const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
+    const all = Object.keys(S.cards).filter(cid => known(cid) && !(PARKED.listening && cid.endsWith('|lp')) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
     // a word still short of its ⭐ (its Recognition card below the mastered box) is never cut, and plays right after the
     // priority cards: the time budget ends the review from the back, and the ⭐ must reach 50 by day 11
     const star = cid => S.cards[cid].box < MASTERED_BOX && STAR_RECS.has(cid);
@@ -537,6 +538,7 @@
     const rung = mode === 'parent' ? S.writing.rung : Math.min(S.writing.rung, 2);
     // his own card, once, with a parent: it is that day's writing (PRD §6.5, §6.6)
     const about = mode === 'parent' && !S.about.date && !midBossDue() && phase2() && packIntroduced('u2') && rung >= 3 && !!(C.about || []).length;
+    if (PARKED.writing && !about) return null;                // his own card is not part of the parked track
     return { rung, paper: rung >= 3, about };
   }
   const estStory = s => s.reread ? 2.5 : (s.p.tier === 'A' ? 3 : (s.p.tier === 'C' ? 6.5 : 4.5));
@@ -548,7 +550,7 @@
   // recordings; it went so all three fit before the mock, the run being two days behind the plan.)
   // After the recordings come the unheard dialogues (PRD §6.7), in the order they are listed.
   function listeningForSession(mode) {
-    if (mode !== 'parent' || !phase2() || S.listening.runs.some(r => r.date === todayStr())) return null;
+    if (PARKED.listening || mode !== 'parent' || !phase2() || S.listening.runs.some(r => r.date === todayStr())) return null;
     return LISTEN.find(x => !x.fallback && !S.listening.done[x.id]) || null;
   }
   const estListening = x => x.min || 4;
@@ -623,6 +625,8 @@
       else { pendingMode = mode; view = 'split'; return render(); }
     }
     if (phase2()) birthClozes();
+    // an item added to a unit he has already opened gets its card here (19 Nov: pronoun subjects, the table's nouns)
+    S.packsIntroduced.forEach(p => { if ((C.units || []).some(u => u.id === p.id)) packCards(p.id).forEach(cid => { if (!S.cards[cid]) S.cards[cid] = { box: 1, lastSession: 0, misses: 0, born: n - 1, priority: 1 }; }); });   // priority: they play first, whatever the stack's cap
     const pl = planFor(mode);
     const cards = sitting !== 'long', longForms = sitting !== 'cards';
     const newLand = pl.newLand, unit = pl.unit, sd = pl.sd;
@@ -632,7 +636,7 @@
     // the cards sitting stops at 8 minutes; the one that holds the mid-boss gets two more, or the new land never fits behind it
     const stopMin = sitting === 'cards' ? C.cardsStopMin + (boss ? 2 : 0) : C.sessionHardStopMin;
     // word bank and sentence halves: one set of each in the review; on the mid-boss day they are inside the boss
-    const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? ['halves'] : ['bank', 'halves']);
+    const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? ['halves'] : ['bank', 'halves']).filter(k => !(PARKED.halves && k === 'halves'));
     // the review stack is what gives way to everything else in the sitting
     const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + (warm ? 0.5 : 0) + 1;   // the sets are outside the clock (see minLeft)
     const short = boss || sitting === 'single';

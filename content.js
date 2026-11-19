@@ -194,11 +194,29 @@ window.CONTENT = {
         { id: 'u2-6', t: 'They ___ a lot of toys.', a: 'have', o: ['has', 'have'], he: 'יש להם הרבה צעצועים.', tip: 'they → have' },
         { id: 'u2-7', t: 'Maya ___ a brush.', a: 'has', o: ['has', 'have'], he: 'למאיה יש מברשת.', tip: 'Maya = she → has' },
         { id: 'u2-8', t: 'Noa and Tali ___ the same hobby.', a: 'have', o: ['has', 'have'], he: 'לנועה ולטלי יש אותו תחביב.', tip: 'Noa and Tali = they → have' },
+        // 19 Nov: pronoun subjects, so that the unit is half pronouns and half names (prd.md §4.2)
+        { id: 'u2-9', t: 'I ___ a game.', a: 'have', o: ['has', 'have'], he: 'יש לי משחק.', tip: 'I → have' },
+        { id: 'u2-10', t: 'You ___ a birthday in June.', a: 'have', o: ['has', 'have'], he: 'יש לך יום הולדת ביוני.', tip: 'you → have' },
+        { id: 'u2-11', t: 'We ___ a team.', a: 'have', o: ['has', 'have'], he: 'יש לנו קבוצה.', tip: 'we → have' },
+        { id: 'u2-12', t: 'He ___ a lot of toys.', a: 'has', o: ['has', 'have'], he: 'יש לו הרבה צעצועים.', tip: 'he → has' },
+        { id: 'u2-13', t: 'She ___ a brush.', a: 'has', o: ['has', 'have'], he: 'יש לה מברשת.', tip: 'she → has' },
+        { id: 'u2-14', t: 'It ___ a blanket.', a: 'has', o: ['has', 'have'], he: 'יש לו שמיכה.', tip: 'it → has' },
+        { id: 'u2-15', t: 'You ___ a special hobby.', a: 'have', o: ['has', 'have'], he: 'יש לך תחביב מיוחד.', tip: 'you → have' },
+        { id: 'u2-16', t: 'I ___ a lot of time.', a: 'have', o: ['has', 'have'], he: 'יש לי הרבה זמן.', tip: 'I → have' },
       ],
       bridge: [
         { id: 'np-4', en: 'Tom', a: 'he', o: ['he', 'she', 'it', 'they'], he: 'תום = הוא' },
         { id: 'np-5', en: 'the toy', a: 'it', o: ['he', 'she', 'it', 'they'], he: 'הצעצוע = זה' },
         { id: 'np-6', en: 'Dan and I', a: 'we', o: ['we', 'they', 'he', 'you'], he: 'דן ואני = אנחנו' },
+        // 19 Nov: the kinds of nouns the test's pronoun table holds (prd.md §4.2)
+        { id: 'np-10', en: 'you and Dana', a: 'you', o: ['you', 'we', 'they', 'she'], he: 'אתה ודנה = אתם' },
+        { id: 'np-11', en: 'the toy and the blanket', a: 'they', o: ['they', 'it', 'we', 'you'], he: 'הצעצוע והשמיכה = הם' },
+        { id: 'np-12', en: 'my sister and I', a: 'we', o: ['we', 'they', 'she', 'you'], he: 'אחותי ואני = אנחנו' },
+        { id: 'np-13', en: 'the pool', a: 'it', o: ['it', 'he', 'she', 'they'], he: 'הבריכה = זה' },
+        { id: 'np-14', en: 'grandmother', a: 'she', o: ['she', 'he', 'it', 'they'], he: 'סבתא = היא' },
+        { id: 'np-15', en: 'the kids', a: 'they', o: ['they', 'it', 'we', 'he'], he: 'הילדים = הם' },
+        { id: 'np-16', en: 'you and Omer', a: 'you', o: ['you', 'we', 'they', 'he'], he: 'אתה ועומר = אתם' },
+        { id: 'np-17', en: 'Dad', a: 'he', o: ['he', 'she', 'it', 'they'], he: 'אבא = הוא' },
       ] },
     { id: 'u3', title: "isn't · aren't · Is…?",
       rule: [
@@ -250,6 +268,15 @@ window.CONTENT = {
         { id: 'u4b-4', t: 'Omer has ___ hobby.', a: 'a', o: ['a', 'an', 'some'], he: 'לעומר יש תחביב.', tip: 'hobby → a' },
         { id: 'u4b-5', t: 'I have ___ information.', a: 'some', o: ['a', 'an', 'some'], he: 'יש לי מידע.', tip: 'information → some' },
         { id: 'u4b-6', t: 'It is ___ important day.', a: 'an', o: ['a', 'an', 'some'], he: 'זה יום חשוב.', tip: 'important (i) → an' },
+        // 19 Nov: single words, as in the test's sorting table (prd.md §4.2)
+        { id: 'u4b-7', t: '___ egg', a: 'an', o: ['a', 'an', 'some'], he: 'ביצה', tip: 'egg (e) → an' },
+        { id: 'u4b-8', t: '___ pool', a: 'a', o: ['a', 'an', 'some'], he: 'בריכה', tip: 'pool → a' },
+        { id: 'u4b-9', t: '___ flowers', a: 'some', o: ['a', 'an', 'some'], he: 'פרחים', tip: 'flowers = כמה → some' },
+        { id: 'u4b-10', t: '___ old man', a: 'an', o: ['a', 'an', 'some'], he: 'איש זקן', tip: 'old (o) → an' },
+        { id: 'u4b-11', t: '___ team', a: 'a', o: ['a', 'an', 'some'], he: 'קבוצה', tip: 'team → a' },
+        { id: 'u4b-12', t: '___ kids', a: 'some', o: ['a', 'an', 'some'], he: 'ילדים', tip: 'kids = כמה → some' },
+        { id: 'u4b-13', t: '___ orange', a: 'an', o: ['a', 'an', 'some'], he: 'תפוז', tip: 'orange (o) → an' },
+        { id: 'u4b-14', t: '___ blankets', a: 'some', o: ['a', 'an', 'some'], he: 'שמיכות', tip: 'blankets = כמה → some' },
       ],
       bridge: [] },
   ],
@@ -1667,7 +1694,10 @@ window.CONTENT = {
   cardsStopMin: 10,               // was 8 until 15 Nov; the cards sitting of a quest played in two sittings (PRD §7.4)
   freePlayCapMinDefault: 15,
   reviewStackCap: 80,      // about 7–8 minutes at his pace; the sitting's time budget and hard stop still bound it
-  finalBossFrom: '2026-11-20',  // day 12: from this date a parent session is the final boss (the mock inside the game), once
+  finalBossFrom: '',            // was 2026-11-20. Off since 19 Nov (prd.md §0.1): the mock inside the game is the publisher's shape. The coach can still open it
+  // 19 Nov (prd.md §0.1): the teacher's test has no listening, no picture writing and no sentence halves.
+  // Parked, not removed: out of the daily quest, still in the training grounds and on the coach screen.
+  parked: { listening: true, writing: true, halves: true },
   speedSec: 60,                 // the speed round's length; it opens with 12 of the 50 words mastered
   // "about me": the five lines of his own card. `he` is the hint under a line; `ph` is an example shown in an empty field.
   about: [
@@ -1677,6 +1707,6 @@ window.CONTENT = {
     { id: 'hobby', pre: 'My hobby is', he: 'התחביב שלך',         ph: 'chess' },
     { id: 'like',  pre: 'I like',      he: 'משהו שאתה אוהב, ולמה', ph: 'to swim', mid: 'because', id2: 'why', ph2: 'it is fun' },
   ],
-  testModeFrom: '2026-11-19',   // day 11: from this date a parent session is test mode on paper, once (prd.md §6.4, §8)
+  testModeFrom: '',             // was 2026-11-19. Off since 19 Nov (prd.md §0.1): paper is its own sitting now, away from the screen
   masteredBox: 3,          // "mastered" = Box 3–5 (PRD §2), i.e. two correct recalls after a gap: the ⭐, the map, the stamp
 };

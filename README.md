@@ -296,6 +296,23 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.0 changed (19 Nov: the teacher's test)
+
+The real test follows the teacher's example, not the publisher's practice copy (`prd.md` §0.1).
+This is the first, small step.
+
+- `parked` in `content.js` keeps listening, picture writing and sentence halves out of the daily
+  quest. Nothing is removed: recordings replay from their pet cards, and his "about me" card
+  still opens if it is not written yet.
+- `testModeFrom` and `finalBossFrom` are empty, so test mode and the final boss no longer open
+  by date. The coach screen can still open either.
+- 24 new grammar items: has/have with pronoun subjects (`u2-9` to `u2-16`), noun→pronoun of the
+  kinds in the test's table (`np-10` to `np-17`), single-word a/an/some (`u4b-7` to `u4b-14`).
+  A session gives each a card if its unit is already open, in Box 1 with priority, so they play
+  first.
+
+Checked in the browser from the day-11 sample save. Not on the iPad.
+
 ## What 3.8.3 changed (18 Nov: the sitting alone comes first)
 
 On the mode screen the parent button stays locked until the day's sitting alone is done; the sitting
