@@ -297,6 +297,25 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.4 added (19 Nov: the reading section)
+
+The eighth tile of the training grounds is open (`read`, `prd.md` §6.5). A run is one story
+from `readStories` in `content.js` (R1 "The Kite", R2 "The Cake", in turn).
+
+- Each paragraph is its own screen, with one check under it: "what happened here?" and three
+  lines in Hebrew. The right line opens the next paragraph; a wrong one greys out.
+- Then five questions. For each he taps the paragraph that holds the answer, then the sentence
+  that answers it. A wrong first tap on a sentence is the run's miss; paragraphs and checks can
+  be tried again freely.
+- No read-aloud, no clock, and no pen: writing the answer is for the printed papers.
+- **Not yet as in the PRD:** no tap-for-Hebrew on a word; a wrong check does not light the
+  sentence that decides it; a "why" answer is a tapped sentence, not built from tiles; stories
+  D1–D3 for the quest and the boss are not written; the old stories still read as before.
+- A run is `__game.practice.set` with `kind: 'read'`: `stage` (`para`, `q`), `pi`, `qi`,
+  `step` (`para`, `sent`), `gist`, `miss`.
+
+Checked in the browser from the day-11 sample save. Not on the iPad.
+
 ## What 3.9.3 added (19 Nov: the sorting sets)
 
 Three sections of the training grounds now play a set, not ten cards (`prd.md` §6.2, §7.8):

@@ -974,6 +974,7 @@
     const pick = shuffle(pool.sort((a, b) => S.cards[a].box - S.cards[b].box).slice(0, Math.max(n, Math.min(pool.length, n * 2)))).slice(0, n);
     P = { sec: sec.id, secN: n, secMiss: 0, queue: pick.map(cid => ({ cid, retry: false, retries: 0 })), current: null, seen: 0, correct: 0, wrong: 0, combo: 0, maxCombo: 0, misses: {}, startedAt: Date.now(), lastTick: Date.now() };
     logEvent('section_start', { id: sec.id });
+    if (sec.set === 'read') { P.queue = []; P.secN = 1; P.set = makeReadRun(); view = 'sortset'; return render(); }
     if (sec.set && (sec.set !== 'bank' || BANK.length)) { P.queue = []; P.secN = 1; P.set = makeSortSet(sec.set); view = 'sortset'; return render(); }
     nextPracticeCard();
   }
@@ -1053,6 +1054,60 @@
       <div class="ssbank en" data-action="ss-box" data-id="bank">${left.map(x => chip(x)).join('') || '&nbsp;'}</div>
       <div class="bigcta" style="text-align:center">${done ? `<button class="btn primary" data-action="ss-next">${t('ssNext')}</button>` : (v.stage === 'look' ? `<button class="btn primary" data-action="ss-done">${t('ssDone')}</button>` : '')}</div>`;
   }
+  // ----- the reading section (PRD §6.5, v4.1): one paragraph at a time, no read-aloud, the answer found in the text -----
+  // Each paragraph is its own screen with one check in Hebrew under it. After the last one come the questions:
+  // first the paragraph that holds the answer, then the sentence. Nothing is timed.
+  function makeReadRun() {
+    const all = C.readStories || [], st = all[(S.sets.readSeq || 0) % all.length];
+    S.sets.readSeq = (S.sets.readSeq || 0) + 1;
+    return { kind: 'read', st, stage: 'para', pi: 0, qi: 0, step: 'para', gist: shuffle(st.paras[0].gist.map((he, i) => ({ he, ok: i === 0 }))), bad: [], hit: false, miss: 0, tried: false };
+  }
+  function rdGist(i) {
+    const v = P.set, o = v.gist[i]; if (!o) return;
+    if (!o.ok) { if (!v.bad.includes(i)) v.bad.push(i); return render(); }
+    v.pi++; v.bad = [];
+    if (v.pi < v.st.paras.length) v.gist = shuffle(v.st.paras[v.pi].gist.map((he, k) => ({ he, ok: k === 0 })));
+    else { v.stage = 'q'; v.step = 'para'; }
+    tickPractice(); render();
+  }
+  function rdPara(i) {
+    const v = P.set, q = v.st.qs[v.qi]; if (v.stage !== 'q' || v.step !== 'para') return;
+    if (i !== q.p) { if (!v.bad.includes(i)) v.bad.push(i); return render(); }
+    v.step = 'sent'; v.bad = []; v.tried = false; render();
+  }
+  function rdSent(i) {
+    const v = P.set, q = v.st.qs[v.qi]; if (v.stage !== 'q' || v.step !== 'sent' || v.hit) return;
+    if (i !== q.s) { if (!v.tried) { v.miss++; v.tried = true; } if (!v.bad.includes(i)) v.bad.push(i); return render(); }
+    v.hit = true; if (!v.tried) { P.correct++; P.combo++; } else { P.wrong++; P.combo = 0; }
+    P.seen++; save(); render();
+  }
+  function rdNext() {
+    const v = P.set; if (!v.hit) return;
+    v.hit = false; v.bad = []; v.tried = false; v.qi++; v.step = 'para';
+    if (v.qi >= v.st.qs.length) { P.secMiss = v.miss; logEvent('section_read', { id: v.st.id, miss: v.miss }); return endSection(); }
+    tickPractice(); render();
+  }
+  function readView() {
+    const v = P.set, sec = SECS.find(x => x.id === P.sec), st = v.st, m = st.paras.length;
+    const head = sub => topbar(`${sec.e} <span class="en">${esc(st.title)}</span>`, sub, `<button class="btn small" data-action="grounds">${t('practiceEnd')}</button>`);
+    if (v.stage === 'para') {
+      return `${head(t('rdPart', { n: v.pi + 1, m }))}
+        <div class="card rdpara en">${st.paras[v.pi].s.map(x => `<span>${esc(x)}</span>`).join(' ')}</div>
+        <div class="rdask">${t('rdGist')}</div>
+        <div class="rdopts">${v.gist.map((o, i) => `<button class="rdopt ${v.bad.includes(i) ? 'bad' : ''}" data-action="rd-gist" data-i="${i}" ${v.bad.includes(i) ? 'disabled' : ''}>${esc(o.he)}</button>`).join('')}</div>`;
+    }
+    const q = st.qs[v.qi];
+    const qcard = `<div class="card rdq en">${esc(q.q)}</div>`;
+    if (v.step === 'para') {
+      return `${head(t('rdQ', { n: v.qi + 1, m: st.qs.length }))}${qcard}
+        <div class="rdask">${t('rdFindPara')}</div>
+        ${st.paras.map((p, i) => `<button class="rdpick en ${v.bad.includes(i) ? 'bad' : ''}" data-action="rd-para" data-i="${i}" ${v.bad.includes(i) ? 'disabled' : ''}>${p.s.map(esc).join(' ')}</button>`).join('')}`;
+    }
+    return `${head(t('rdQ', { n: v.qi + 1, m: st.qs.length }))}${qcard}
+      <div class="rdask">${v.hit ? t('rdCaught') : t('rdFindSent')}</div>
+      <div class="card rdpara en pick">${st.paras[q.p].s.map((x, i) => `<span class="rdsent ${v.hit && i === q.s ? 'good' : ''} ${v.bad.includes(i) ? 'bad' : ''}" data-action="rd-sent" data-i="${i}">${esc(x)}</span>`).join(' ')}</div>
+      ${v.hit ? `<div class="bigcta" style="text-align:center"><button class="btn primary" data-action="rd-next">${t('rdNext')}</button></div>` : ''}`;
+  }
   function endSection() {
     const sec = SECS.find(x => x.id === P.sec), st = secState(sec);
     const clean = P.secMiss === 0, up = clean && secUpsLeft(sec) > 0;
@@ -1064,7 +1119,7 @@
   const secMeter = (lvl, pop) => `<div class="secmeter">${[1, 2, 3, 4, 5].map(i => `<span class="${i <= lvl ? 'on' : ''} ${pop && i === lvl ? 'pop' : ''}"></span>`).join('')}</div>`;
   function groundsView() {
     const tiles = SECS.map(sec => {
-      if (!sec.pool) return `<div class="sectile shut"><div class="sece">${sec.e}</div><div class="secname">${esc(sec.he)}</div><div class="muted">${t('secSoon')}</div></div>`;
+      if (!sec.pool && !sec.set) return `<div class="sectile shut"><div class="sece">${sec.e}</div><div class="secname">${esc(sec.he)}</div><div class="muted">${t('secSoon')}</div></div>`;
       const st = secState(sec), has = !!sec.set || secPool(sec).length > 0;
       const note = st.lvl >= 5 ? t('secFull') : (secUpsLeft(sec) ? '' : t('secTomorrow'));
       return `<button class="sectile ${st.lvl >= 5 ? 'full' : ''}" data-action="section" data-id="${sec.id}" ${has ? '' : 'disabled'}>
@@ -3050,7 +3105,7 @@
     card() { return cardScreen(R, false); },
     practice() { return cardScreen(P, true); },
     grounds() { return groundsView(); },
-    sortset() { return P && P.set ? sortSetView() : groundsView(); },
+    sortset() { return P && P.set ? (P.set.kind === 'read' ? readView() : sortSetView()) : groundsView(); },
     secdone() { return P && P.secDone ? secDoneView() : groundsView(); },
     surprise() { return surpriseView(); },
 
@@ -3571,6 +3626,10 @@
       case 'ss-box': ssBox(a.dataset.id); break;
       case 'ss-done': ssDone(); break;
       case 'ss-next': endSection(); break;
+      case 'rd-gist': rdGist(Number(a.dataset.i)); break;
+      case 'rd-para': rdPara(Number(a.dataset.i)); break;
+      case 'rd-sent': rdSent(Number(a.dataset.i)); break;
+      case 'rd-next': rdNext(); break;
       case 'end-practice': endPractice(false); break;
       case 'save-cap': { const v = parseInt(document.getElementById('capInput').value, 10); if (!isNaN(v)) { S.settings.freePlayCapMin = clamp(v, 0, 60); save(); toast('נשמר'); render(); } break; }
       case 'toggle-solofirst': S.settings.soloFirst = S.settings.soloFirst === false; save(); render(); break;

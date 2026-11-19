@@ -1286,6 +1286,13 @@ window.CONTENT = {
     secSub: 'כאן המילים מתבצרות. בוחרים מבצר ולוקחים ממנו חלק.',
     secGo: 'סיבוב של {n}',
     secSoon: 'נפתח מחר 🔒',
+    rdPart: 'חלק {n} מתוך {m}',
+    rdGist: 'מה קרה כאן?',
+    rdFindPara: 'באיזה חלק התשובה מתחבאת?',
+    rdFindSent: 'ועכשיו המשפט שעונה. מקישים עליו.',
+    rdCaught: 'נתפסה!',
+    rdNext: 'הלאה',
+    rdQ: 'שאלה {n} מתוך {m}',
     ssPickPron: 'בוחרים מילה, ואז את הטור שלה',
     ssPickArt: 'בוחרים מילה, ואז את הטור שלה',
     ssPickBank: 'בוחרים מילה, ואז את המקום שלה. שתי מילים נשארות בחוץ.',
@@ -1756,6 +1763,44 @@ window.CONTENT = {
     wb9: { spare: ['pool', 'month'], open: { w: 'call', t: '___ me on the phone, Dana.', a: 'call', he: 'תתקשרי אליי, דנה.' } },
     wb10: { spare: ['age', 'year'], open: { w: 'choose', t: '___ a book, Tom. Which one?', a: 'choose', he: 'תבחר ספר, תום. איזה?' } },
   },
+  // The reading section's stories (prd.md §6.5, v4.1): the teacher's kind of story, in the third person, read one
+  // paragraph at a time. A paragraph is a list of sentences. `gist` is the check under it: the first line is the
+  // right one. A question names its paragraph (`p`) and the sentence that answers it (`s`), both counted from 0.
+  // These stories are for the game only: the printed papers have their own (papers.js).
+  readStories: [
+    { id: 'R1', title: 'The Kite',
+      paras: [
+        { s: ['Yoav and Lia are brother and sister.', 'They live in a small town near a big park.', 'Every Friday they go to the park with their dog, Lucky.', 'They like to run and to fly a kite.'],
+          gist: ['אח ואחות הולכים כל יום שישי לפארק עם הכלב, רצים ומעיפים עפיפון.', 'אח ואחות גרים בפארק גדול עם הרבה כלבים.', 'שני חברים הולכים כל יום לבית הספר עם עפיפון.'] },
+        { s: ['This Friday the wind is very strong.', 'The kite goes up, up, up, and then it is not there!', '"Oh no! Where is our kite?" says Lia.', 'The children look next to the lake and behind the trees.', 'The kite is not there.'],
+          gist: ['הרוח חזקה, העפיפון נעלם, והילדים מחפשים אותו ולא מוצאים.', 'העפיפון נופל לאגם והילדים שוחים אליו.', 'הילדים עייפים מהרוח וחוזרים הביתה.'] },
+        { s: ['Suddenly Lucky runs to an old tree and barks.', 'The kite is in the tree!', 'A tall man helps the children and gives them the kite.', '"Thank you!" says Yoav.', '"Lucky is the best dog because he always helps us."', 'The children are happy, and Lucky has a big bone.'],
+          gist: ['הכלב מוצא את העפיפון על עץ, ואיש גבוה עוזר להוריד אותו.', 'הכלב בורח, והילדים מחפשים אותו ליד עץ זקן.', 'איש גבוה נותן לילדים עפיפון חדש במתנה.'] },
+      ],
+      qs: [
+        { q: 'What do Yoav and Lia like to do in the park?', p: 0, s: 3 },
+        { q: 'Where do the children look for the kite?', p: 1, s: 3 },
+        { q: 'Where is the kite?', p: 2, s: 1 },
+        { q: 'Who helps the children?', p: 2, s: 2 },
+        { q: 'Why is Lucky the best dog?', p: 2, s: 4 },
+      ] },
+    { id: 'R2', title: 'The Cake',
+      paras: [
+        { s: ['Michal is nine years old.', 'She lives with her mom, her dad and her little brother, Itay.', 'Michal likes to cook, and Itay likes to eat.'],
+          gist: ['מיכל בת תשע, גרה עם ההורים ועם אח קטן. היא אוהבת לבשל והוא אוהב לאכול.', 'מיכל ואיתי אחים בני תשע שאוהבים לבשל ביחד.', 'מיכל גרה עם סבתא שלה, שאוהבת לבשל.'] },
+        { s: ['Today is Mom\'s birthday.', 'Mom is at work.', 'Michal and Dad want to make a chocolate cake.', 'They put eggs, sugar and milk on the table.', 'But there is a problem: they have no chocolate!', '"Wait here," says Dad, and he goes to the shop.'],
+          gist: ['לאמא יש יום הולדת. מיכל ואבא רוצים לאפות עוגה, אבל אין שוקולד, ואבא הולך לחנות.', 'אמא אופה עוגת שוקולד ליום ההולדת של מיכל.', 'מיכל ואבא הולכים לחנות לקנות עוגה לאמא.'] },
+        { s: ['Dad comes home with the chocolate.', 'The cake is in the oven for forty minutes.', 'At six o\'clock Mom opens the door.', '"Surprise!" shout Michal and Itay.', 'Mom is very happy because she loves chocolate cake.', 'Itay is happy too.', 'He eats three pieces!'],
+          gist: ['העוגה מוכנה, אמא חוזרת בשש ומקבלת הפתעה. היא שמחה מאוד.', 'אמא חוזרת מוקדם ועוזרת לאפות את העוגה.', 'העוגה נשרפת בתנור, ואיתי עצוב.'] },
+      ],
+      qs: [
+        { q: 'Who likes to cook?', p: 0, s: 2 },
+        { q: 'Why is today a special day?', p: 1, s: 0 },
+        { q: 'What do Michal and Dad put on the table?', p: 1, s: 3 },
+        { q: 'Why does Dad go to the shop?', p: 1, s: 4 },
+        { q: 'Why is Mom happy?', p: 2, s: 4 },
+      ] },
+  ],
   sectionRun: 10, sectionUpsPerDay: 3,   // three, so a section that starts at 0 on Fri 20 Nov can still be full on the 21st
   sections: [
     { id: 'words', e: '📖', he: 'מה המילה אומרת?',        pool: { type: 'rec' } },
@@ -1763,7 +1808,7 @@ window.CONTENT = {
     { id: 'be',    e: '⚖️', he: 'am · is · are',           pool: { pack: 'u1', kind: 'gc' }, en: true },
     { id: 'have',  e: '🎒', he: 'have · has',              pool: { pack: 'u2', kind: 'gc' }, en: true },
     { id: 'art',   e: '🥚', he: 'a · an · some',           pool: { pack: 'u4b', kind: 'gc' }, en: true, set: 'art' },
-    { id: 'read',  e: '📜', he: 'סיפור',                   pool: null },
+    { id: 'read',  e: '📜', he: 'סיפור',                   pool: null, set: 'read' },
     { id: 'pron',  e: '👥', he: 'he · she · it · we · you · they', pool: { kind: 'np' }, en: true, set: 'pron' },
     { id: 'wh',    e: '❓', he: 'What · Where · Who',      pool: { pack: 'u4a' }, en: true },
   ],

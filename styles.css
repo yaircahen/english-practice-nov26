@@ -733,3 +733,16 @@ button.sectile:active { transform: translateY(2px); }
 .ssrow { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg); border-radius: 14px; padding: 12px 14px; font-size: 21px; line-height: 2.1; text-align: left; }
 .ssslot { display: inline-block; min-width: 110px; min-height: 44px; vertical-align: middle; border-bottom: 3px solid var(--gold); margin: 0 6px; text-align: center; cursor: pointer; }
 .ssslot.has { border-bottom-color: transparent; }
+
+/* the reading section: one paragraph at a time (PRD §6.5, v4.1) */
+.rdpara { direction: ltr; text-align: left; font-size: 26px; line-height: 1.9; padding: 22px 24px; letter-spacing: .3px; word-spacing: 3px; }
+.rdpara.pick { font-size: 23px; }
+.rdsent { border-radius: 8px; padding: 3px 2px; cursor: pointer; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.rdsent.good { background: #bfe6bf; }
+.rdsent.bad { opacity: .35; }
+.rdask { color: var(--fg); font-family: var(--display-font); font-size: 22px; text-align: center; margin: 16px 0 10px; }
+.rdopts { display: flex; flex-direction: column; gap: 10px; }
+.rdopt { font: inherit; font-size: 19px; line-height: 1.4; text-align: right; padding: 14px 16px; border-radius: 14px; border: 0; background: #f4ead2; color: #2a2118; box-shadow: 0 4px 0 rgba(0, 0, 0, .25); }
+.rdopt.bad, .rdpick.bad { opacity: .35; }
+.rdq { direction: ltr; text-align: left; font-size: 24px; font-weight: 700; padding: 16px 20px; }
+.rdpick { display: block; width: 100%; direction: ltr; text-align: left; font: inherit; font-size: 17px; line-height: 1.5; margin-bottom: 10px; padding: 12px 14px; border-radius: 14px; border: 2px solid color-mix(in srgb, var(--fg) 30%, transparent); background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg); }
