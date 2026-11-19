@@ -296,6 +296,24 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.1 added (19 Nov: the training grounds in eight sections, first version)
+
+The training-grounds button on the map now opens eight sections in the test's order (`sections`
+in `content.js`, `prd.md` §7.8). Each has a level from 0 to 5.
+
+- A run is ten cards from the section's pool, the lower boxes first. A run with every card right
+  at the first try takes the level up one, twice a day per section at most. A level never goes
+  down, and no card moves box: this is still free play.
+- A section's first level is seeded from his save: the share of its cards in Box 3 and up, to 3.
+- **Not yet as in the PRD:** the word bank, the pronoun table and the a/an/some sort are still
+  four-choice cards, not sets; the reading section is shut ("opens tomorrow"); the quest does
+  not move the meters; no crests, seals or second look.
+- Handles: `__game.openGrounds()`, `__game.startSection(id)`, `__game.secState(id)`; a run is
+  `__game.practice` with `sec`, `secN`, `secMiss`. Ids: `words, bank, be, have, art, read, pron, wh`.
+
+Checked in the browser from the day-11 sample save (a clean run, a run with a miss, the
+two-a-day rule). Not on the iPad.
+
 ## What 3.9.0 changed (19 Nov: the teacher's test)
 
 The real test follows the teacher's example, not the publisher's practice copy (`prd.md` §0.1).

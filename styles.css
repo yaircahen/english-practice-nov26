@@ -697,3 +697,21 @@ button.fchip { font: inherit; cursor: pointer; }
 @keyframes flicker { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.06); filter: brightness(1.18); } }
 @media (prefers-reduced-motion: reduce) { .goldbanner, .treasurehint, .streakcard .flames, .streakpill.blaze, .cdnum { animation: none; } }
 .comboline { font-size: 20px; font-weight: 700; color: var(--accent-deep); animation: lootpop .5s ease-out both; }
+
+/* the training grounds in eight sections (PRD §7.8) */
+.secgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.sectile { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 10px 10px; border-radius: 18px; border: 2px solid color-mix(in srgb, var(--fg) 18%, transparent); background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg); font: inherit; text-align: center; min-height: 150px; }
+button.sectile:active { transform: translateY(2px); }
+.sectile.full { border-color: var(--gold); }
+.sectile.shut, .sectile:disabled { opacity: .55; }
+.sece { font-size: 40px; line-height: 1; }
+.secname { font-family: var(--display-font); font-size: 20px; line-height: 1.2; }
+.secname.en { font-family: inherit; font-weight: 700; direction: ltr; font-size: 18px; }
+.secmeter { display: flex; gap: 5px; direction: ltr; justify-content: center; margin: 4px 0; }
+.secmeter span { width: 26px; height: 16px; border-radius: 4px 4px 2px 2px; background: color-mix(in srgb, currentColor 18%, transparent); }
+.secmeter span.on { background: var(--gold); }
+.secmeter span.pop { animation: secpop .7s ease-out; }
+@keyframes secpop { 0% { transform: scale(.3); } 60% { transform: scale(1.5); } 100% { transform: scale(1); } }
+.secdone .secmeter span { width: 44px; height: 26px; }
+.secdone .secmeter { margin: 16px 0; }
+.secdone .big { font-family: var(--display-font); font-size: 30px; }

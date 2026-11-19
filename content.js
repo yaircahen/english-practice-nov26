@@ -1282,6 +1282,22 @@ window.CONTENT = {
     firstWithParent: 'את הראשונה עושים עם הורה 👨‍👩‍👦',
     allRest: 'כל הקלפים נחים עד מחר 😴',
     practiceShut: 'המגרש סגור להיום 🔒',
+    secTitle: '🏰 שמונה מבצרים',
+    secSub: 'כאן המילים מתבצרות. בוחרים מבצר ולוקחים ממנו חלק.',
+    secGo: 'סיבוב של {n}',
+    secSoon: 'נפתח מחר 🔒',
+    secTomorrow: 'החלק הבא נפתח מחר',
+    secFull: 'המבצר כולו שלך 👑',
+    secMixed: '🎲 הכול מעורבב',
+    secBack: 'למפה',
+    secRunTitle: '{e} {name}',
+    secUpTitle: 'חלק מהמבצר נפל!',
+    secUpSub: 'המילים שם כבר אורזות.',
+    secCleanTitle: 'סיבוב נקי!',
+    secDoneTitle: 'סיבוב נגמר',
+    secDoneLines: ['המילים נשארו בפנים. הן יודעות שתחזור.', 'בפנים שומעים אותן לוחשות: "הוא שוב כאן".', 'המבצר עוד עומד. המילים כבר פחות רגועות.'],
+    secAgain: 'עוד סיבוב כאן',
+    secOther: 'למבצרים',
     practiceEmpty: 'עוד אין קלפים לאימון',
     practiceCapped: 'המגרש נסגר. המאמן הלך לאכול 🍕',
     saveFailed: 'השמירה נכשלה',
@@ -1698,6 +1714,19 @@ window.CONTENT = {
   // 19 Nov (prd.md §0.1): the teacher's test has no listening, no picture writing and no sentence halves.
   // Parked, not removed: out of the daily quest, still in the training grounds and on the coach screen.
   parked: { listening: true, writing: true, halves: true },
+  // The training grounds in eight sections, in the test's order (prd.md §7.8). `pool` says which cards a run draws from.
+  // A run is `sectionRun` cards; a clean run takes one more part of the section's stronghold, `sectionUpsPerDay` a day at most.
+  sectionRun: 10, sectionUpsPerDay: 2,
+  sections: [
+    { id: 'words', e: '📖', he: 'מה המילה אומרת?',        pool: { type: 'rec' } },
+    { id: 'bank',  e: '🧩', he: 'המילה שחסרה במשפט',      pool: { type: 'cz' } },
+    { id: 'be',    e: '⚖️', he: 'am · is · are',           pool: { pack: 'u1', kind: 'gc' }, en: true },
+    { id: 'have',  e: '🎒', he: 'have · has',              pool: { pack: 'u2', kind: 'gc' }, en: true },
+    { id: 'art',   e: '🥚', he: 'a · an · some',           pool: { pack: 'u4b', kind: 'gc' }, en: true },
+    { id: 'read',  e: '📜', he: 'סיפור',                   pool: null },
+    { id: 'pron',  e: '👥', he: 'he · she · it · we · you · they', pool: { kind: 'np' }, en: true },
+    { id: 'wh',    e: '❓', he: 'What · Where · Who',      pool: { pack: 'u4a' }, en: true },
+  ],
   speedSec: 60,                 // the speed round's length; it opens with 12 of the 50 words mastered
   // "about me": the five lines of his own card. `he` is the hint under a line; `ph` is an example shown in an empty field.
   about: [

@@ -768,6 +768,7 @@
     if (practice) {
       P.seen++;
       if (correct) practiceRight(item);
+      if (!correct && P.sec && !item.retry) P.secMiss++;
       if (!correct) { P.misses[item.cid] = (P.misses[item.cid] || 0) + 1; if (P.misses[item.cid] >= 3) st.priority = 1; }
     }
     const rt = practice ? P : R;
@@ -930,10 +931,83 @@
   function nextPracticeCard() {
     if (!tickPractice()) return;
     if (P.surprise) { const why = P.surprise; P.surprise = false; return openSurprise(why); }
+    if (!P.queue.length && P.sec) return endSection();
     if (!P.queue.length) P.queue = practicePool().map(cid => ({ cid, retry: false, retries: 0 }));
     P.current = P.queue.shift(); P.current.view = makeCardView(P.current.cid);
     if (goldRoll(P.current, C.surprise.goldPractice)) P.current.gold = true;
     view = 'practice'; render();
+  }
+  // ----- the training grounds in eight sections (PRD §7.8) -----
+  // A section's level (0–5) is the part of its stronghold he has taken. It rises on a clean run, never falls,
+  // and moves no card: boxes still move only in the quest. Kept in S.secs[id] = { lvl, ups: { date: n }, runs: [...] }.
+  const SECS = C.sections || [];
+  function secPool(sec) {
+    const q = sec.pool; if (!q) return [];
+    return Object.keys(S.cards).filter(cid => {
+      if (!known(cid)) return false;
+      const p = parseCard(cid);
+      if (q.type) return p.type === q.type && !!p.word;
+      return !!p.g && (!q.pack || p.g.pack === q.pack) && (!q.kind || p.g.kind === q.kind);
+    });
+  }
+  function secState(sec) {
+    if (!S.secs) S.secs = {};
+    if (!S.secs[sec.id]) {
+      // where the meter starts: from what he has already done, up to 3 (the share of the section's cards in Box 3 and up)
+      const pool = secPool(sec), share = pool.length ? pool.filter(cid => S.cards[cid].box >= MASTERED_BOX).length / pool.length : 0;
+      S.secs[sec.id] = { lvl: Math.min(3, Math.floor(share * 4)), ups: {}, runs: [] };
+    }
+    return S.secs[sec.id];
+  }
+  const secUpsLeft = sec => { const st = secState(sec); return st.lvl >= 5 ? 0 : Math.max(0, (C.sectionUpsPerDay || 2) - (st.ups[todayStr()] || 0)); };
+  function openGrounds() {
+    if (today().freePlaySec >= S.settings.freePlayCapMin * 60) { toast(t('practiceShut')); return; }
+    if (!SECS.length) return startPractice();
+    P = null; view = 'grounds'; render();
+  }
+  function startSection(id) {
+    const sec = SECS.find(x => x.id === id); if (!sec) return;
+    if (today().freePlaySec >= S.settings.freePlayCapMin * 60) { toast(t('practiceShut')); return; }
+    const pool = shuffle(secPool(sec)); if (!pool.length) { toast(t('practiceEmpty')); return; }
+    // the lower boxes first, so a run is mostly what still needs him; shuffled again so the order says nothing
+    const n = Math.min(C.sectionRun || 10, pool.length);
+    const pick = shuffle(pool.sort((a, b) => S.cards[a].box - S.cards[b].box).slice(0, Math.max(n, Math.min(pool.length, n * 2)))).slice(0, n);
+    P = { sec: sec.id, secN: n, secMiss: 0, queue: pick.map(cid => ({ cid, retry: false, retries: 0 })), current: null, seen: 0, correct: 0, wrong: 0, combo: 0, maxCombo: 0, misses: {}, startedAt: Date.now(), lastTick: Date.now() };
+    logEvent('section_start', { id: sec.id });
+    nextPracticeCard();
+  }
+  function endSection() {
+    const sec = SECS.find(x => x.id === P.sec), st = secState(sec);
+    const clean = P.secMiss === 0, up = clean && secUpsLeft(sec) > 0;
+    if (up) { st.lvl++; st.ups[todayStr()] = (st.ups[todayStr()] || 0) + 1; }
+    st.runs.push({ date: todayStr(), n: P.secN, miss: P.secMiss, up }); if (st.runs.length > 40) st.runs.shift();
+    tickPractice(); logEvent('section_end', { id: sec.id, miss: P.secMiss, up, lvl: st.lvl });
+    P.secDone = { clean, up }; save(); view = 'secdone'; render();
+  }
+  const secMeter = (lvl, pop) => `<div class="secmeter">${[1, 2, 3, 4, 5].map(i => `<span class="${i <= lvl ? 'on' : ''} ${pop && i === lvl ? 'pop' : ''}"></span>`).join('')}</div>`;
+  function groundsView() {
+    const tiles = SECS.map(sec => {
+      if (!sec.pool) return `<div class="sectile shut"><div class="sece">${sec.e}</div><div class="secname">${esc(sec.he)}</div><div class="muted">${t('secSoon')}</div></div>`;
+      const st = secState(sec), has = secPool(sec).length > 0;
+      const note = st.lvl >= 5 ? t('secFull') : (secUpsLeft(sec) ? '' : t('secTomorrow'));
+      return `<button class="sectile ${st.lvl >= 5 ? 'full' : ''}" data-action="section" data-id="${sec.id}" ${has ? '' : 'disabled'}>
+        <div class="sece">${sec.e}</div><div class="secname ${sec.en ? 'en' : ''}">${esc(sec.he)}</div>${secMeter(st.lvl)}<div class="muted">${note || '&nbsp;'}</div></button>`;
+    }).join('');
+    return `${topbar(t('secTitle'), t('secSub'), `<button class="btn small" data-action="end-practice">${t('secBack')}</button>`)}
+      <div class="secgrid">${tiles}</div>
+      <div class="row wrap" style="justify-content:center; margin-top:14px"><button class="btn" data-action="practice-mixed">${t('secMixed')}</button></div>`;
+  }
+  function secDoneView() {
+    const sec = SECS.find(x => x.id === P.sec), st = secState(sec), d = P.secDone;
+    if (d.up) onRendered(() => { Audio.fanfare(); confetti(70); });
+    const lines = C.copy.secDoneLines || [];
+    const title = d.up ? t('secUpTitle') : (d.clean ? t('secCleanTitle') : t('secDoneTitle'));
+    const sub = d.up ? t('secUpSub') : (d.clean ? (st.lvl >= 5 ? t('secFull') : t('secTomorrow')) : (lines.length ? lines[st.runs.length % lines.length] : ''));
+    const shut = today().freePlaySec >= S.settings.freePlayCapMin * 60;
+    return `${topbar(`${sec.e} <span class="${sec.en ? 'en' : ''}">${esc(sec.he)}</span>`, '')}
+      <div class="card center secdone"><div class="big">${title}</div>${secMeter(st.lvl, d.up)}<div class="muted">${sub}</div>
+        <div class="bigcta row wrap" style="justify-content:center">${shut ? '' : `<button class="btn" data-action="section" data-id="${sec.id}">${t('secAgain')}</button>`}<button class="btn primary" data-action="${shut ? 'end-practice' : 'grounds'}">${t(shut ? 'secBack' : 'secOther')}</button></div>
+      </div>`;
   }
   function endPractice(capped) {
     if (P) { tickPractice(); logEvent('practice_end', { seen: P.seen, correct: P.correct, wrong: P.wrong }); }
@@ -2898,6 +2972,8 @@
 
     card() { return cardScreen(R, false); },
     practice() { return cardScreen(P, true); },
+    grounds() { return groundsView(); },
+    secdone() { return P && P.secDone ? secDoneView() : groundsView(); },
     surprise() { return surpriseView(); },
 
     // one screen with the rule, before a grammar unit's first cards
@@ -2980,7 +3056,7 @@
     const st = item.cid ? S.cards[item.cid] : null;          // a set and a mid-boss sentence are not cards: no box, no ladder
     const boss = !practice && R.phase === 'boss';              // in the mid-boss the bar is his, and the line under the title names the section
     const header = practice
-      ? topbar(t('practiceTitle'), '', `<button class="btn small" data-action="end-practice">${t('practiceEnd')}</button>`)
+      ? topbar(rt.sec ? `${SECS.find(x => x.id === rt.sec).e} ${esc(SECS.find(x => x.id === rt.sec).he)}` : t('practiceTitle'), rt.sec ? `${Math.min(rt.seen + 1, Math.max(rt.secN, rt.seen + 1))}${rt.seen < rt.secN ? '/' + rt.secN : ' · 🔁'}` : '', `<button class="btn small" data-action="${rt.sec ? 'grounds' : 'end-practice'}">${t('practiceEnd')}</button>`)
       : topbar(R.round.title, boss ? t('bossSec' + item.sec) : `${Math.min(rt.done, total)}/${total}${item.retry ? ' · 🔁' : ''}`, `<span class="combo ${rt.combo >= 5 ? 'hot' : ''}">${rt.combo >= 2 ? `x${rt.combo}` : ''}</span>`);
     const popAt = st && v.res && v.res.up ? st.box : 0;        // a tile card redraws after the answer; its new square pops
     const ladder = st ? `<div class="boxladder" title="קופסה">${[1, 2, 3, 4, 5].map(b => `<span class="${b <= st.box ? (b === 5 ? 'top' : 'on') : ''} ${b === popAt ? 'pop' : ''}"></span>`).join('')}</div>` : '';
@@ -3409,7 +3485,10 @@
       case 'coach-freeze': { const k = coachFreeze(); toast(k < 0 ? 'אין רצף להקפיא: לא הייתה משימה בשלושת השבועות האחרונים' : (k ? `הוקפאו ${k} ימים. הרצף נשמר.` : 'אין ימים חסרים')); render(); break; }
       case 'toggle-box': S.settings.boxEvery = (S.settings.boxEvery || 1) === 2 ? 1 : 2; save(); render(); break;
       case 'to-map': view = 'map'; render(); break;
-      case 'practice': startPractice(); break;
+      case 'practice': openGrounds(); break;
+      case 'grounds': openGrounds(); break;
+      case 'practice-mixed': startPractice(); break;
+      case 'section': startSection(a.dataset.id); break;
       case 'end-practice': endPractice(false); break;
       case 'save-cap': { const v = parseInt(document.getElementById('capInput').value, 10); if (!isNaN(v)) { S.settings.freePlayCapMin = clamp(v, 0, 60); save(); toast('נשמר'); render(); } break; }
       case 'toggle-solofirst': S.settings.soloFirst = S.settings.soloFirst === false; save(); render(); break;
@@ -3551,5 +3630,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, get practice() { return P; }, startPractice, startReplay, finishSession, soloFirstDue };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, get practice() { return P; }, startPractice, startReplay, finishSession, soloFirstDue, openGrounds, startSection, secState: id => secState(SECS.find(x => x.id === id)) };
 })();
