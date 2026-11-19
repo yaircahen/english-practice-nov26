@@ -963,7 +963,7 @@
   function openGrounds() {
     if (today().freePlaySec >= S.settings.freePlayCapMin * 60) { toast(t('practiceShut')); return; }
     if (!SECS.length) return startPractice();
-    P = null; view = 'grounds'; render();
+    P = null; sealWon = null; view = 'grounds'; render();
   }
   function startSection(id) {
     const sec = SECS.find(x => x.id === id); if (!sec) return;
@@ -1108,6 +1108,33 @@
       <div class="card rdpara en pick">${st.paras[q.p].s.map((x, i) => `<span class="rdsent ${v.hit && i === q.s ? 'good' : ''} ${v.bad.includes(i) ? 'bad' : ''}" data-action="rd-sent" data-i="${i}">${esc(x)}</span>`).join(' ')}</div>
       ${v.hit ? `<div class="bigcta" style="text-align:center"><button class="btn primary" data-action="rd-next">${t('rdNext')}</button></div>` : ''}`;
   }
+  // ----- seals (PRD §6.4): the one thing paper changes in the game -----
+  // A clean task on a printed paper earns a secret phrase from the parent; typed here, it seals that section's crest.
+  const sealNorm = x => String(x || '').replace(/[^\u05d0-\u05eaA-Za-z0-9]/g, '').replace(/ך/g, 'כ').replace(/ם/g, 'מ').replace(/ן/g, 'נ').replace(/ף/g, 'פ').replace(/ץ/g, 'צ').toLowerCase();
+  const sealPhrases = () => Object.assign({}, C.seals || {}, (S.settings.seals || {}));
+  let sealMsg = '', sealWon = null;
+  function sealTry() {
+    const el = document.getElementById('sealInput'), typed = sealNorm(el && el.value); if (!typed) return;
+    const ph = sealPhrases(), id = Object.keys(ph).find(k => sealNorm(ph[k]) === typed), sec = id && SECS.find(x => x.id === id);
+    if (!sec) { sealMsg = t('sealNo'); logEvent('seal_miss', {}); return render(); }
+    const st = secState(sec);
+    if (st.seal) { sealMsg = t('sealHave'); return render(); }
+    st.seal = todayStr(); sealMsg = ''; sealWon = sec.id; logEvent('seal', { id: sec.id }); save(); render();
+  }
+  function sealView() {
+    if (sealWon) {
+      const sec = SECS.find(x => x.id === sealWon);
+      onRendered(() => { Audio.fanfare(); confetti(110); });
+      return `${topbar(t('sealTitle'), '')}
+        <div class="card center secdone"><div class="sealbig">🏅</div><div class="big">${t('sealWin')}</div>
+          <div class="sece">${sec.e}</div><div class="secname ${sec.en ? 'en' : ''}" style="color:inherit">${esc(sec.he)}</div><div class="muted">${t('sealWinSub')}</div>
+          <div class="bigcta"><button class="btn primary" data-action="grounds">${t('secOther')}</button></div></div>`;
+    }
+    return `${topbar(t('sealTitle'), t('sealSub'), `<button class="btn small" data-action="grounds">${t('secOther')}</button>`)}
+      <div class="card center"><input id="sealInput" class="sealinput" type="text" dir="rtl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('sealPh')}">
+        ${sealMsg ? `<div class="muted" style="margin-top:10px">${sealMsg}</div>` : ''}
+        <div class="bigcta"><button class="btn primary" data-action="seal-try">${t('sealGo')}</button></div></div>`;
+  }
   function endSection() {
     const sec = SECS.find(x => x.id === P.sec), st = secState(sec);
     const clean = P.secMiss === 0, up = clean && secUpsLeft(sec) > 0;
@@ -1123,11 +1150,11 @@
       const st = secState(sec), has = !!sec.set || secPool(sec).length > 0;
       const note = st.lvl >= 5 ? t('secFull') : (secUpsLeft(sec) ? '' : t('secTomorrow'));
       return `<button class="sectile ${st.lvl >= 5 ? 'full' : ''}" data-action="section" data-id="${sec.id}" ${has ? '' : 'disabled'}>
-        <div class="sece">${sec.e}</div><div class="secname ${sec.en ? 'en' : ''}">${esc(sec.he)}</div>${secMeter(st.lvl)}<div class="muted">${note || '&nbsp;'}</div></button>`;
+        <div class="sece">${sec.e}</div><div class="secname ${sec.en ? 'en' : ''}">${esc(sec.he)}</div>${secMeter(st.lvl)}<div class="muted">${note || '&nbsp;'}</div>${(C.seals || {})[sec.id] ? `<span class="sealslot ${st.seal ? 'on' : ''}">${st.seal ? '🏅' : ''}</span>` : ''}</button>`;
     }).join('');
     return `${topbar(t('secTitle'), t('secSub'), `<button class="btn small" data-action="end-practice">${t('secBack')}</button>`)}
       <div class="secgrid">${tiles}</div>
-      <div class="row wrap" style="justify-content:center; margin-top:14px"><button class="btn" data-action="practice-mixed">${t('secMixed')}</button></div>`;
+      <div class="row wrap" style="justify-content:center; margin-top:14px"><button class="btn" data-action="seal-open">${t('sealBtn')}</button><button class="btn" data-action="practice-mixed">${t('secMixed')}</button></div>`;
   }
   function secDoneView() {
     const sec = SECS.find(x => x.id === P.sec), st = secState(sec), d = P.secDone;
@@ -3105,6 +3132,7 @@
     card() { return cardScreen(R, false); },
     practice() { return cardScreen(P, true); },
     grounds() { return groundsView(); },
+    seal() { return sealView(); },
     sortset() { return P && P.set ? (P.set.kind === 'read' ? readView() : sortSetView()) : groundsView(); },
     secdone() { return P && P.secDone ? secDoneView() : groundsView(); },
     surprise() { return surpriseView(); },
@@ -3622,6 +3650,8 @@
       case 'grounds': openGrounds(); break;
       case 'practice-mixed': startPractice(); break;
       case 'section': startSection(a.dataset.id); break;
+      case 'seal-open': sealMsg = ''; sealWon = null; view = 'seal'; render(); break;
+      case 'seal-try': sealTry(); break;
       case 'ss-tile': ssTile(Number(a.dataset.id)); break;
       case 'ss-box': ssBox(a.dataset.id); break;
       case 'ss-done': ssDone(); break;

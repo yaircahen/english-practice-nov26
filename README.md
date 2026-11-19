@@ -297,6 +297,23 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.5 added (19 Nov: seals)
+
+The one link from paper to the game (`prd.md` §6.4). Under the eight tiles is "יש לי משפט סוד":
+he types the phrase a parent gave him for a clean task on a printed paper, and that section's
+tile takes a seal (`state.secs[id].seal`, the date).
+
+- The phrases are `seals` in `content.js`, one for each of the seven sections that are test
+  tasks, and the same ones are printed on the papers' coach page (`seals` in `papers.js`).
+  **Change both together.** `state.settings.seals` overrides them, but the coach screen has no
+  field for it yet.
+- Spaces, punctuation and final-letter forms are ignored when the phrase is compared.
+- A wrong phrase changes nothing and is not counted against him.
+- The seal screen is inside the training grounds, so it is reachable only when they are open
+  (after the day's quest, within the cap).
+
+Checked in the browser from the day-11 sample save. Not on the iPad.
+
 ## What 3.9.4 added (19 Nov: the reading section)
 
 The eighth tile of the training grounds is open (`read`, `prd.md` §6.5). A run is one story

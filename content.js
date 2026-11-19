@@ -1305,6 +1305,15 @@ window.CONTENT = {
     secTomorrow: 'החלק הבא נפתח מחר',
     secFull: 'המבצר כולו שלך 👑',
     secMixed: '🎲 הכול מעורבב',
+    sealBtn: '🔑 יש לי משפט סוד',
+    sealTitle: '🔑 משפט סוד',
+    sealSub: 'משפט סוד מקבלים רק מאבא או מאמא, על דף שיצא נקי.',
+    sealPh: 'כותבים כאן את המשפט',
+    sealGo: 'לפתוח',
+    sealNo: 'המנעול לא זז. בודקים את המשפט עם אבא או אמא.',
+    sealHave: 'החותם הזה כבר שלך 🏅',
+    sealWin: 'חותם על המבצר!',
+    sealWinSub: 'מה שנכתב בעט כבר לא נמחק. המילים יודעות את זה.',
     secBack: 'למפה',
     secRunTitle: '{e} {name}',
     secUpTitle: 'חלק מהמבצר נפל!',
@@ -1801,6 +1810,10 @@ window.CONTENT = {
         { q: 'Why is Mom happy?', p: 2, s: 4 },
       ] },
   ],
+  // The seals (prd.md §6.4): one secret phrase per section, told by the parent when that task came out clean on
+  // a printed paper. The same phrases are printed on the papers' coach page (papers.js); change both together.
+  // The coach can also set his own on the coach screen (state.settings.seals), which wins over these.
+  seals: { bank: 'גילעד האלוף', be: 'המילים בורחות', have: 'מלך המבצר', art: 'צייד המילים', pron: 'שום מילה לא מתחבאת', read: 'קורא עקבות', wh: 'אלוף השאלות' },
   sectionRun: 10, sectionUpsPerDay: 3,   // three, so a section that starts at 0 on Fri 20 Nov can still be full on the 21st
   sections: [
     { id: 'words', e: '📖', he: 'מה המילה אומרת?',        pool: { type: 'rec' } },
