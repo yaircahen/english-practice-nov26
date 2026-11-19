@@ -1286,6 +1286,15 @@ window.CONTENT = {
     secSub: 'כאן המילים מתבצרות. בוחרים מבצר ולוקחים ממנו חלק.',
     secGo: 'סיבוב של {n}',
     secSoon: 'נפתח מחר 🔒',
+    ssPickPron: 'בוחרים מילה, ואז את הטור שלה',
+    ssPickArt: 'בוחרים מילה, ואז את הטור שלה',
+    ssPickBank: 'בוחרים מילה, ואז את המקום שלה. שתי מילים נשארות בחוץ.',
+    ssLook: '👀 מבט שני: אפשר עוד להזיז. מילה שהתחבאה במקום הלא נכון נתפסת עכשיו.',
+    ssDone: 'סיימתי ✔',
+    ssNext: 'הלאה',
+    ssClean: 'הכול במקום. למילים לא נשאר איפה להתחבא.',
+    ssLookWin: 'המבט השני תפס אחת! היא כבר חשבה שהצליחה לברוח.',
+    ssFix: 'אלה ניסו להתחבא בטור אחר. עכשיו רואים איפה הן גרות.',
     secTomorrow: 'החלק הבא נפתח מחר',
     secFull: 'המבצר כולו שלך 👑',
     secMixed: '🎲 הכול מעורבב',
@@ -1716,15 +1725,46 @@ window.CONTENT = {
   parked: { listening: true, writing: true, halves: true },
   // The training grounds in eight sections, in the test's order (prd.md §7.8). `pool` says which cards a run draws from.
   // A run is `sectionRun` cards; a clean run takes one more part of the section's stronghold, `sectionUpsPerDay` a day at most (was two until the dates were counted).
+  // The sorting sets (prd.md §6.2, v4.1). A run of the pronoun table draws ten nouns: one from each column and four
+  // more. A run of the a/an/some sort draws four, three and three. Nothing is checked until he presses "done".
+  sortPron: {
+    cols: ['It', 'She', 'They', 'We', 'You', 'He'],
+    It: ['the toy', 'the brush', 'my blanket', 'the game', 'the dog', 'the phone'],
+    She: ['Maya', 'my mom', 'the girl', 'Tali', 'my aunt'],
+    They: ['Dan and Tom', 'the toys', 'my friends', 'the brush and the blanket', 'Maya and Noa', 'the dogs'],
+    We: ['Tom and I', 'my team and I', 'my mom and I', 'my friends and I'],
+    You: ['you and Maya', 'you and your team', 'you and Dan', 'you and the kids'],
+    He: ['Omer', 'my dad', 'the boy', 'Dan', 'my grandpa'],
+  },
+  sortArt: {
+    cols: ['a', 'an', 'some'], take: { a: 4, an: 3, some: 3 },
+    a: ['toy', 'team', 'hobby', 'pool', 'blanket', 'brush', 'year', 'month', 'game', 'special day'],
+    an: ['age', 'old toy', 'important day', 'egg', 'apple', 'orange', 'old dog'],
+    some: ['toys', 'people', 'blankets', 'friends', 'games', 'dogs', 'books'],
+  },
+  // The word bank with spare words: for each fixed set, two words that fit none of its blanks (checked by hand),
+  // and, where one could be written, a sentence whose blank opens it (`w` says whose sentence it replaces).
+  bankSpare: {
+    wb1: { spare: ['year', 'chess'], open: { w: 'people', t: '___ come to the pool every day.', a: 'people', he: 'אנשים באים לבריכה כל יום.' } },
+    wb2: { spare: ['birthday', 'hobby'], open: { w: 'if', t: '___ it is hard, call me.', a: 'if', he: 'אם זה קשה, תתקשר אליי.' } },
+    wb3: { spare: ['month', 'age'] },
+    wb4: { spare: ['pool', 'toy'], open: { w: 'every', t: '___ day Omer is at the pool.', a: 'every', he: 'כל יום עומר בבריכה.' } },
+    wb5: { spare: ['pool', 'age'], open: { w: 'learn', t: '___ chess with me, Tom! It is a good game.', a: 'learn', he: 'תלמד איתי שחמט, תום! זה משחק טוב.' } },
+    wb6: { spare: ['chess', 'blanket'], open: { w: 'birthday', t: '___ parties are fun. My party is in April.', a: 'birthday', he: 'מסיבות יום הולדת הן כיף. המסיבה שלי באפריל.' } },
+    wb7: { spare: ['pool', 'brush'], open: { w: 'begin', t: '___ the game, please. It is ten.', a: 'begin', he: 'תתחילו את המשחק, בבקשה. השעה עשר.' } },
+    wb8: { spare: ['blanket', 'toy'], open: { w: 'help', t: '___ me, Tali! This is hard.', a: 'help', he: 'תעזרי לי, טלי! זה קשה.' } },
+    wb9: { spare: ['pool', 'month'], open: { w: 'call', t: '___ me on the phone, Dana.', a: 'call', he: 'תתקשרי אליי, דנה.' } },
+    wb10: { spare: ['age', 'year'], open: { w: 'choose', t: '___ a book, Tom. Which one?', a: 'choose', he: 'תבחר ספר, תום. איזה?' } },
+  },
   sectionRun: 10, sectionUpsPerDay: 3,   // three, so a section that starts at 0 on Fri 20 Nov can still be full on the 21st
   sections: [
     { id: 'words', e: '📖', he: 'מה המילה אומרת?',        pool: { type: 'rec' } },
-    { id: 'bank',  e: '🧩', he: 'המילה שחסרה במשפט',      pool: { type: 'cz' } },
+    { id: 'bank',  e: '🧩', he: 'המילה שחסרה במשפט',      pool: { type: 'cz' }, set: 'bank' },
     { id: 'be',    e: '⚖️', he: 'am · is · are',           pool: { pack: 'u1', kind: 'gc' }, en: true },
     { id: 'have',  e: '🎒', he: 'have · has',              pool: { pack: 'u2', kind: 'gc' }, en: true },
-    { id: 'art',   e: '🥚', he: 'a · an · some',           pool: { pack: 'u4b', kind: 'gc' }, en: true },
+    { id: 'art',   e: '🥚', he: 'a · an · some',           pool: { pack: 'u4b', kind: 'gc' }, en: true, set: 'art' },
     { id: 'read',  e: '📜', he: 'סיפור',                   pool: null },
-    { id: 'pron',  e: '👥', he: 'he · she · it · we · you · they', pool: { kind: 'np' }, en: true },
+    { id: 'pron',  e: '👥', he: 'he · she · it · we · you · they', pool: { kind: 'np' }, en: true, set: 'pron' },
     { id: 'wh',    e: '❓', he: 'What · Where · Who',      pool: { pack: 'u4a' }, en: true },
   ],
   speedSec: 60,                 // the speed round's length; it opens with 12 of the 50 words mastered

@@ -968,13 +968,90 @@
   function startSection(id) {
     const sec = SECS.find(x => x.id === id); if (!sec) return;
     if (today().freePlaySec >= S.settings.freePlayCapMin * 60) { toast(t('practiceShut')); return; }
-    const pool = shuffle(secPool(sec)); if (!pool.length) { toast(t('practiceEmpty')); return; }
+    const pool = shuffle(secPool(sec)); if (!pool.length && !sec.set) { toast(t('practiceEmpty')); return; }
     // the lower boxes first, so a run is mostly what still needs him; shuffled again so the order says nothing
     const n = Math.min(C.sectionRun || 10, pool.length);
     const pick = shuffle(pool.sort((a, b) => S.cards[a].box - S.cards[b].box).slice(0, Math.max(n, Math.min(pool.length, n * 2)))).slice(0, n);
     P = { sec: sec.id, secN: n, secMiss: 0, queue: pick.map(cid => ({ cid, retry: false, retries: 0 })), current: null, seen: 0, correct: 0, wrong: 0, combo: 0, maxCombo: 0, misses: {}, startedAt: Date.now(), lastTick: Date.now() };
     logEvent('section_start', { id: sec.id });
+    if (sec.set && (sec.set !== 'bank' || BANK.length)) { P.queue = []; P.secN = 1; P.set = makeSortSet(sec.set); view = 'sortset'; return render(); }
     nextPracticeCard();
+  }
+  // ----- the sets of the sections (PRD §6.2, v4.1): the pronoun table, the a/an/some sort, the word bank with spares -----
+  // One set is a run. A tile is tapped and then its place; it can be moved again; nothing is checked until "done".
+  // When every place is taken the set is shown once more (the second look) with "done" under it.
+  const takeN = (arr, n) => sample(arr, Math.min(n, arr.length));
+  function makeSortSet(kind) {
+    let id = 0; const tile = (text, home) => ({ id: id++, text, home, at: null, first: null });
+    if (kind === 'pron' || kind === 'art') {
+      const src = kind === 'pron' ? C.sortPron : C.sortArt, tiles = [];
+      if (kind === 'art') src.cols.forEach(c => takeN(src[c], src.take[c]).forEach(x => tiles.push(tile(x, c))));
+      else {
+        const picked = {}; src.cols.forEach(c => { picked[c] = takeN(src[c], 1); });
+        shuffle(src.cols).slice(0, 4).forEach(c => { const more = src[c].filter(x => !picked[c].includes(x)); if (more.length) picked[c].push(sample(more, 1)[0]); });
+        src.cols.forEach(c => picked[c].forEach(x => tiles.push(tile(x, c))));
+      }
+      return { kind, boxes: src.cols.map(c => ({ id: c, label: c })), tiles: shuffle(tiles), sel: null, stage: 'work', wrong: 0 };
+    }
+    // the word bank: five sentences, seven words
+    const set = BANK[(S.sets.secBankSeq || 0) % BANK.length], extra = (C.bankSpare || {})[set.id] || { spare: [] };
+    S.sets.secBankSeq = (S.sets.secBankSeq || 0) + 1;
+    const rows = shuffle(set.items.map(it => extra.open && extra.open.w === it.w ? Object.assign({ open: true }, extra.open) : it));
+    const tiles = rows.map((r, i) => tile(r.a, 'r' + i)).concat(extra.spare.map(w => tile(w, null)));
+    return { kind, sid: set.id, rows, boxes: rows.map((r, i) => ({ id: 'r' + i, one: true })), tiles: shuffle(tiles), sel: null, stage: 'work', wrong: 0 };
+  }
+  const ssFull = v => v.kind === 'bank' ? v.boxes.every(b => v.tiles.some(x => x.at === b.id)) : v.tiles.every(x => x.at);
+  function ssTile(id) {
+    const v = P.set; if (!v || v.stage === 'checked') return;
+    // with a word in hand, a tap on a word that is already placed means "put mine there too"
+    if (v.sel !== null && v.sel !== id) return ssBox(v.tiles.find(x => x.id === id).at || 'bank');
+    v.sel = v.sel === id ? null : id; render();
+  }
+  function ssBox(bid) {
+    const v = P.set; if (!v || v.stage === 'checked' || v.sel === null) return;
+    const tl = v.tiles.find(x => x.id === v.sel), box = v.boxes.find(b => b.id === bid);
+    if (bid === 'bank') tl.at = null;
+    else {
+      if (box.one) v.tiles.forEach(x => { if (x.at === bid) x.at = null; });   // a blank holds one word: the old one goes back
+      if (tl.first === null) tl.first = bid;
+      tl.at = bid;
+    }
+    v.sel = null; v.stage = ssFull(v) ? 'look' : 'work'; render();
+  }
+  function ssDone() {
+    const v = P.set; if (!v || !ssFull(v)) return;
+    const placed = v.tiles.filter(x => x.home || x.at);
+    v.wrong = placed.filter(x => x.at !== x.home).length;
+    // the second look paid off: something first put in a wrong place was moved, and the set came out clean
+    v.lookWin = !v.wrong && v.tiles.some(x => x.home && x.first && x.first !== x.home);
+    v.stage = 'checked'; P.seen++; P.secMiss = v.wrong;
+    if (v.wrong) { P.wrong++; P.combo = 0; } else { P.correct++; Audio.fanfare && onRendered(() => confetti(v.lookWin ? 90 : 40)); }
+    tickPractice(); logEvent('section_set', { kind: v.kind, sid: v.sid || '', wrong: v.wrong, look: !!v.lookWin });
+    save(); render();
+  }
+  function sortSetView() {
+    const v = P.set, sec = SECS.find(x => x.id === P.sec), done = v.stage === 'checked';
+    const cap = (x, row) => row && row.open ? x.text[0].toUpperCase() + x.text.slice(1) : x.text;
+    const chip = (x, row) => `<span class="sstile ${v.sel === x.id ? 'sel' : ''} ${done && x.at ? (x.at === x.home ? 'good' : 'miss') : ''}" data-action="ss-tile" data-id="${x.id}">${esc(cap(x, row))}</span>`;
+    const home = (x, row) => `<span class="sstile good ghost">${esc(cap(x, row))}</span>`;
+    let board;
+    if (v.kind === 'bank') {
+      board = `<div class="ssrows">${v.rows.map((r, i) => {
+        const bid = 'r' + i, x = v.tiles.find(q => q.at === bid), right = v.tiles.find(q => q.home === bid);
+        const slot = `<span class="ssslot ${x ? 'has' : ''}" data-action="ss-box" data-id="${bid}">${x ? chip(x, r) : ''}</span>${done && x && x.at !== x.home ? home(right, r) : ''}`;
+        return `<div class="ssrow en">${esc(r.t).replace('___', slot)}</div>`;
+      }).join('')}</div>`;
+    } else {
+      board = `<div class="ssgrid ${v.kind}">${v.boxes.map(b => `<div class="ssbox" data-action="ss-box" data-id="${b.id}"><div class="sshead en">${b.label}</div>
+        ${v.tiles.filter(x => x.at === b.id).map(x => chip(x)).join('')}${done ? v.tiles.filter(x => x.home === b.id && x.at !== b.id).map(x => home(x)).join('') : ''}</div>`).join('')}</div>`;
+    }
+    const left = v.tiles.filter(x => !x.at);
+    const msg = done ? t(v.wrong ? 'ssFix' : (v.lookWin ? 'ssLookWin' : 'ssClean')) : (v.stage === 'look' ? t('ssLook') : t({ pron: 'ssPickPron', art: 'ssPickArt', bank: 'ssPickBank' }[v.kind]));
+    return `${topbar(`${sec.e} <span class="${sec.en ? 'en' : ''}">${esc(sec.he)}</span>`, '', `<button class="btn small" data-action="grounds">${t('practiceEnd')}</button>`)}
+      <div class="card ssmsg ${v.stage}">${msg}</div>
+      ${board}
+      <div class="ssbank en" data-action="ss-box" data-id="bank">${left.map(x => chip(x)).join('') || '&nbsp;'}</div>
+      <div class="bigcta" style="text-align:center">${done ? `<button class="btn primary" data-action="ss-next">${t('ssNext')}</button>` : (v.stage === 'look' ? `<button class="btn primary" data-action="ss-done">${t('ssDone')}</button>` : '')}</div>`;
   }
   function endSection() {
     const sec = SECS.find(x => x.id === P.sec), st = secState(sec);
@@ -988,7 +1065,7 @@
   function groundsView() {
     const tiles = SECS.map(sec => {
       if (!sec.pool) return `<div class="sectile shut"><div class="sece">${sec.e}</div><div class="secname">${esc(sec.he)}</div><div class="muted">${t('secSoon')}</div></div>`;
-      const st = secState(sec), has = secPool(sec).length > 0;
+      const st = secState(sec), has = !!sec.set || secPool(sec).length > 0;
       const note = st.lvl >= 5 ? t('secFull') : (secUpsLeft(sec) ? '' : t('secTomorrow'));
       return `<button class="sectile ${st.lvl >= 5 ? 'full' : ''}" data-action="section" data-id="${sec.id}" ${has ? '' : 'disabled'}>
         <div class="sece">${sec.e}</div><div class="secname ${sec.en ? 'en' : ''}">${esc(sec.he)}</div>${secMeter(st.lvl)}<div class="muted">${note || '&nbsp;'}</div></button>`;
@@ -2973,6 +3050,7 @@
     card() { return cardScreen(R, false); },
     practice() { return cardScreen(P, true); },
     grounds() { return groundsView(); },
+    sortset() { return P && P.set ? sortSetView() : groundsView(); },
     secdone() { return P && P.secDone ? secDoneView() : groundsView(); },
     surprise() { return surpriseView(); },
 
@@ -3489,6 +3567,10 @@
       case 'grounds': openGrounds(); break;
       case 'practice-mixed': startPractice(); break;
       case 'section': startSection(a.dataset.id); break;
+      case 'ss-tile': ssTile(Number(a.dataset.id)); break;
+      case 'ss-box': ssBox(a.dataset.id); break;
+      case 'ss-done': ssDone(); break;
+      case 'ss-next': endSection(); break;
       case 'end-practice': endPractice(false); break;
       case 'save-cap': { const v = parseInt(document.getElementById('capInput').value, 10); if (!isNaN(v)) { S.settings.freePlayCapMin = clamp(v, 0, 60); save(); toast('נשמר'); render(); } break; }
       case 'toggle-solofirst': S.settings.soloFirst = S.settings.soloFirst === false; save(); render(); break;

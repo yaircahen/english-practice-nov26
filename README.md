@@ -297,6 +297,27 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.3 added (19 Nov: the sorting sets)
+
+Three sections of the training grounds now play a set, not ten cards (`prd.md` §6.2, §7.8):
+
+- **The pronoun table** (`pron`): ten nouns from `sortPron`, at least one for each of the six
+  columns. **The a/an/some sort** (`art`): four, three and three words from `sortArt`.
+  **The word bank** (`bank`): one of the ten fixed sets with two spare words and, in nine of
+  them, a sentence whose blank opens it (`bankSpare`; `wb3` has none).
+- He taps a word and then its place, and can move it again. Nothing is checked until "done".
+  When every place is taken the screen says "second look" and shows the "done" button.
+- A set with no wrong place is a clean run and takes the level up. A word first put in a wrong
+  place, moved, and the set finished clean gets its own line and more confetti. That is all the
+  second look earns so far: the "small find" of the PRD is not built.
+- No card moves box, and a miss in a set demotes nothing (the PRD's rule for sets in a quest
+  is not built: the quest does not use these sets yet).
+- A run is `__game.practice.set`: `tiles` (`home`, `at`, `first`), `boxes`, `stage`
+  (`work`, `look`, `checked`), `wrong`, `lookWin`.
+
+Checked in the browser from the day-11 sample save. Not on the iPad: the tap targets and the
+six columns need a look on the real screen.
+
 ## What 3.9.1 added (19 Nov: the training grounds in eight sections, first version)
 
 The training-grounds button on the map now opens eight sections in the test's order (`sections`
