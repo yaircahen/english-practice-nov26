@@ -1305,6 +1305,7 @@ window.CONTENT = {
     secTomorrow: 'החלק הבא נפתח מחר',
     secFull: 'המבצר כולו שלך 👑',
     secMixed: '🎲 הכול מעורבב',
+    secQuestUp: '🏰 במשימה נפל עוד חלק: {names}',
     sealBtn: '🔑 יש לי משפט סוד',
     sealTitle: '🔑 משפט סוד',
     sealSub: 'משפט סוד מקבלים רק מאבא או מאמא, על דף שיצא נקי.',
@@ -1814,6 +1815,7 @@ window.CONTENT = {
   // a printed paper. The same phrases are printed on the papers' coach page (papers.js); change both together.
   // The coach can also set his own on the coach screen (state.settings.seals), which wins over these.
   seals: { bank: 'גילעד האלוף', be: 'המילים בורחות', have: 'מלך המבצר', art: 'צייד המילים', pron: 'שום מילה לא מתחבאת', read: 'קורא עקבות', wh: 'אלוף השאלות' },
+  sectionQuestMin: 5,      // a quest moves a section's meter when at least this many of its cards came up, all right
   sectionRun: 10, sectionUpsPerDay: 3,   // three, so a section that starts at 0 on Fri 20 Nov can still be full on the 21st
   sections: [
     { id: 'words', e: '📖', he: 'מה המילה אומרת?',        pool: { type: 'rec' } },

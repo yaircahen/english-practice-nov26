@@ -297,6 +297,14 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.6 added (19 Nov: the quest moves the meters)
+
+A quest now counts towards the sections' levels (`prd.md` §7.8). When at least five cards of a
+section came up in a quest (`sectionQuestMin`) and every one was right at the first try, that
+section rises one level, inside the same limit of three a day. A toast on the close screen
+names the sections that rose. Boxes are untouched by this, and a quest with a miss changes
+nothing he can see. The quest still plays cards, not the new sets.
+
 ## What 3.9.5 added (19 Nov: seals)
 
 The one link from paper to the game (`prd.md` §6.4). Under the eight tiles is "יש לי משפט סוד":

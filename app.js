@@ -757,6 +757,7 @@
   function applyAnswer(item, correct, practice) {
     const st = S.cards[item.cid]; let born = false;
     if (!practice && !item.retry && !item.nobox) {
+      secTally(item.cid, correct);
       st.lastSession = R.n; st.priority = 0;
       if (correct) { if (st.box < 5) { st.box++; R.promoted++; if (st.box === MASTERED_BOX) R.mastered.push(item.cid); } }
       else { st.misses++; if (st.box > 1) { st.box--; R.demoted++; } }
@@ -786,6 +787,7 @@
       // hard stop hit before the new land was reached: it stays for the next parent session
       R.newLand = null;
     }
+    settleQuestSections();
     setPhase('close');
     const dur = Date.now() - R.startedAt;
     S.sessionCount = R.n;
@@ -1134,6 +1136,26 @@
       <div class="card center"><input id="sealInput" class="sealinput" type="text" dir="rtl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('sealPh')}">
         ${sealMsg ? `<div class="muted" style="margin-top:10px">${sealMsg}</div>` : ''}
         <div class="bigcta"><button class="btn primary" data-action="seal-try">${t('sealGo')}</button></div></div>`;
+  }
+  // The quest moves the same meters (PRD §7.8): a section whose cards came up at least `sectionQuestMin` times in a
+  // quest, all right at the first try, rises one level, inside the same daily limit. Boxes are not touched here.
+  function secOf(cid) { const p = parseCard(cid); return SECS.find(sec => { const q = sec.pool; if (!q) return false; if (q.type) return p.type === q.type && !!p.word; return !!p.g && (!q.pack || p.g.pack === q.pack) && (!q.kind || p.g.kind === q.kind); }); }
+  function secTally(cid, correct) {
+    const sec = secOf(cid); if (!sec || !R) return;
+    if (!R.secTally) R.secTally = {};
+    const x = R.secTally[sec.id] || (R.secTally[sec.id] = { n: 0, miss: 0 });
+    x.n++; if (!correct) x.miss++;
+  }
+  function settleQuestSections() {
+    const ups = [];
+    Object.entries((R && R.secTally) || {}).forEach(([id, x]) => {
+      const sec = SECS.find(s => s.id === id), st = secState(sec);
+      const up = x.n >= (C.sectionQuestMin || 5) && x.miss === 0 && secUpsLeft(sec) > 0;
+      if (up) { st.lvl++; st.ups[todayStr()] = (st.ups[todayStr()] || 0) + 1; ups.push(sec); }
+      st.runs.push({ date: todayStr(), n: x.n, miss: x.miss, up, quest: true }); if (st.runs.length > 40) st.runs.shift();
+    });
+    if (R) R.secTally = null;                                  // settled once, even if the close is reached twice
+    if (ups.length) { logEvent('section_quest', { ids: ups.map(s => s.id) }); setTimeout(() => toast(t('secQuestUp', { names: ups.map(s => `${s.e} ${s.he}`).join(' · ') }), 6000), 1200); }
   }
   function endSection() {
     const sec = SECS.find(x => x.id === P.sec), st = secState(sec);
