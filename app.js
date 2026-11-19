@@ -461,10 +461,11 @@
   let P = null;     // practice (training grounds)
   let view = 'map';
 
+  const PARKED = C.parked || {};                              // 19 Nov (prd.md §0.1): tracks the teacher's test does not have stay out of the quest
   function buildReviewQueue(n, cap = C.reviewStackCap, short = false) {
     // one promotion per card per day (PRD §6.1): a card already reviewed in today's earlier session waits
     const seenToday = todayNs();
-    const all = Object.keys(S.cards).filter(cid => known(cid) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
+    const all = Object.keys(S.cards).filter(cid => known(cid) && !(PARKED.listening && cid.endsWith('|lp')) && isDue(S.cards[cid], n) && !seenToday.includes(S.cards[cid].lastSession));
     // a word still short of its ⭐ (its Recognition card below the mastered box) is never cut, and plays right after the
     // priority cards: the time budget ends the review from the back, and the ⭐ must reach 50 by day 11
     const star = cid => S.cards[cid].box < MASTERED_BOX && STAR_RECS.has(cid);
@@ -537,6 +538,7 @@
     const rung = mode === 'parent' ? S.writing.rung : Math.min(S.writing.rung, 2);
     // his own card, once, with a parent: it is that day's writing (PRD §6.5, §6.6)
     const about = mode === 'parent' && !S.about.date && !midBossDue() && phase2() && packIntroduced('u2') && rung >= 3 && !!(C.about || []).length;
+    if (PARKED.writing && !about) return null;                // his own card is not part of the parked track
     return { rung, paper: rung >= 3, about };
   }
   const estStory = s => s.reread ? 2.5 : (s.p.tier === 'A' ? 3 : (s.p.tier === 'C' ? 6.5 : 4.5));
@@ -548,7 +550,7 @@
   // recordings; it went so all three fit before the mock, the run being two days behind the plan.)
   // After the recordings come the unheard dialogues (PRD §6.7), in the order they are listed.
   function listeningForSession(mode) {
-    if (mode !== 'parent' || !phase2() || S.listening.runs.some(r => r.date === todayStr())) return null;
+    if (PARKED.listening || mode !== 'parent' || !phase2() || S.listening.runs.some(r => r.date === todayStr())) return null;
     return LISTEN.find(x => !x.fallback && !S.listening.done[x.id]) || null;
   }
   const estListening = x => x.min || 4;
@@ -623,6 +625,8 @@
       else { pendingMode = mode; view = 'split'; return render(); }
     }
     if (phase2()) birthClozes();
+    // an item added to a unit he has already opened gets its card here (19 Nov: pronoun subjects, the table's nouns)
+    S.packsIntroduced.forEach(p => { if ((C.units || []).some(u => u.id === p.id)) packCards(p.id).forEach(cid => { if (!S.cards[cid]) S.cards[cid] = { box: 1, lastSession: 0, misses: 0, born: n - 1, priority: 1 }; }); });   // priority: they play first, whatever the stack's cap
     const pl = planFor(mode);
     const cards = sitting !== 'long', longForms = sitting !== 'cards';
     const newLand = pl.newLand, unit = pl.unit, sd = pl.sd;
@@ -632,7 +636,7 @@
     // the cards sitting stops at 8 minutes; the one that holds the mid-boss gets two more, or the new land never fits behind it
     const stopMin = sitting === 'cards' ? C.cardsStopMin + (boss ? 2 : 0) : C.sessionHardStopMin;
     // word bank and sentence halves: one set of each in the review; on the mid-boss day they are inside the boss
-    const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? ['halves'] : ['bank', 'halves']);
+    const sets = !(cards && !boss && phase2() && BANK.length) ? [] : (sitting === 'single' ? ['halves'] : ['bank', 'halves']).filter(k => !(PARKED.halves && k === 'halves'));
     // the review stack is what gives way to everything else in the sitting
     const other = (newLand ? 3.5 : 0) + (unit ? 2 : 0) + (sd ? 1 : 0) + (writing ? estWriting(writing) : 0) + (story ? estStory(story) : 0) + (listening ? estListening(listening) : 0) + (boss ? 5 : 0) + (warm ? 0.5 : 0) + 1;   // the sets are outside the clock (see minLeft)
     const short = boss || sitting === 'single';
@@ -753,6 +757,7 @@
   function applyAnswer(item, correct, practice) {
     const st = S.cards[item.cid]; let born = false;
     if (!practice && !item.retry && !item.nobox) {
+      secTally(item.cid, correct);
       st.lastSession = R.n; st.priority = 0;
       if (correct) { if (st.box < 5) { st.box++; R.promoted++; if (st.box === MASTERED_BOX) R.mastered.push(item.cid); } }
       else { st.misses++; if (st.box > 1) { st.box--; R.demoted++; } }
@@ -764,6 +769,7 @@
     if (practice) {
       P.seen++;
       if (correct) practiceRight(item);
+      if (!correct && P.sec && !item.retry) P.secMiss++;
       if (!correct) { P.misses[item.cid] = (P.misses[item.cid] || 0) + 1; if (P.misses[item.cid] >= 3) st.priority = 1; }
     }
     const rt = practice ? P : R;
@@ -781,6 +787,7 @@
       // hard stop hit before the new land was reached: it stays for the next parent session
       R.newLand = null;
     }
+    settleQuestSections();
     setPhase('close');
     const dur = Date.now() - R.startedAt;
     S.sessionCount = R.n;
@@ -926,10 +933,262 @@
   function nextPracticeCard() {
     if (!tickPractice()) return;
     if (P.surprise) { const why = P.surprise; P.surprise = false; return openSurprise(why); }
+    if (!P.queue.length && P.sec) return endSection();
     if (!P.queue.length) P.queue = practicePool().map(cid => ({ cid, retry: false, retries: 0 }));
     P.current = P.queue.shift(); P.current.view = makeCardView(P.current.cid);
     if (goldRoll(P.current, C.surprise.goldPractice)) P.current.gold = true;
     view = 'practice'; render();
+  }
+  // ----- the training grounds in eight sections (PRD §7.8) -----
+  // A section's level (0–5) is the part of its stronghold he has taken. It rises on a clean run, never falls,
+  // and moves no card: boxes still move only in the quest. Kept in S.secs[id] = { lvl, ups: { date: n }, runs: [...] }.
+  const SECS = C.sections || [];
+  function secPool(sec) {
+    const q = sec.pool; if (!q) return [];
+    return Object.keys(S.cards).filter(cid => {
+      if (!known(cid)) return false;
+      const p = parseCard(cid);
+      if (q.type) return p.type === q.type && !!p.word;
+      return !!p.g && (!q.pack || p.g.pack === q.pack) && (!q.kind || p.g.kind === q.kind);
+    });
+  }
+  function secState(sec) {
+    if (!S.secs) S.secs = {};
+    if (!S.secs[sec.id]) {
+      // where the meter starts: from what he has already done, up to 3 (the share of the section's cards in Box 3 and up)
+      const pool = secPool(sec), share = pool.length ? pool.filter(cid => S.cards[cid].box >= MASTERED_BOX).length / pool.length : 0;
+      S.secs[sec.id] = { lvl: Math.min(3, Math.floor(share * 4)), ups: {}, runs: [] };
+    }
+    return S.secs[sec.id];
+  }
+  const secUpsLeft = sec => { const st = secState(sec); return st.lvl >= 5 ? 0 : Math.max(0, (C.sectionUpsPerDay || 2) - (st.ups[todayStr()] || 0)); };
+  function openGrounds() {
+    if (today().freePlaySec >= S.settings.freePlayCapMin * 60) { toast(t('practiceShut')); return; }
+    if (!SECS.length) return startPractice();
+    P = null; sealWon = null; view = 'grounds'; render();
+  }
+  function startSection(id) {
+    const sec = SECS.find(x => x.id === id); if (!sec) return;
+    if (today().freePlaySec >= S.settings.freePlayCapMin * 60) { toast(t('practiceShut')); return; }
+    const pool = shuffle(secPool(sec)); if (!pool.length && !sec.set) { toast(t('practiceEmpty')); return; }
+    // the lower boxes first, so a run is mostly what still needs him; shuffled again so the order says nothing
+    const n = Math.min(C.sectionRun || 10, pool.length);
+    const pick = shuffle(pool.sort((a, b) => S.cards[a].box - S.cards[b].box).slice(0, Math.max(n, Math.min(pool.length, n * 2)))).slice(0, n);
+    P = { sec: sec.id, secN: n, secMiss: 0, queue: pick.map(cid => ({ cid, retry: false, retries: 0 })), current: null, seen: 0, correct: 0, wrong: 0, combo: 0, maxCombo: 0, misses: {}, startedAt: Date.now(), lastTick: Date.now() };
+    logEvent('section_start', { id: sec.id });
+    if (sec.set === 'read') { P.queue = []; P.secN = 1; P.set = makeReadRun(); view = 'sortset'; return render(); }
+    if (sec.set && (sec.set !== 'bank' || BANK.length)) { P.queue = []; P.secN = 1; P.set = makeSortSet(sec.set); view = 'sortset'; return render(); }
+    nextPracticeCard();
+  }
+  // ----- the sets of the sections (PRD §6.2, v4.1): the pronoun table, the a/an/some sort, the word bank with spares -----
+  // One set is a run. A tile is tapped and then its place; it can be moved again; nothing is checked until "done".
+  // When every place is taken the set is shown once more (the second look) with "done" under it.
+  const takeN = (arr, n) => sample(arr, Math.min(n, arr.length));
+  function makeSortSet(kind) {
+    let id = 0; const tile = (text, home) => ({ id: id++, text, home, at: null, first: null });
+    if (kind === 'pron' || kind === 'art') {
+      const src = kind === 'pron' ? C.sortPron : C.sortArt, tiles = [];
+      if (kind === 'art') src.cols.forEach(c => takeN(src[c], src.take[c]).forEach(x => tiles.push(tile(x, c))));
+      else {
+        const picked = {}; src.cols.forEach(c => { picked[c] = takeN(src[c], 1); });
+        shuffle(src.cols).slice(0, 4).forEach(c => { const more = src[c].filter(x => !picked[c].includes(x)); if (more.length) picked[c].push(sample(more, 1)[0]); });
+        src.cols.forEach(c => picked[c].forEach(x => tiles.push(tile(x, c))));
+      }
+      return { kind, boxes: src.cols.map(c => ({ id: c, label: c })), tiles: shuffle(tiles), sel: null, stage: 'work', wrong: 0 };
+    }
+    // the word bank: five sentences, seven words
+    const set = BANK[(S.sets.secBankSeq || 0) % BANK.length], extra = (C.bankSpare || {})[set.id] || { spare: [] };
+    S.sets.secBankSeq = (S.sets.secBankSeq || 0) + 1;
+    const rows = shuffle(set.items.map(it => extra.open && extra.open.w === it.w ? Object.assign({ open: true }, extra.open) : it));
+    const tiles = rows.map((r, i) => tile(r.a, 'r' + i)).concat(extra.spare.map(w => tile(w, null)));
+    return { kind, sid: set.id, rows, boxes: rows.map((r, i) => ({ id: 'r' + i, one: true })), tiles: shuffle(tiles), sel: null, stage: 'work', wrong: 0 };
+  }
+  const ssFull = v => v.kind === 'bank' ? v.boxes.every(b => v.tiles.some(x => x.at === b.id)) : v.tiles.every(x => x.at);
+  function ssTile(id) {
+    const v = P.set; if (!v || v.stage === 'checked') return;
+    // with a word in hand, a tap on a word that is already placed means "put mine there too"
+    if (v.sel !== null && v.sel !== id) return ssBox(v.tiles.find(x => x.id === id).at || 'bank');
+    v.sel = v.sel === id ? null : id; render();
+  }
+  function ssBox(bid) {
+    const v = P.set; if (!v || v.stage === 'checked' || v.sel === null) return;
+    const tl = v.tiles.find(x => x.id === v.sel), box = v.boxes.find(b => b.id === bid);
+    if (bid === 'bank') tl.at = null;
+    else {
+      if (box.one) v.tiles.forEach(x => { if (x.at === bid) x.at = null; });   // a blank holds one word: the old one goes back
+      if (tl.first === null) tl.first = bid;
+      tl.at = bid;
+    }
+    v.sel = null; v.stage = ssFull(v) ? 'look' : 'work'; render();
+  }
+  function ssDone() {
+    const v = P.set; if (!v || !ssFull(v)) return;
+    const placed = v.tiles.filter(x => x.home || x.at);
+    v.wrong = placed.filter(x => x.at !== x.home).length;
+    // the second look paid off: something first put in a wrong place was moved, and the set came out clean
+    v.lookWin = !v.wrong && v.tiles.some(x => x.home && x.first && x.first !== x.home);
+    v.stage = 'checked'; P.seen++; P.secMiss = v.wrong;
+    if (v.wrong) { P.wrong++; P.combo = 0; } else { P.correct++; Audio.fanfare && onRendered(() => confetti(v.lookWin ? 90 : 40)); }
+    tickPractice(); logEvent('section_set', { kind: v.kind, sid: v.sid || '', wrong: v.wrong, look: !!v.lookWin });
+    save(); render();
+  }
+  function sortSetView() {
+    const v = P.set, sec = SECS.find(x => x.id === P.sec), done = v.stage === 'checked';
+    const cap = (x, row) => row && row.open ? x.text[0].toUpperCase() + x.text.slice(1) : x.text;
+    const chip = (x, row) => `<span class="sstile ${v.sel === x.id ? 'sel' : ''} ${done && x.at ? (x.at === x.home ? 'good' : 'miss') : ''}" data-action="ss-tile" data-id="${x.id}">${esc(cap(x, row))}</span>`;
+    const home = (x, row) => `<span class="sstile good ghost">${esc(cap(x, row))}</span>`;
+    let board;
+    if (v.kind === 'bank') {
+      board = `<div class="ssrows">${v.rows.map((r, i) => {
+        const bid = 'r' + i, x = v.tiles.find(q => q.at === bid), right = v.tiles.find(q => q.home === bid);
+        const slot = `<span class="ssslot ${x ? 'has' : ''}" data-action="ss-box" data-id="${bid}">${x ? chip(x, r) : ''}</span>${done && x && x.at !== x.home ? home(right, r) : ''}`;
+        return `<div class="ssrow en">${esc(r.t).replace('___', slot)}</div>`;
+      }).join('')}</div>`;
+    } else {
+      board = `<div class="ssgrid ${v.kind}">${v.boxes.map(b => `<div class="ssbox" data-action="ss-box" data-id="${b.id}"><div class="sshead en">${b.label}</div>
+        ${v.tiles.filter(x => x.at === b.id).map(x => chip(x)).join('')}${done ? v.tiles.filter(x => x.home === b.id && x.at !== b.id).map(x => home(x)).join('') : ''}</div>`).join('')}</div>`;
+    }
+    const left = v.tiles.filter(x => !x.at);
+    const msg = done ? t(v.wrong ? 'ssFix' : (v.lookWin ? 'ssLookWin' : 'ssClean')) : (v.stage === 'look' ? t('ssLook') : t({ pron: 'ssPickPron', art: 'ssPickArt', bank: 'ssPickBank' }[v.kind]));
+    return `${topbar(`${sec.e} <span class="${sec.en ? 'en' : ''}">${esc(sec.he)}</span>`, '', `<button class="btn small" data-action="grounds">${t('practiceEnd')}</button>`)}
+      <div class="card ssmsg ${v.stage}">${msg}</div>
+      ${board}
+      <div class="ssbank en" data-action="ss-box" data-id="bank">${left.map(x => chip(x)).join('') || '&nbsp;'}</div>
+      <div class="bigcta" style="text-align:center">${done ? `<button class="btn primary" data-action="ss-next">${t('ssNext')}</button>` : (v.stage === 'look' ? `<button class="btn primary" data-action="ss-done">${t('ssDone')}</button>` : '')}</div>`;
+  }
+  // ----- the reading section (PRD §6.5, v4.1): one paragraph at a time, no read-aloud, the answer found in the text -----
+  // Each paragraph is its own screen with one check in Hebrew under it. After the last one come the questions:
+  // first the paragraph that holds the answer, then the sentence. Nothing is timed.
+  function makeReadRun() {
+    const all = C.readStories || [], st = all[(S.sets.readSeq || 0) % all.length];
+    S.sets.readSeq = (S.sets.readSeq || 0) + 1;
+    return { kind: 'read', st, stage: 'para', pi: 0, qi: 0, step: 'para', gist: shuffle(st.paras[0].gist.map((he, i) => ({ he, ok: i === 0 }))), bad: [], hit: false, miss: 0, tried: false };
+  }
+  function rdGist(i) {
+    const v = P.set, o = v.gist[i]; if (!o) return;
+    if (!o.ok) { if (!v.bad.includes(i)) v.bad.push(i); return render(); }
+    v.pi++; v.bad = [];
+    if (v.pi < v.st.paras.length) v.gist = shuffle(v.st.paras[v.pi].gist.map((he, k) => ({ he, ok: k === 0 })));
+    else { v.stage = 'q'; v.step = 'para'; }
+    tickPractice(); render();
+  }
+  function rdPara(i) {
+    const v = P.set, q = v.st.qs[v.qi]; if (v.stage !== 'q' || v.step !== 'para') return;
+    if (i !== q.p) { if (!v.bad.includes(i)) v.bad.push(i); return render(); }
+    v.step = 'sent'; v.bad = []; v.tried = false; render();
+  }
+  function rdSent(i) {
+    const v = P.set, q = v.st.qs[v.qi]; if (v.stage !== 'q' || v.step !== 'sent' || v.hit) return;
+    if (i !== q.s) { if (!v.tried) { v.miss++; v.tried = true; } if (!v.bad.includes(i)) v.bad.push(i); return render(); }
+    v.hit = true; if (!v.tried) { P.correct++; P.combo++; } else { P.wrong++; P.combo = 0; }
+    P.seen++; save(); render();
+  }
+  function rdNext() {
+    const v = P.set; if (!v.hit) return;
+    v.hit = false; v.bad = []; v.tried = false; v.qi++; v.step = 'para';
+    if (v.qi >= v.st.qs.length) { P.secMiss = v.miss; logEvent('section_read', { id: v.st.id, miss: v.miss }); return endSection(); }
+    tickPractice(); render();
+  }
+  function readView() {
+    const v = P.set, sec = SECS.find(x => x.id === P.sec), st = v.st, m = st.paras.length;
+    const head = sub => topbar(`${sec.e} <span class="en">${esc(st.title)}</span>`, sub, `<button class="btn small" data-action="grounds">${t('practiceEnd')}</button>`);
+    if (v.stage === 'para') {
+      return `${head(t('rdPart', { n: v.pi + 1, m }))}
+        <div class="card rdpara en">${st.paras[v.pi].s.map(x => `<span>${esc(x)}</span>`).join(' ')}</div>
+        <div class="rdask">${t('rdGist')}</div>
+        <div class="rdopts">${v.gist.map((o, i) => `<button class="rdopt ${v.bad.includes(i) ? 'bad' : ''}" data-action="rd-gist" data-i="${i}" ${v.bad.includes(i) ? 'disabled' : ''}>${esc(o.he)}</button>`).join('')}</div>`;
+    }
+    const q = st.qs[v.qi];
+    const qcard = `<div class="card rdq en">${esc(q.q)}</div>`;
+    if (v.step === 'para') {
+      return `${head(t('rdQ', { n: v.qi + 1, m: st.qs.length }))}${qcard}
+        <div class="rdask">${t('rdFindPara')}</div>
+        ${st.paras.map((p, i) => `<button class="rdpick en ${v.bad.includes(i) ? 'bad' : ''}" data-action="rd-para" data-i="${i}" ${v.bad.includes(i) ? 'disabled' : ''}>${p.s.map(esc).join(' ')}</button>`).join('')}`;
+    }
+    return `${head(t('rdQ', { n: v.qi + 1, m: st.qs.length }))}${qcard}
+      <div class="rdask">${v.hit ? t('rdCaught') : t('rdFindSent')}</div>
+      <div class="card rdpara en pick">${st.paras[q.p].s.map((x, i) => `<span class="rdsent ${v.hit && i === q.s ? 'good' : ''} ${v.bad.includes(i) ? 'bad' : ''}" data-action="rd-sent" data-i="${i}">${esc(x)}</span>`).join(' ')}</div>
+      ${v.hit ? `<div class="bigcta" style="text-align:center"><button class="btn primary" data-action="rd-next">${t('rdNext')}</button></div>` : ''}`;
+  }
+  // ----- seals (PRD §6.4): the one thing paper changes in the game -----
+  // A clean task on a printed paper earns a secret phrase from the parent; typed here, it seals that section's crest.
+  const sealNorm = x => String(x || '').replace(/[^\u05d0-\u05eaA-Za-z0-9]/g, '').replace(/ך/g, 'כ').replace(/ם/g, 'מ').replace(/ן/g, 'נ').replace(/ף/g, 'פ').replace(/ץ/g, 'צ').toLowerCase();
+  const sealPhrases = () => Object.assign({}, C.seals || {}, (S.settings.seals || {}));
+  let sealMsg = '', sealWon = null;
+  function sealTry() {
+    const el = document.getElementById('sealInput'), typed = sealNorm(el && el.value); if (!typed) return;
+    const ph = sealPhrases(), id = Object.keys(ph).find(k => sealNorm(ph[k]) === typed), sec = id && SECS.find(x => x.id === id);
+    if (!sec) { sealMsg = t('sealNo'); logEvent('seal_miss', {}); return render(); }
+    const st = secState(sec);
+    if (st.seal) { sealMsg = t('sealHave'); return render(); }
+    st.seal = todayStr(); sealMsg = ''; sealWon = sec.id; logEvent('seal', { id: sec.id }); save(); render();
+  }
+  function sealView() {
+    if (sealWon) {
+      const sec = SECS.find(x => x.id === sealWon);
+      onRendered(() => { Audio.fanfare(); confetti(110); });
+      return `${topbar(t('sealTitle'), '')}
+        <div class="card center secdone"><div class="sealbig">🏅</div><div class="big">${t('sealWin')}</div>
+          <div class="sece">${sec.e}</div><div class="secname ${sec.en ? 'en' : ''}" style="color:inherit">${esc(sec.he)}</div><div class="muted">${t('sealWinSub')}</div>
+          <div class="bigcta"><button class="btn primary" data-action="grounds">${t('secOther')}</button></div></div>`;
+    }
+    return `${topbar(t('sealTitle'), t('sealSub'), `<button class="btn small" data-action="grounds">${t('secOther')}</button>`)}
+      <div class="card center"><input id="sealInput" class="sealinput" type="text" dir="rtl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('sealPh')}">
+        ${sealMsg ? `<div class="muted" style="margin-top:10px">${sealMsg}</div>` : ''}
+        <div class="bigcta"><button class="btn primary" data-action="seal-try">${t('sealGo')}</button></div></div>`;
+  }
+  // The quest moves the same meters (PRD §7.8): a section whose cards came up at least `sectionQuestMin` times in a
+  // quest, all right at the first try, rises one level, inside the same daily limit. Boxes are not touched here.
+  function secOf(cid) { const p = parseCard(cid); return SECS.find(sec => { const q = sec.pool; if (!q) return false; if (q.type) return p.type === q.type && !!p.word; return !!p.g && (!q.pack || p.g.pack === q.pack) && (!q.kind || p.g.kind === q.kind); }); }
+  function secTally(cid, correct) {
+    const sec = secOf(cid); if (!sec || !R) return;
+    if (!R.secTally) R.secTally = {};
+    const x = R.secTally[sec.id] || (R.secTally[sec.id] = { n: 0, miss: 0 });
+    x.n++; if (!correct) x.miss++;
+  }
+  function settleQuestSections() {
+    const ups = [];
+    Object.entries((R && R.secTally) || {}).forEach(([id, x]) => {
+      const sec = SECS.find(s => s.id === id), st = secState(sec);
+      const up = x.n >= (C.sectionQuestMin || 5) && x.miss === 0 && secUpsLeft(sec) > 0;
+      if (up) { st.lvl++; st.ups[todayStr()] = (st.ups[todayStr()] || 0) + 1; ups.push(sec); }
+      st.runs.push({ date: todayStr(), n: x.n, miss: x.miss, up, quest: true }); if (st.runs.length > 40) st.runs.shift();
+    });
+    if (R) R.secTally = null;                                  // settled once, even if the close is reached twice
+    if (ups.length) { logEvent('section_quest', { ids: ups.map(s => s.id) }); setTimeout(() => toast(t('secQuestUp', { names: ups.map(s => `${s.e} ${s.he}`).join(' · ') }), 6000), 1200); }
+  }
+  function endSection() {
+    const sec = SECS.find(x => x.id === P.sec), st = secState(sec);
+    const clean = P.secMiss === 0, up = clean && secUpsLeft(sec) > 0;
+    if (up) { st.lvl++; st.ups[todayStr()] = (st.ups[todayStr()] || 0) + 1; }
+    st.runs.push({ date: todayStr(), n: P.secN, miss: P.secMiss, up }); if (st.runs.length > 40) st.runs.shift();
+    tickPractice(); logEvent('section_end', { id: sec.id, miss: P.secMiss, up, lvl: st.lvl });
+    P.secDone = { clean, up }; save(); view = 'secdone'; render();
+  }
+  const secMeter = (lvl, pop) => `<div class="secmeter">${[1, 2, 3, 4, 5].map(i => `<span class="${i <= lvl ? 'on' : ''} ${pop && i === lvl ? 'pop' : ''}"></span>`).join('')}</div>`;
+  function groundsView() {
+    const tiles = SECS.map(sec => {
+      if (!sec.pool && !sec.set) return `<div class="sectile shut"><div class="sece">${sec.e}</div><div class="secname">${esc(sec.he)}</div><div class="muted">${t('secSoon')}</div></div>`;
+      const st = secState(sec), has = !!sec.set || secPool(sec).length > 0;
+      const note = st.lvl >= 5 ? t('secFull') : (secUpsLeft(sec) ? '' : t('secTomorrow'));
+      return `<button class="sectile ${st.lvl >= 5 ? 'full' : ''}" data-action="section" data-id="${sec.id}" ${has ? '' : 'disabled'}>
+        <div class="sece">${sec.e}</div><div class="secname ${sec.en ? 'en' : ''}">${esc(sec.he)}</div>${secMeter(st.lvl)}<div class="muted">${note || '&nbsp;'}</div>${(C.seals || {})[sec.id] ? `<span class="sealslot ${st.seal ? 'on' : ''}">${st.seal ? '🏅' : ''}</span>` : ''}</button>`;
+    }).join('');
+    return `${topbar(t('secTitle'), t('secSub'), `<button class="btn small" data-action="end-practice">${t('secBack')}</button>`)}
+      <div class="secgrid">${tiles}</div>
+      <div class="row wrap" style="justify-content:center; margin-top:14px"><button class="btn" data-action="seal-open">${t('sealBtn')}</button><button class="btn" data-action="practice-mixed">${t('secMixed')}</button></div>`;
+  }
+  function secDoneView() {
+    const sec = SECS.find(x => x.id === P.sec), st = secState(sec), d = P.secDone;
+    if (d.up) onRendered(() => { Audio.fanfare(); confetti(70); });
+    const lines = C.copy.secDoneLines || [];
+    const title = d.up ? t('secUpTitle') : (d.clean ? t('secCleanTitle') : t('secDoneTitle'));
+    const sub = d.up ? t('secUpSub') : (d.clean ? (st.lvl >= 5 ? t('secFull') : t('secTomorrow')) : (lines.length ? lines[st.runs.length % lines.length] : ''));
+    const shut = today().freePlaySec >= S.settings.freePlayCapMin * 60;
+    return `${topbar(`${sec.e} <span class="${sec.en ? 'en' : ''}">${esc(sec.he)}</span>`, '')}
+      <div class="card center secdone"><div class="big">${title}</div>${secMeter(st.lvl, d.up)}<div class="muted">${sub}</div>
+        <div class="bigcta row wrap" style="justify-content:center">${shut ? '' : `<button class="btn" data-action="section" data-id="${sec.id}">${t('secAgain')}</button>`}<button class="btn primary" data-action="${shut ? 'end-practice' : 'grounds'}">${t(shut ? 'secBack' : 'secOther')}</button></div>
+      </div>`;
   }
   function endPractice(capped) {
     if (P) { tickPractice(); logEvent('practice_end', { seen: P.seen, correct: P.correct, wrong: P.wrong }); }
@@ -2894,6 +3153,10 @@
 
     card() { return cardScreen(R, false); },
     practice() { return cardScreen(P, true); },
+    grounds() { return groundsView(); },
+    seal() { return sealView(); },
+    sortset() { return P && P.set ? (P.set.kind === 'read' ? readView() : sortSetView()) : groundsView(); },
+    secdone() { return P && P.secDone ? secDoneView() : groundsView(); },
     surprise() { return surpriseView(); },
 
     // one screen with the rule, before a grammar unit's first cards
@@ -2976,7 +3239,7 @@
     const st = item.cid ? S.cards[item.cid] : null;          // a set and a mid-boss sentence are not cards: no box, no ladder
     const boss = !practice && R.phase === 'boss';              // in the mid-boss the bar is his, and the line under the title names the section
     const header = practice
-      ? topbar(t('practiceTitle'), '', `<button class="btn small" data-action="end-practice">${t('practiceEnd')}</button>`)
+      ? topbar(rt.sec ? `${SECS.find(x => x.id === rt.sec).e} ${esc(SECS.find(x => x.id === rt.sec).he)}` : t('practiceTitle'), rt.sec ? `${Math.min(rt.seen + 1, Math.max(rt.secN, rt.seen + 1))}${rt.seen < rt.secN ? '/' + rt.secN : ' · 🔁'}` : '', `<button class="btn small" data-action="${rt.sec ? 'grounds' : 'end-practice'}">${t('practiceEnd')}</button>`)
       : topbar(R.round.title, boss ? t('bossSec' + item.sec) : `${Math.min(rt.done, total)}/${total}${item.retry ? ' · 🔁' : ''}`, `<span class="combo ${rt.combo >= 5 ? 'hot' : ''}">${rt.combo >= 2 ? `x${rt.combo}` : ''}</span>`);
     const popAt = st && v.res && v.res.up ? st.box : 0;        // a tile card redraws after the answer; its new square pops
     const ladder = st ? `<div class="boxladder" title="קופסה">${[1, 2, 3, 4, 5].map(b => `<span class="${b <= st.box ? (b === 5 ? 'top' : 'on') : ''} ${b === popAt ? 'pop' : ''}"></span>`).join('')}</div>` : '';
@@ -3405,7 +3668,20 @@
       case 'coach-freeze': { const k = coachFreeze(); toast(k < 0 ? 'אין רצף להקפיא: לא הייתה משימה בשלושת השבועות האחרונים' : (k ? `הוקפאו ${k} ימים. הרצף נשמר.` : 'אין ימים חסרים')); render(); break; }
       case 'toggle-box': S.settings.boxEvery = (S.settings.boxEvery || 1) === 2 ? 1 : 2; save(); render(); break;
       case 'to-map': view = 'map'; render(); break;
-      case 'practice': startPractice(); break;
+      case 'practice': openGrounds(); break;
+      case 'grounds': openGrounds(); break;
+      case 'practice-mixed': startPractice(); break;
+      case 'section': startSection(a.dataset.id); break;
+      case 'seal-open': sealMsg = ''; sealWon = null; view = 'seal'; render(); break;
+      case 'seal-try': sealTry(); break;
+      case 'ss-tile': ssTile(Number(a.dataset.id)); break;
+      case 'ss-box': ssBox(a.dataset.id); break;
+      case 'ss-done': ssDone(); break;
+      case 'ss-next': endSection(); break;
+      case 'rd-gist': rdGist(Number(a.dataset.i)); break;
+      case 'rd-para': rdPara(Number(a.dataset.i)); break;
+      case 'rd-sent': rdSent(Number(a.dataset.i)); break;
+      case 'rd-next': rdNext(); break;
       case 'end-practice': endPractice(false); break;
       case 'save-cap': { const v = parseInt(document.getElementById('capInput').value, 10); if (!isNaN(v)) { S.settings.freePlayCapMin = clamp(v, 0, 60); save(); toast('נשמר'); render(); } break; }
       case 'toggle-solofirst': S.settings.soloFirst = S.settings.soloFirst === false; save(); render(); break;
@@ -3547,5 +3823,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, get practice() { return P; }, startPractice, startReplay, finishSession, soloFirstDue };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, get practice() { return P; }, startPractice, startReplay, finishSession, soloFirstDue, openGrounds, startSection, secState: id => secState(SECS.find(x => x.id === id)) };
 })();

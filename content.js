@@ -194,11 +194,29 @@ window.CONTENT = {
         { id: 'u2-6', t: 'They ___ a lot of toys.', a: 'have', o: ['has', 'have'], he: 'יש להם הרבה צעצועים.', tip: 'they → have' },
         { id: 'u2-7', t: 'Maya ___ a brush.', a: 'has', o: ['has', 'have'], he: 'למאיה יש מברשת.', tip: 'Maya = she → has' },
         { id: 'u2-8', t: 'Noa and Tali ___ the same hobby.', a: 'have', o: ['has', 'have'], he: 'לנועה ולטלי יש אותו תחביב.', tip: 'Noa and Tali = they → have' },
+        // 19 Nov: pronoun subjects, so that the unit is half pronouns and half names (prd.md §4.2)
+        { id: 'u2-9', t: 'I ___ a game.', a: 'have', o: ['has', 'have'], he: 'יש לי משחק.', tip: 'I → have' },
+        { id: 'u2-10', t: 'You ___ a birthday in June.', a: 'have', o: ['has', 'have'], he: 'יש לך יום הולדת ביוני.', tip: 'you → have' },
+        { id: 'u2-11', t: 'We ___ a team.', a: 'have', o: ['has', 'have'], he: 'יש לנו קבוצה.', tip: 'we → have' },
+        { id: 'u2-12', t: 'He ___ a lot of toys.', a: 'has', o: ['has', 'have'], he: 'יש לו הרבה צעצועים.', tip: 'he → has' },
+        { id: 'u2-13', t: 'She ___ a brush.', a: 'has', o: ['has', 'have'], he: 'יש לה מברשת.', tip: 'she → has' },
+        { id: 'u2-14', t: 'It ___ a blanket.', a: 'has', o: ['has', 'have'], he: 'יש לו שמיכה.', tip: 'it → has' },
+        { id: 'u2-15', t: 'You ___ a special hobby.', a: 'have', o: ['has', 'have'], he: 'יש לך תחביב מיוחד.', tip: 'you → have' },
+        { id: 'u2-16', t: 'I ___ a lot of time.', a: 'have', o: ['has', 'have'], he: 'יש לי הרבה זמן.', tip: 'I → have' },
       ],
       bridge: [
         { id: 'np-4', en: 'Tom', a: 'he', o: ['he', 'she', 'it', 'they'], he: 'תום = הוא' },
         { id: 'np-5', en: 'the toy', a: 'it', o: ['he', 'she', 'it', 'they'], he: 'הצעצוע = זה' },
         { id: 'np-6', en: 'Dan and I', a: 'we', o: ['we', 'they', 'he', 'you'], he: 'דן ואני = אנחנו' },
+        // 19 Nov: the kinds of nouns the test's pronoun table holds (prd.md §4.2)
+        { id: 'np-10', en: 'you and Dana', a: 'you', o: ['you', 'we', 'they', 'she'], he: 'אתה ודנה = אתם' },
+        { id: 'np-11', en: 'the toy and the blanket', a: 'they', o: ['they', 'it', 'we', 'you'], he: 'הצעצוע והשמיכה = הם' },
+        { id: 'np-12', en: 'my sister and I', a: 'we', o: ['we', 'they', 'she', 'you'], he: 'אחותי ואני = אנחנו' },
+        { id: 'np-13', en: 'the pool', a: 'it', o: ['it', 'he', 'she', 'they'], he: 'הבריכה = זה' },
+        { id: 'np-14', en: 'grandmother', a: 'she', o: ['she', 'he', 'it', 'they'], he: 'סבתא = היא' },
+        { id: 'np-15', en: 'the kids', a: 'they', o: ['they', 'it', 'we', 'he'], he: 'הילדים = הם' },
+        { id: 'np-16', en: 'you and Omer', a: 'you', o: ['you', 'we', 'they', 'he'], he: 'אתה ועומר = אתם' },
+        { id: 'np-17', en: 'Dad', a: 'he', o: ['he', 'she', 'it', 'they'], he: 'אבא = הוא' },
       ] },
     { id: 'u3', title: "isn't · aren't · Is…?",
       rule: [
@@ -250,6 +268,15 @@ window.CONTENT = {
         { id: 'u4b-4', t: 'Omer has ___ hobby.', a: 'a', o: ['a', 'an', 'some'], he: 'לעומר יש תחביב.', tip: 'hobby → a' },
         { id: 'u4b-5', t: 'I have ___ information.', a: 'some', o: ['a', 'an', 'some'], he: 'יש לי מידע.', tip: 'information → some' },
         { id: 'u4b-6', t: 'It is ___ important day.', a: 'an', o: ['a', 'an', 'some'], he: 'זה יום חשוב.', tip: 'important (i) → an' },
+        // 19 Nov: single words, as in the test's sorting table (prd.md §4.2)
+        { id: 'u4b-7', t: '___ egg', a: 'an', o: ['a', 'an', 'some'], he: 'ביצה', tip: 'egg (e) → an' },
+        { id: 'u4b-8', t: '___ pool', a: 'a', o: ['a', 'an', 'some'], he: 'בריכה', tip: 'pool → a' },
+        { id: 'u4b-9', t: '___ flowers', a: 'some', o: ['a', 'an', 'some'], he: 'פרחים', tip: 'flowers = כמה → some' },
+        { id: 'u4b-10', t: '___ old man', a: 'an', o: ['a', 'an', 'some'], he: 'איש זקן', tip: 'old (o) → an' },
+        { id: 'u4b-11', t: '___ team', a: 'a', o: ['a', 'an', 'some'], he: 'קבוצה', tip: 'team → a' },
+        { id: 'u4b-12', t: '___ kids', a: 'some', o: ['a', 'an', 'some'], he: 'ילדים', tip: 'kids = כמה → some' },
+        { id: 'u4b-13', t: '___ orange', a: 'an', o: ['a', 'an', 'some'], he: 'תפוז', tip: 'orange (o) → an' },
+        { id: 'u4b-14', t: '___ blankets', a: 'some', o: ['a', 'an', 'some'], he: 'שמיכות', tip: 'blankets = כמה → some' },
       ],
       bridge: [] },
   ],
@@ -1255,6 +1282,48 @@ window.CONTENT = {
     firstWithParent: 'את הראשונה עושים עם הורה 👨‍👩‍👦',
     allRest: 'כל הקלפים נחים עד מחר 😴',
     practiceShut: 'המגרש סגור להיום 🔒',
+    secTitle: '🏰 שמונה מבצרים',
+    secSub: 'כאן המילים מתבצרות. בוחרים מבצר ולוקחים ממנו חלק.',
+    secGo: 'סיבוב של {n}',
+    secSoon: 'נפתח מחר 🔒',
+    rdPart: 'חלק {n} מתוך {m}',
+    rdGist: 'מה קרה כאן?',
+    rdFindPara: 'באיזה חלק התשובה מתחבאת?',
+    rdFindSent: 'ועכשיו המשפט שעונה. מקישים עליו.',
+    rdCaught: 'נתפסה!',
+    rdNext: 'הלאה',
+    rdQ: 'שאלה {n} מתוך {m}',
+    ssPickPron: 'בוחרים מילה, ואז את הטור שלה',
+    ssPickArt: 'בוחרים מילה, ואז את הטור שלה',
+    ssPickBank: 'בוחרים מילה, ואז את המקום שלה. שתי מילים נשארות בחוץ.',
+    ssLook: '👀 מבט שני: אפשר עוד להזיז. מילה שהתחבאה במקום הלא נכון נתפסת עכשיו.',
+    ssDone: 'סיימתי ✔',
+    ssNext: 'הלאה',
+    ssClean: 'הכול במקום. למילים לא נשאר איפה להתחבא.',
+    ssLookWin: 'המבט השני תפס אחת! היא כבר חשבה שהצליחה לברוח.',
+    ssFix: 'אלה ניסו להתחבא בטור אחר. עכשיו רואים איפה הן גרות.',
+    secTomorrow: 'החלק הבא נפתח מחר',
+    secFull: 'המבצר כולו שלך 👑',
+    secMixed: '🎲 הכול מעורבב',
+    secQuestUp: '🏰 במשימה נפל עוד חלק: {names}',
+    sealBtn: '🔑 יש לי משפט סוד',
+    sealTitle: '🔑 משפט סוד',
+    sealSub: 'משפט סוד מקבלים רק מאבא או מאמא, על דף שיצא נקי.',
+    sealPh: 'כותבים כאן את המשפט',
+    sealGo: 'לפתוח',
+    sealNo: 'המנעול לא זז. בודקים את המשפט עם אבא או אמא.',
+    sealHave: 'החותם הזה כבר שלך 🏅',
+    sealWin: 'חותם על המבצר!',
+    sealWinSub: 'מה שנכתב בעט כבר לא נמחק. המילים יודעות את זה.',
+    secBack: 'למפה',
+    secRunTitle: '{e} {name}',
+    secUpTitle: 'חלק מהמבצר נפל!',
+    secUpSub: 'המילים שם כבר אורזות.',
+    secCleanTitle: 'סיבוב נקי!',
+    secDoneTitle: 'סיבוב נגמר',
+    secDoneLines: ['המילים נשארו בפנים. הן יודעות שתחזור.', 'בפנים שומעים אותן לוחשות: "הוא שוב כאן".', 'המבצר עוד עומד. המילים כבר פחות רגועות.'],
+    secAgain: 'עוד סיבוב כאן',
+    secOther: 'למבצרים',
     practiceEmpty: 'עוד אין קלפים לאימון',
     practiceCapped: 'המגרש נסגר. המאמן הלך לאכול 🍕',
     saveFailed: 'השמירה נכשלה',
@@ -1667,7 +1736,97 @@ window.CONTENT = {
   cardsStopMin: 10,               // was 8 until 15 Nov; the cards sitting of a quest played in two sittings (PRD §7.4)
   freePlayCapMinDefault: 15,
   reviewStackCap: 80,      // about 7–8 minutes at his pace; the sitting's time budget and hard stop still bound it
-  finalBossFrom: '2026-11-20',  // day 12: from this date a parent session is the final boss (the mock inside the game), once
+  finalBossFrom: '',            // was 2026-11-20. Off since 19 Nov (prd.md §0.1): the mock inside the game is the publisher's shape. The coach can still open it
+  // 19 Nov (prd.md §0.1): the teacher's test has no listening, no picture writing and no sentence halves.
+  // Parked, not removed: out of the daily quest, still in the training grounds and on the coach screen.
+  parked: { listening: true, writing: true, halves: true },
+  // The training grounds in eight sections, in the test's order (prd.md §7.8). `pool` says which cards a run draws from.
+  // A run is `sectionRun` cards; a clean run takes one more part of the section's stronghold, `sectionUpsPerDay` a day at most (was two until the dates were counted).
+  // The sorting sets (prd.md §6.2, v4.1). A run of the pronoun table draws ten nouns: one from each column and four
+  // more. A run of the a/an/some sort draws four, three and three. Nothing is checked until he presses "done".
+  sortPron: {
+    cols: ['It', 'She', 'They', 'We', 'You', 'He'],
+    It: ['the toy', 'the brush', 'my blanket', 'the game', 'the dog', 'the phone'],
+    She: ['Maya', 'my mom', 'the girl', 'Tali', 'my aunt'],
+    They: ['Dan and Tom', 'the toys', 'my friends', 'the brush and the blanket', 'Maya and Noa', 'the dogs'],
+    We: ['Tom and I', 'my team and I', 'my mom and I', 'my friends and I'],
+    You: ['you and Maya', 'you and your team', 'you and Dan', 'you and the kids'],
+    He: ['Omer', 'my dad', 'the boy', 'Dan', 'my grandpa'],
+  },
+  sortArt: {
+    cols: ['a', 'an', 'some'], take: { a: 4, an: 3, some: 3 },
+    a: ['toy', 'team', 'hobby', 'pool', 'blanket', 'brush', 'year', 'month', 'game', 'special day'],
+    an: ['age', 'old toy', 'important day', 'egg', 'apple', 'orange', 'old dog'],
+    some: ['toys', 'people', 'blankets', 'friends', 'games', 'dogs', 'books'],
+  },
+  // The word bank with spare words: for each fixed set, two words that fit none of its blanks (checked by hand),
+  // and, where one could be written, a sentence whose blank opens it (`w` says whose sentence it replaces).
+  bankSpare: {
+    wb1: { spare: ['year', 'chess'], open: { w: 'people', t: '___ come to the pool every day.', a: 'people', he: 'אנשים באים לבריכה כל יום.' } },
+    wb2: { spare: ['birthday', 'hobby'], open: { w: 'if', t: '___ it is hard, call me.', a: 'if', he: 'אם זה קשה, תתקשר אליי.' } },
+    wb3: { spare: ['month', 'age'] },
+    wb4: { spare: ['pool', 'toy'], open: { w: 'every', t: '___ day Omer is at the pool.', a: 'every', he: 'כל יום עומר בבריכה.' } },
+    wb5: { spare: ['pool', 'age'], open: { w: 'learn', t: '___ chess with me, Tom! It is a good game.', a: 'learn', he: 'תלמד איתי שחמט, תום! זה משחק טוב.' } },
+    wb6: { spare: ['chess', 'blanket'], open: { w: 'birthday', t: '___ parties are fun. My party is in April.', a: 'birthday', he: 'מסיבות יום הולדת הן כיף. המסיבה שלי באפריל.' } },
+    wb7: { spare: ['pool', 'brush'], open: { w: 'begin', t: '___ the game, please. It is ten.', a: 'begin', he: 'תתחילו את המשחק, בבקשה. השעה עשר.' } },
+    wb8: { spare: ['blanket', 'toy'], open: { w: 'help', t: '___ me, Tali! This is hard.', a: 'help', he: 'תעזרי לי, טלי! זה קשה.' } },
+    wb9: { spare: ['pool', 'month'], open: { w: 'call', t: '___ me on the phone, Dana.', a: 'call', he: 'תתקשרי אליי, דנה.' } },
+    wb10: { spare: ['age', 'year'], open: { w: 'choose', t: '___ a book, Tom. Which one?', a: 'choose', he: 'תבחר ספר, תום. איזה?' } },
+  },
+  // The reading section's stories (prd.md §6.5, v4.1): the teacher's kind of story, in the third person, read one
+  // paragraph at a time. A paragraph is a list of sentences. `gist` is the check under it: the first line is the
+  // right one. A question names its paragraph (`p`) and the sentence that answers it (`s`), both counted from 0.
+  // These stories are for the game only: the printed papers have their own (papers.js).
+  readStories: [
+    { id: 'R1', title: 'The Kite',
+      paras: [
+        { s: ['Yoav and Lia are brother and sister.', 'They live in a small town near a big park.', 'Every Friday they go to the park with their dog, Lucky.', 'They like to run and to fly a kite.'],
+          gist: ['אח ואחות הולכים כל יום שישי לפארק עם הכלב, רצים ומעיפים עפיפון.', 'אח ואחות גרים בפארק גדול עם הרבה כלבים.', 'שני חברים הולכים כל יום לבית הספר עם עפיפון.'] },
+        { s: ['This Friday the wind is very strong.', 'The kite goes up, up, up, and then it is not there!', '"Oh no! Where is our kite?" says Lia.', 'The children look next to the lake and behind the trees.', 'The kite is not there.'],
+          gist: ['הרוח חזקה, העפיפון נעלם, והילדים מחפשים אותו ולא מוצאים.', 'העפיפון נופל לאגם והילדים שוחים אליו.', 'הילדים עייפים מהרוח וחוזרים הביתה.'] },
+        { s: ['Suddenly Lucky runs to an old tree and barks.', 'The kite is in the tree!', 'A tall man helps the children and gives them the kite.', '"Thank you!" says Yoav.', '"Lucky is the best dog because he always helps us."', 'The children are happy, and Lucky has a big bone.'],
+          gist: ['הכלב מוצא את העפיפון על עץ, ואיש גבוה עוזר להוריד אותו.', 'הכלב בורח, והילדים מחפשים אותו ליד עץ זקן.', 'איש גבוה נותן לילדים עפיפון חדש במתנה.'] },
+      ],
+      qs: [
+        { q: 'What do Yoav and Lia like to do in the park?', p: 0, s: 3 },
+        { q: 'Where do the children look for the kite?', p: 1, s: 3 },
+        { q: 'Where is the kite?', p: 2, s: 1 },
+        { q: 'Who helps the children?', p: 2, s: 2 },
+        { q: 'Why is Lucky the best dog?', p: 2, s: 4 },
+      ] },
+    { id: 'R2', title: 'The Cake',
+      paras: [
+        { s: ['Michal is nine years old.', 'She lives with her mom, her dad and her little brother, Itay.', 'Michal likes to cook, and Itay likes to eat.'],
+          gist: ['מיכל בת תשע, גרה עם ההורים ועם אח קטן. היא אוהבת לבשל והוא אוהב לאכול.', 'מיכל ואיתי אחים בני תשע שאוהבים לבשל ביחד.', 'מיכל גרה עם סבתא שלה, שאוהבת לבשל.'] },
+        { s: ['Today is Mom\'s birthday.', 'Mom is at work.', 'Michal and Dad want to make a chocolate cake.', 'They put eggs, sugar and milk on the table.', 'But there is a problem: they have no chocolate!', '"Wait here," says Dad, and he goes to the shop.'],
+          gist: ['לאמא יש יום הולדת. מיכל ואבא רוצים לאפות עוגה, אבל אין שוקולד, ואבא הולך לחנות.', 'אמא אופה עוגת שוקולד ליום ההולדת של מיכל.', 'מיכל ואבא הולכים לחנות לקנות עוגה לאמא.'] },
+        { s: ['Dad comes home with the chocolate.', 'The cake is in the oven for forty minutes.', 'At six o\'clock Mom opens the door.', '"Surprise!" shout Michal and Itay.', 'Mom is very happy because she loves chocolate cake.', 'Itay is happy too.', 'He eats three pieces!'],
+          gist: ['העוגה מוכנה, אמא חוזרת בשש ומקבלת הפתעה. היא שמחה מאוד.', 'אמא חוזרת מוקדם ועוזרת לאפות את העוגה.', 'העוגה נשרפת בתנור, ואיתי עצוב.'] },
+      ],
+      qs: [
+        { q: 'Who likes to cook?', p: 0, s: 2 },
+        { q: 'Why is today a special day?', p: 1, s: 0 },
+        { q: 'What do Michal and Dad put on the table?', p: 1, s: 3 },
+        { q: 'Why does Dad go to the shop?', p: 1, s: 4 },
+        { q: 'Why is Mom happy?', p: 2, s: 4 },
+      ] },
+  ],
+  // The seals (prd.md §6.4): one secret phrase per section, told by the parent when that task came out clean on
+  // a printed paper. The same phrases are printed on the papers' coach page (papers.js); change both together.
+  // The coach can also set his own on the coach screen (state.settings.seals), which wins over these.
+  seals: { bank: 'גילעד האלוף', be: 'המילים בורחות', have: 'מלך המבצר', art: 'צייד המילים', pron: 'שום מילה לא מתחבאת', read: 'קורא עקבות', wh: 'אלוף השאלות' },
+  sectionQuestMin: 5,      // a quest moves a section's meter when at least this many of its cards came up, all right
+  sectionRun: 10, sectionUpsPerDay: 3,   // three, so a section that starts at 0 on Fri 20 Nov can still be full on the 21st
+  sections: [
+    { id: 'words', e: '📖', he: 'מה המילה אומרת?',        pool: { type: 'rec' } },
+    { id: 'bank',  e: '🧩', he: 'המילה שחסרה במשפט',      pool: { type: 'cz' }, set: 'bank' },
+    { id: 'be',    e: '⚖️', he: 'am · is · are',           pool: { pack: 'u1', kind: 'gc' }, en: true },
+    { id: 'have',  e: '🎒', he: 'have · has',              pool: { pack: 'u2', kind: 'gc' }, en: true },
+    { id: 'art',   e: '🥚', he: 'a · an · some',           pool: { pack: 'u4b', kind: 'gc' }, en: true, set: 'art' },
+    { id: 'read',  e: '📜', he: 'סיפור',                   pool: null, set: 'read' },
+    { id: 'pron',  e: '👥', he: 'he · she · it · we · you · they', pool: { kind: 'np' }, en: true, set: 'pron' },
+    { id: 'wh',    e: '❓', he: 'What · Where · Who',      pool: { pack: 'u4a' }, en: true },
+  ],
   speedSec: 60,                 // the speed round's length; it opens with 12 of the 50 words mastered
   // "about me": the five lines of his own card. `he` is the hint under a line; `ph` is an example shown in an empty field.
   about: [
@@ -1677,6 +1836,6 @@ window.CONTENT = {
     { id: 'hobby', pre: 'My hobby is', he: 'התחביב שלך',         ph: 'chess' },
     { id: 'like',  pre: 'I like',      he: 'משהו שאתה אוהב, ולמה', ph: 'to swim', mid: 'because', id2: 'why', ph2: 'it is fun' },
   ],
-  testModeFrom: '2026-11-19',   // day 11: from this date a parent session is test mode on paper, once (prd.md §6.4, §8)
+  testModeFrom: '',             // was 2026-11-19. Off since 19 Nov (prd.md §0.1): paper is its own sitting now, away from the screen
   masteredBox: 3,          // "mastered" = Box 3–5 (PRD §2), i.e. two correct recalls after a gap: the ⭐, the map, the stamp
 };

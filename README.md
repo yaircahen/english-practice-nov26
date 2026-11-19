@@ -10,6 +10,7 @@ Design: `prd.md`. Static web app, no build step, no backend.
 | `styles.css` | reading-friendly styles |
 | `content.js` | the 50 words, lands, skins, Leitner intervals; from M2 also the grammar units, same/different cards, writing lists, stories and the tap-for-Hebrew glossary; from 2.1.0 the loot catalogue, the reading-minute sentences and `copy`, the table of every line the kid reads; from 3.0.0 the bonus land, the word-bank sets, the sentence halves, the listen-and-pick cards and the listening questions (data only) |
 | `app.js` | engine, session loop, screens, coach screen; from M2 also the grammar cards, the writing track and the story track; from 2.1.0 the mystery box and wardrobe, streak freeze, brag card, reading minute and letter-tile cards; from 3.0.0 the mid-boss, the sets, the listening player and the two-sitting quest |
+| `paper.html`, `papers.js` | the printed papers in the teacher's shape (v4.1): `paper.html?n=1` is paper 1 (5 pages, A4), `&view=key` its answers (2 pages), `&view=coach` one page for the parent, with the working method and the seven secret phrases for the seals. `papers.js` holds papers 1–5; the game reads none of it |
 | `mock.html` | the printable mock (M4): the test, the answer key and a page for the coach. It reads `mock` in `content.js` and nothing else |
 | `prd.md` | the design (v4): the one to build from |
 | `archive/prd-v3.md` | the previous version of the design, kept as written for the record |
@@ -295,6 +296,106 @@ and the map after it, the speed round, the card written inside a quest and reope
 the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 20 Nov the boss),
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
+
+## What 3.9.6 added (19 Nov: the quest moves the meters)
+
+A quest now counts towards the sections' levels (`prd.md` §7.8). When at least five cards of a
+section came up in a quest (`sectionQuestMin`) and every one was right at the first try, that
+section rises one level, inside the same limit of three a day. A toast on the close screen
+names the sections that rose. Boxes are untouched by this, and a quest with a miss changes
+nothing he can see. The quest still plays cards, not the new sets.
+
+## What 3.9.5 added (19 Nov: seals)
+
+The one link from paper to the game (`prd.md` §6.4). Under the eight tiles is "יש לי משפט סוד":
+he types the phrase a parent gave him for a clean task on a printed paper, and that section's
+tile takes a seal (`state.secs[id].seal`, the date).
+
+- The phrases are `seals` in `content.js`, one for each of the seven sections that are test
+  tasks, and the same ones are printed on the papers' coach page (`seals` in `papers.js`).
+  **Change both together.** `state.settings.seals` overrides them, but the coach screen has no
+  field for it yet.
+- Spaces, punctuation and final-letter forms are ignored when the phrase is compared.
+- A wrong phrase changes nothing and is not counted against him.
+- The seal screen is inside the training grounds, so it is reachable only when they are open
+  (after the day's quest, within the cap).
+
+Checked in the browser from the day-11 sample save. Not on the iPad.
+
+## What 3.9.4 added (19 Nov: the reading section)
+
+The eighth tile of the training grounds is open (`read`, `prd.md` §6.5). A run is one story
+from `readStories` in `content.js` (R1 "The Kite", R2 "The Cake", in turn).
+
+- Each paragraph is its own screen, with one check under it: "what happened here?" and three
+  lines in Hebrew. The right line opens the next paragraph; a wrong one greys out.
+- Then five questions. For each he taps the paragraph that holds the answer, then the sentence
+  that answers it. A wrong first tap on a sentence is the run's miss; paragraphs and checks can
+  be tried again freely.
+- No read-aloud, no clock, and no pen: writing the answer is for the printed papers.
+- **Not yet as in the PRD:** no tap-for-Hebrew on a word; a wrong check does not light the
+  sentence that decides it; a "why" answer is a tapped sentence, not built from tiles; stories
+  D1–D3 for the quest and the boss are not written; the old stories still read as before.
+- A run is `__game.practice.set` with `kind: 'read'`: `stage` (`para`, `q`), `pi`, `qi`,
+  `step` (`para`, `sent`), `gist`, `miss`.
+
+Checked in the browser from the day-11 sample save. Not on the iPad.
+
+## What 3.9.3 added (19 Nov: the sorting sets)
+
+Three sections of the training grounds now play a set, not ten cards (`prd.md` §6.2, §7.8):
+
+- **The pronoun table** (`pron`): ten nouns from `sortPron`, at least one for each of the six
+  columns. **The a/an/some sort** (`art`): four, three and three words from `sortArt`.
+  **The word bank** (`bank`): one of the ten fixed sets with two spare words and, in nine of
+  them, a sentence whose blank opens it (`bankSpare`; `wb3` has none).
+- He taps a word and then its place, and can move it again. Nothing is checked until "done".
+  When every place is taken the screen says "second look" and shows the "done" button.
+- A set with no wrong place is a clean run and takes the level up. A word first put in a wrong
+  place, moved, and the set finished clean gets its own line and more confetti. That is all the
+  second look earns so far: the "small find" of the PRD is not built.
+- No card moves box, and a miss in a set demotes nothing (the PRD's rule for sets in a quest
+  is not built: the quest does not use these sets yet).
+- A run is `__game.practice.set`: `tiles` (`home`, `at`, `first`), `boxes`, `stage`
+  (`work`, `look`, `checked`), `wrong`, `lookWin`.
+
+Checked in the browser from the day-11 sample save. Not on the iPad: the tap targets and the
+six columns need a look on the real screen.
+
+## What 3.9.1 added (19 Nov: the training grounds in eight sections, first version)
+
+The training-grounds button on the map now opens eight sections in the test's order (`sections`
+in `content.js`, `prd.md` §7.8). Each has a level from 0 to 5.
+
+- A run is ten cards from the section's pool, the lower boxes first. A run with every card right
+  at the first try takes the level up one, three times a day per section at most (two in 3.9.1). A level never goes
+  down, and no card moves box: this is still free play.
+- A section's first level is seeded from his save: the share of its cards in Box 3 and up, to 3.
+- **Not yet as in the PRD:** the word bank, the pronoun table and the a/an/some sort are still
+  four-choice cards, not sets; the reading section is shut ("opens tomorrow"); the quest does
+  not move the meters; no crests, seals or second look.
+- Handles: `__game.openGrounds()`, `__game.startSection(id)`, `__game.secState(id)`; a run is
+  `__game.practice` with `sec`, `secN`, `secMiss`. Ids: `words, bank, be, have, art, read, pron, wh`.
+
+Checked in the browser from the day-11 sample save (a clean run, a run with a miss, the
+two-a-day rule). Not on the iPad.
+
+## What 3.9.0 changed (19 Nov: the teacher's test)
+
+The real test follows the teacher's example, not the publisher's practice copy (`prd.md` §0.1).
+This is the first, small step.
+
+- `parked` in `content.js` keeps listening, picture writing and sentence halves out of the daily
+  quest. Nothing is removed: recordings replay from their pet cards, and his "about me" card
+  still opens if it is not written yet.
+- `testModeFrom` and `finalBossFrom` are empty, so test mode and the final boss no longer open
+  by date. The coach screen can still open either.
+- 24 new grammar items: has/have with pronoun subjects (`u2-9` to `u2-16`), noun→pronoun of the
+  kinds in the test's table (`np-10` to `np-17`), single-word a/an/some (`u4b-7` to `u4b-14`).
+  A session gives each a card if its unit is already open, in Box 1 with priority, so they play
+  first.
+
+Checked in the browser from the day-11 sample save. Not on the iPad.
 
 ## What 3.8.3 changed (18 Nov: the sitting alone comes first)
 
