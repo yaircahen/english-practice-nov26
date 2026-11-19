@@ -302,7 +302,7 @@ The training-grounds button on the map now opens eight sections in the test's or
 in `content.js`, `prd.md` §7.8). Each has a level from 0 to 5.
 
 - A run is ten cards from the section's pool, the lower boxes first. A run with every card right
-  at the first try takes the level up one, twice a day per section at most. A level never goes
+  at the first try takes the level up one, three times a day per section at most (two in 3.9.1). A level never goes
   down, and no card moves box: this is still free play.
 - A section's first level is seeded from his save: the share of its cards in Box 3 and up, to 3.
 - **Not yet as in the PRD:** the word bank, the pronoun table and the a/an/some sort are still

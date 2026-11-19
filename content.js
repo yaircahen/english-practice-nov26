@@ -1715,8 +1715,8 @@ window.CONTENT = {
   // Parked, not removed: out of the daily quest, still in the training grounds and on the coach screen.
   parked: { listening: true, writing: true, halves: true },
   // The training grounds in eight sections, in the test's order (prd.md §7.8). `pool` says which cards a run draws from.
-  // A run is `sectionRun` cards; a clean run takes one more part of the section's stronghold, `sectionUpsPerDay` a day at most.
-  sectionRun: 10, sectionUpsPerDay: 2,
+  // A run is `sectionRun` cards; a clean run takes one more part of the section's stronghold, `sectionUpsPerDay` a day at most (was two until the dates were counted).
+  sectionRun: 10, sectionUpsPerDay: 3,   // three, so a section that starts at 0 on Fri 20 Nov can still be full on the 21st
   sections: [
     { id: 'words', e: '📖', he: 'מה המילה אומרת?',        pool: { type: 'rec' } },
     { id: 'bank',  e: '🧩', he: 'המילה שחסרה במשפט',      pool: { type: 'cz' } },
