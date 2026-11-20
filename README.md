@@ -300,6 +300,11 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.9 added (20 Nov: where and when)
+
+Words in disguise gets a tenth topic: **where vs when**. Meaning (איפה / מתי, with "here" hiding inside
+"where"), questions answered by a place or a time, and two heard by ear. A round is now twelve questions.
+
 ## What 3.9.8 added (20 Nov: who and how)
 
 Words in disguise gets a ninth topic: **who vs how**, the same three letters in reverse order.
