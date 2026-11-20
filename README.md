@@ -65,6 +65,9 @@ git remote add origin git@github.com:<personal-user>/<repo>.git && git push -u o
 4. On the iPad: open that URL in Safari, tap Share → **Add to Home Screen**. The icon opens the
    game full-screen. Progress lives in that home-screen app; do not open the URL in a different
    browser and expect the same save.
+   The command above lists the M1 files only. A published copy also needs `mock.html` (M4) and,
+   from 19 Nov, **`paper.html` and `papers.js`** (the printed papers). If the published repo is
+   this one, served from `main`, they are there already.
 5. Each later milestone: commit, push. The `?v=` stamps in `index.html` are bumped per milestone
    so the iPad picks up the new files. If a change does not appear, pull down to refresh once.
    If a file is changed again after a version has already been opened somewhere, bump the three
