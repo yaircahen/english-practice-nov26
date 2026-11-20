@@ -1545,7 +1545,7 @@ window.CONTENT = {
     mapTricky: '🎭 מילים בתחפושת',
     trTitle: '🎭 מילים בתחפושת',
     trLead: 'כמה מילים מתחפשות למילים אחרות.',
-    trSub: 'friend · week · month · numbers · year · age · at · eat · with · be · who · how',
+    trSub: 'friend · week · month · numbers · year · age · at · eat · with · be · who · how · where · when',
     trSub2: 'תוריד להן את המסכה.',
     trGo: 'יאללה!',
     trCount: '{n} מסכות ירדו',
@@ -1846,7 +1846,7 @@ window.CONTENT = {
   // topic, then two more; a miss comes back once at the end. Free play: no card moves and no meter. Our own sentences.
   // q = the prompt (English with ___, or a Hebrew word in he: true) · say = played aloud instead of shown (listening)
   // o = choices, a = the right one · full = the finished sentence, shown after the answer with its Hebrew and tip.
-  trickySize: 11,
+  trickySize: 12,
   tricky: [
     { id: 'fr1', topic: 'friend', q: 'חבר', he: true, o: ['friend', 'freind', 'frend'], a: 'friend', tip: 'בסוף של friend מסתתרת המילה end' },
     { id: 'fr2', topic: 'friend', q: 'Dana is my best ___.', o: ['friend', 'frend', 'freind'], a: 'friend', full: 'Dana is my best friend.', tr: 'דנה החברה הכי טובה שלי.', tip: 'קודם i ואז e, ובסוף מסתתרת המילה end' },
@@ -1880,6 +1880,14 @@ window.CONTENT = {
     { id: 'wi1', topic: 'with', q: 'עם', he: true, o: ['with', 'whit', 'wiht'], a: 'with', tip: 'ארבע אותיות, ו-th בסוף: w-i-t-h' },
     { id: 'wi2', topic: 'with', q: 'Maya plays ___ her dog.', o: ['with', 'when', 'what'], a: 'with', full: 'Maya plays with her dog.', tr: 'מאיה משחקת עם הכלב שלה.', tip: 'עם = with' },
     { id: 'wi3', topic: 'with', q: 'Roni is at the pool ___ his sister.', o: ['with', 'at', 'is'], a: 'with', full: 'Roni is at the pool with his sister.', tr: 'רוני בבריכה עם אחותו.', tip: 'עם = with' },
+    { id: 'we1', topic: 'wherewhen', q: 'איפה', he: true, o: ['Where', 'When', 'Were'], a: 'Where', tip: 'בתוך Where מסתתרת המילה here, כאן. איפה? כאן!' },
+    { id: 'we2', topic: 'wherewhen', q: 'מתי', he: true, o: ['When', 'Where', 'Then'], a: 'When', tip: 'מתי זה When, ונגמר ב-n' },
+    { id: 'we3', topic: 'wherewhen', q: '___ is Dana? At the pool.', o: ['Where', 'When', 'Who'], a: 'Where', full: 'Where is Dana? At the pool.', tr: 'איפה דנה? בבריכה.', tip: 'התשובה היא מקום, אז שואלים איפה: Where' },
+    { id: 'we4', topic: 'wherewhen', q: '___ is your birthday? In May.', o: ['When', 'Where', 'What'], a: 'When', full: 'When is your birthday? In May.', tr: 'מתי יום ההולדת שלך? במאי.', tip: 'התשובה היא זמן, אז שואלים מתי: When' },
+    { id: 'we5', topic: 'wherewhen', q: '___ is the chess game? Today.', o: ['When', 'Where', 'Who'], a: 'When', full: 'When is the chess game? Today.', tr: 'מתי משחק השחמט? היום.', tip: 'התשובה היא זמן, אז שואלים מתי: When' },
+    { id: 'we6', topic: 'wherewhen', q: '___ is your dog? In the garden.', o: ['Where', 'When', 'What'], a: 'Where', full: 'Where is your dog? In the garden.', tr: 'איפה הכלב שלך? בגינה.', tip: 'התשובה היא מקום, אז שואלים איפה: Where' },
+    { id: 'we7', topic: 'wherewhen', say: 'where', o: ['Where', 'When'], a: 'Where', tip: 'שומעים וֶור? זה Where. שומעים וֶן? זה When' },
+    { id: 'we8', topic: 'wherewhen', say: 'when', o: ['When', 'Where'], a: 'When', tip: 'שומעים וֶן? זה When. שומעים וֶור? זה Where' },
     { id: 'be1', topic: 'be', q: 'להיות', he: true, o: ['be', 'by', 'bee'], a: 'be', tip: 'להיות = be. ו-am, is, are הן be בתחפושת!' },
     { id: 'be2', topic: 'be', q: 'I want to ___ first.', o: ['be', 'is', 'am'], a: 'be', full: 'I want to be first.', tr: 'אני רוצה להיות ראשון.', tip: 'אחרי to באה be בלי תחפושת: to be' },
     { id: 'be3', topic: 'be', q: 'I ___ ten.', o: ['am', 'be', 'is'], a: 'am', full: 'I am ten.', tr: 'אני בן עשר.', tip: 'אחרי I, ה-be מתחפשת ל-am' },
