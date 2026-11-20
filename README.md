@@ -300,6 +300,12 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.8 added (20 Nov: who and how)
+
+Words in disguise gets a ninth topic: **who vs how**, the same three letters in reverse order.
+Spelling, meaning (מי / איך / בן כמה), sentences (`___ old are you?`, `___ is your best friend?`,
+`___ are you?`) and two heard by ear. A round is now eleven questions: one per topic and two more.
+
 ## What 3.9.7 added (20 Nov: words in disguise)
 
 - **🎭 Words in disguise**, a short round on words that pass for other words: friend, week, month and the

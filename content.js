@@ -1545,7 +1545,7 @@ window.CONTENT = {
     mapTricky: '🎭 מילים בתחפושת',
     trTitle: '🎭 מילים בתחפושת',
     trLead: 'כמה מילים מתחפשות למילים אחרות.',
-    trSub: 'friend · week · month · numbers · year · age · at · eat · with · be',
+    trSub: 'friend · week · month · numbers · year · age · at · eat · with · be · who · how',
     trSub2: 'תוריד להן את המסכה.',
     trGo: 'יאללה!',
     trCount: '{n} מסכות ירדו',
@@ -1846,7 +1846,7 @@ window.CONTENT = {
   // topic, then two more; a miss comes back once at the end. Free play: no card moves and no meter. Our own sentences.
   // q = the prompt (English with ___, or a Hebrew word in he: true) · say = played aloud instead of shown (listening)
   // o = choices, a = the right one · full = the finished sentence, shown after the answer with its Hebrew and tip.
-  trickySize: 10,
+  trickySize: 11,
   tricky: [
     { id: 'fr1', topic: 'friend', q: 'חבר', he: true, o: ['friend', 'freind', 'frend'], a: 'friend', tip: 'בסוף של friend מסתתרת המילה end' },
     { id: 'fr2', topic: 'friend', q: 'Dana is my best ___.', o: ['friend', 'frend', 'freind'], a: 'friend', full: 'Dana is my best friend.', tr: 'דנה החברה הכי טובה שלי.', tip: 'קודם i ואז e, ובסוף מסתתרת המילה end' },
@@ -1885,6 +1885,14 @@ window.CONTENT = {
     { id: 'be3', topic: 'be', q: 'I ___ ten.', o: ['am', 'be', 'is'], a: 'am', full: 'I am ten.', tr: 'אני בן עשר.', tip: 'אחרי I, ה-be מתחפשת ל-am' },
     { id: 'be4', topic: 'be', q: 'They ___ my friends.', o: ['are', 'be', 'is'], a: 'are', full: 'They are my friends.', tr: 'הם החברים שלי.', tip: 'אחרי they, ה-be מתחפשת ל-are' },
     { id: 'be5', topic: 'be', q: 'Omer ___ at school.', o: ['is', 'be', 'are'], a: 'is', full: 'Omer is at school.', tr: 'עומר בבית הספר.', tip: 'עומר הוא he, וה-be מתחפשת ל-is' },
+    { id: 'wh1', topic: 'whohow', q: 'מי', he: true, o: ['Who', 'How', 'Why'], a: 'Who', tip: 'אותן שלוש אותיות בסדר הפוך! מי זה Who, איך זה How' },
+    { id: 'wh2', topic: 'whohow', q: 'איך', he: true, o: ['How', 'Who', 'Hwo'], a: 'How', tip: 'אותן שלוש אותיות בסדר הפוך! איך זה How, מי זה Who' },
+    { id: 'wh3', topic: 'whohow', q: '___ is your best friend? Tom.', o: ['Who', 'How', 'What'], a: 'Who', full: 'Who is your best friend? Tom.', tr: 'מי החבר הכי טוב שלך? תום.', tip: 'התשובה היא אדם, אז שואלים מי: Who' },
+    { id: 'wh4', topic: 'whohow', q: '___ old are you? I am ten.', o: ['How', 'Who', 'What'], a: 'How', full: 'How old are you? I am ten.', tr: 'בן כמה אתה? אני בן עשר.', tip: 'בן כמה = How old' },
+    { id: 'wh5', topic: 'whohow', q: '___ are you? I am fine.', o: ['How', 'Who', 'Where'], a: 'How', full: 'How are you? I am fine.', tr: 'מה שלומך? אני בסדר.', tip: 'מה שלומך = How are you' },
+    { id: 'wh6', topic: 'whohow', q: 'בן כמה', he: true, o: ['How old', 'Who old', 'How age'], a: 'How old', tip: 'בן כמה זה How old' },
+    { id: 'wh7', topic: 'whohow', say: 'who', o: ['Who', 'How'], a: 'Who', tip: 'שומעים הוּ? זה Who, וה-w שקטה. שומעים הַאוּ? זה How' },
+    { id: 'wh8', topic: 'whohow', say: 'how', o: ['How', 'Who'], a: 'How', tip: 'שומעים הַאוּ? זה How. שומעים הוּ? זה Who, וה-w שקטה' },
   ],
   speedSec: 60,                 // the speed round's length; it opens with 12 of the 50 words mastered
   // "about me": the five lines of his own card. `he` is the hint under a line; `ph` is an example shown in an empty field.
