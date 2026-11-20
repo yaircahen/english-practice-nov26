@@ -300,6 +300,17 @@ the coach screen's sections, the date rules on a fixed clock (19 Nov test mode, 
 and the older sample saves still starting. **Not tried on the iPad; the device voices were
 stubbed, and the fields were typed into from a desktop keyboard.**
 
+## What 3.9.7 added (20 Nov: words in disguise)
+
+- **🎭 Words in disguise**, a short round on words that pass for other words: friend, week, month and the
+  month names, numbers (13/30, 15/50, forty), year vs age, at vs eat (two of them heard, not read), with, and be.
+  One question from each of the eight topics and two more, ten in all; a miss comes back once at the end.
+  After each answer the whole sentence is shown with its Hebrew and the word's trick.
+- Untimed and free play, like the speed round: no card moves and no meter. Its time counts in the parent's cap.
+  It opens from the map once the day's quest is done, and from the training grounds' second row.
+- Questions are `tricky` in `content.js` (own sentences); runs are kept in `state.tricky.runs` and the log.
+  Drive it with `__game.startTricky()` and `__game.tricky`.
+
 ## What 3.9.6 added (19 Nov: the quest moves the meters)
 
 A quest now counts towards the sections' levels (`prd.md` §7.8). When at least five cards of a

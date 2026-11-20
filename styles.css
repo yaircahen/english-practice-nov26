@@ -753,3 +753,8 @@ button.sectile:active { transform: translateY(2px); }
 .sealslot.on { border: 0; font-size: 30px; }
 .sealinput { width: 100%; font: inherit; font-size: 26px; text-align: center; padding: 14px; border-radius: 14px; border: 3px solid var(--gold); background: #fff; color: #2a2118; }
 .sealbig { font-size: 84px; line-height: 1.1; }
+/* words in disguise (20 Nov) */
+.trblank { display: inline-block; min-width: 2.4em; border-bottom: 3px solid var(--accent); color: transparent; }
+.feedback.trafter { align-items: stretch; text-align: center; }
+.feedback.trafter .tip { font-size: 22px; }
+.feedback.trafter .bigcta { margin-top: 6px; }

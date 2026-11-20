@@ -80,12 +80,13 @@
       test: { runs: [] },                                    // test mode on paper: runs: [{ date, n, hits, total, sec: { L: [points, of], … }, misses }]
       about: { date: null, f: {}, text: [] },                // his own card: f = what was typed into the template's fields · text = the sentences
       speed: { best: 0, runs: [] },                          // speed round: runs: [{ date, hits, misses }]
+      tricky: { runs: [] },                                  // words in disguise: runs: [{ date, hits, misses: [item ids] }]
     };
   }
   // An older save lacks the newer fields. It gets their defaults; nothing it holds is dropped or renamed.
   function adopt(s) {
     const f = freshState(); const st = Object.assign({}, f, s);
-    ['settings', 'story', 'writing', 'loot', 'streak', 'reading', 'sets', 'listening', 'boss', 'test', 'about', 'speed'].forEach(k => { st[k] = Object.assign({}, f[k], s[k]); });
+    ['settings', 'story', 'writing', 'loot', 'streak', 'reading', 'sets', 'listening', 'boss', 'test', 'about', 'speed', 'tricky'].forEach(k => { st[k] = Object.assign({}, f[k], s[k]); });
     return st;
   }
   let S = load();
@@ -1176,7 +1177,7 @@
     }).join('');
     return `${topbar(t('secTitle'), t('secSub'), `<button class="btn small" data-action="end-practice">${t('secBack')}</button>`)}
       <div class="secgrid">${tiles}</div>
-      <div class="row wrap" style="justify-content:center; margin-top:14px"><button class="btn" data-action="seal-open">${t('sealBtn')}</button><button class="btn" data-action="practice-mixed">${t('secMixed')}</button></div>`;
+      <div class="row wrap" style="justify-content:center; margin-top:14px"><button class="btn" data-action="seal-open">${t('sealBtn')}</button><button class="btn" data-action="practice-mixed">${t('secMixed')}</button>${TRICKY.length ? `<button class="btn" data-action="tricky">${t('mapTricky')}</button>` : ''}</div>`;
   }
   function secDoneView() {
     const sec = SECS.find(x => x.id === P.sec), st = secState(sec), d = P.secDone;
@@ -2040,6 +2041,97 @@
           <div class="lead">${SP.hits === 1 ? t('spEndOne', { sec: SPEED_SEC }) : t('spEndHits', { n: SP.hits, sec: SPEED_SEC })}</div>
           ${SP.best ? `<div class="lead">${t('spBest')}</div>` : ''}
           <div class="bigcta row"><button class="btn" data-action="sp-end">${t('back')}</button>${capLeft ? `<button class="btn primary grow" data-action="sp-go">${t('spAgain')}</button>` : ''}</div>
+        </div>`;
+  }
+
+  // ---------- words in disguise (20 Nov) ----------
+  // A short round on words that dress up as other words (friend, week, months, numbers, year/age, at/eat, with, be).
+  // Untimed and in free play: one question from each topic, then a few more; a miss comes back once at the end.
+  // No card moves and no meter. After each answer the whole sentence is shown with its Hebrew and the word's trick.
+  let TR = null;
+  const TRICKY = C.tricky || [];
+  function startTricky() {
+    if (today().freePlaySec >= S.settings.freePlayCapMin * 60) { toast(t('practiceShut')); return; }
+    if (!TRICKY.length) return;
+    TR = { stage: 'pre', q: [], cur: null, hits: 0, misses: [], startedAt: 0, from: view === 'grounds' ? 'grounds' : 'map' };
+    view = 'tricky'; render();
+  }
+  function trGo() {
+    const topics = [...new Set(TRICKY.map(x => x.topic))];
+    const first = shuffle(topics).map(tp => sample(TRICKY.filter(x => x.topic === tp), 1)[0]);
+    const more = sample(TRICKY.filter(x => !first.includes(x)), Math.max(0, (C.trickySize || 10) - first.length));
+    Object.assign(TR, { stage: 'run', q: shuffle(first.concat(more)).map(it => ({ it, again: false })), hits: 0, misses: [], startedAt: Date.now() });
+    trNext();
+  }
+  function trNext() {
+    if (!TR) return;
+    const next = TR.q.shift();
+    if (!next) return trEnd();
+    TR.cur = Object.assign({}, next, { options: shuffle(next.it.o), picked: null });
+    render();
+    if (next.it.say) onRendered(() => setTimeout(() => Audio.speak(next.it.say, 0.8), 250));
+  }
+  function trPick(i) {
+    const c = TR && TR.cur; if (!c || c.picked != null) return;
+    c.picked = c.options[i];
+    if (c.picked === c.it.a) { TR.hits++; Audio.ding(TR.hits); }
+    else {
+      Audio.hm(); TR.misses.push(c.it.id);
+      if (!c.again) TR.q.push({ it: c.it, again: true });   // it comes back once, at the end, in a new order
+    }
+    render();
+    const full = c.it.full || (c.it.say ? c.it.a : '');
+    if (full) setTimeout(() => { if (TR && TR.cur === c) Audio.speak(full, 0.85); }, 350);
+  }
+  function trEnd() {
+    TR.stage = 'end'; TR.cur = null;
+    const sec = Math.min(900, Math.round((Date.now() - TR.startedAt) / 1000));
+    today().freePlaySec += sec;                                // free play: counts in the parent's cap
+    if (!S.tricky) S.tricky = { runs: [] };
+    S.tricky.runs.push({ date: todayStr(), hits: TR.hits, misses: TR.misses }); if (S.tricky.runs.length > 40) S.tricky.runs.shift();
+    logEvent('tricky', { hits: TR.hits, misses: TR.misses, sec }); save();
+    render(); Audio.fanfare(); confetti(50);
+  }
+  function endTricky() { if (TR && TR.stage === 'run' && TR.startedAt) today().freePlaySec += Math.min(900, Math.round((Date.now() - TR.startedAt) / 1000)); const back = TR ? TR.from : 'map'; TR = null; view = back; save(); render(); }
+  function trickyView() {
+    if (!TR) { view = 'map'; return VIEWS.map(); }
+    const out = `<button class="btn small" data-action="tr-end">${t('practiceEnd')}</button>`;
+    if (TR.stage === 'pre') return `
+        ${topbar(t('trTitle'), '', out)}
+        <div class="card bosscard">
+          <div class="bossbig">🎭</div>
+          <div class="lead">${t('trLead')}</div>
+          <div class="muted en" dir="ltr">${t('trSub')}</div>
+          <div class="lead">${t('trSub2')}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="tr-go">${t('trGo')}</button></div>
+        </div>`;
+    if (TR.stage === 'run') {
+      const c = TR.cur, it = c.it, done = c.picked != null, ok = c.picked === it.a;
+      const cls = o => !done ? '' : (o === it.a ? 'good' : (o === c.picked ? 'miss' : 'dim'));
+      const isHe = s => /[֐-׿]/.test(s);
+      const prompt = it.say
+        ? `<div class="lead">${t('trListen')}</div><button class="btn speak" data-action="speak" data-text="${esc(it.say)}">🔊</button>`
+        : `<div class="${it.he && isHe(it.q) ? 'he' : 'en'} big" ${it.he && isHe(it.q) ? '' : 'dir="ltr"'}>${esc(it.q).replace('___', '<span class="trblank">___</span>')}</div>`;
+      const after = !done ? '' : `
+        <div class="feedback trafter ${ok ? '' : 'miss'}">
+          ${it.full ? `<div class="en big" dir="ltr">${esc(it.full)}</div><div class="muted">${esc(it.tr || '')}</div>` : ''}
+          <div class="tip">💡 ${esc(it.tip)}</div>
+          <div class="bigcta"><button class="btn primary block" data-action="tr-next">${t('trNext')}</button></div>
+        </div>`;
+      return `
+        ${topbar(t('trTitle'), t('trCount', { n: TR.hits }), out)}
+        ${c.again ? `<div class="muted center">${t('trAgainOne')}</div>` : ''}
+        <div class="card question center" style="margin-top:14px">${prompt}</div>
+        <div class="options">${c.options.map((o, i) => `<button class="opt ${isHe(o) ? 'he' : 'en'} ${cls(o)}" dir="${isHe(o) ? 'rtl' : 'ltr'}" data-action="tr-pick" data-i="${i}" ${done ? 'disabled' : ''}>${esc(o)}</button>`).join('')}</div>
+        ${after}`;
+    }
+    const capLeft = today().freePlaySec < S.settings.freePlayCapMin * 60;
+    return `
+        ${topbar(t('trEndTitle'), '')}
+        <div class="card bosscard">
+          <div class="bossbig">🎭</div>
+          <div class="lead">${t('trEndSub')}</div>
+          <div class="bigcta row"><button class="btn" data-action="tr-end">${t('back')}</button>${capLeft ? `<button class="btn primary grow" data-action="tr-go">${t('trAgain')}</button>` : ''}</div>
         </div>`;
   }
 
@@ -2991,6 +3083,7 @@
                 ${parentToo ? `<button class="btn ${boxWaiting ? '' : 'primary'}" data-action="mode" data-mode="parent">${t('mapParentToo')}</button>` : ''}
                 <button class="btn ${capLeft > 0 && !boxWaiting && !parentToo ? 'primary' : ''}" data-action="practice" ${capLeft > 0 ? '' : 'disabled'}>${capLeft > 0 ? t('mapPractice', { n: capLeft }) : t('mapPracticeShut')}</button>
                 ${speedOpen() ? `<button class="btn" data-action="speed" ${capLeft > 0 ? '' : 'disabled'}>${t('mapSpeed')}</button>` : ''}
+                ${TRICKY.length ? `<button class="btn" data-action="tricky" ${capLeft > 0 ? '' : 'disabled'}>${t('mapTricky')}</button>` : ''}
                 <button class="btn" data-action="wardrobe">${sk.wardrobeIcon} ${sk.wardrobe}</button>
                 <button class="btn" data-action="shelf">${sk.shelfIcon} ${sk.shelf}</button>
                 <button class="btn" data-action="brag">${t('bragBtn')}</button>
@@ -3128,6 +3221,7 @@
     },
     about() { return aboutView(); },
     speed() { return speedView(); },
+    tricky() { return trickyView(); },
     // the last sheet is marked: a count of right answers, no total and no score (those are on the coach screen)
     testend() {
       const T = R && R.test;
@@ -3621,6 +3715,11 @@
       case 'sp-go': spGo(); break;
       case 'sp-pick': spPick(a.dataset.id); break;
       case 'sp-end': endSpeed(); break;
+      case 'tricky': startTricky(); break;
+      case 'tr-go': trGo(); break;
+      case 'tr-pick': trPick(Number(a.dataset.i)); break;
+      case 'tr-next': trNext(); break;
+      case 'tr-end': endTricky(); break;
       case 't-pendown': tPenDown(); break;
       case 't-mark': tMark(Number(a.dataset.i), a.dataset.m); break;
       case 't-next': tNext(); break;
@@ -3823,5 +3922,5 @@
   if (bkStatus().pending) scheduleBackup(5000);   // a change from last time that never reached the Sheet
 
   // Expose for debugging in the browser console.
-  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, get practice() { return P; }, startPractice, startReplay, finishSession, soloFirstDue, openGrounds, startSection, secState: id => secState(SECS.find(x => x.id === id)) };
+  window.__game = { get state() { return S; }, get session() { return R; }, get view() { return view; }, get brag() { return { ready: bragReady(), busy: bragBusy, waiting: bragWaiting.length, key: bragKey(), brKey: BR && BR.key }; }, save, render, Audio, startSession, startPractice, t, streak, settleStreak, grantLoot, readingPick, buildReviewQueue, drawBrag, sendBackup, bkStatus, planFor, phase2, settleHalves, isLongDay, startWriting, startStory, startListening, nextCard, startTest, testDue, makeScene, finalDue, startAbout, startSpeed, get speed() { return SP; }, startTricky, get tricky() { return TR; }, get practice() { return P; }, startPractice, startReplay, finishSession, soloFirstDue, openGrounds, startSection, secState: id => secState(SECS.find(x => x.id === id)) };
 })();
